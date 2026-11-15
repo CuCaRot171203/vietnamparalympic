@@ -1,0 +1,24 @@
+# Local frontend development: edit web-client files and Next.js refreshes them.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build web
+services:
+  web:
+    image: vietnam-parasport-web-web-dev
+    build:
+      target: development
+    command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--webpack"]
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+      WATCHPACK_POLLING: "1000"
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+    volumes:
+      - ./web-client:/usr/src/app/web-client
+      - /usr/src/app/web-client/node_modules
+      - web_dev_next_cache:/usr/src/app/web-client/.next
+    healthcheck:
+      timeout: 15s
+      start_period: 120s
+      retries: 10
+
+volumes:
+  web_dev_next_cache:

@@ -1,0 +1,590 @@
+.header {
+  --bar-bg: #f7f4ed;
+  --bar-fg: #1c1c1c;
+  --bar-hover: rgba(28, 28, 28, 0.045);
+  --bar-border: #eceae4;
+  --nav-bg: #f7f4ed;
+  --nav-surface: #fcfbf8;
+  --nav-text: #1c1c1c;
+  --nav-muted: #5f5f5d;
+  --nav-border: #eceae4;
+  --nav-hover: rgba(28, 28, 28, 0.045);
+  --nav-inverse: #fcfbf8;
+  --bar-h-base: 64px;
+  --bar-h: var(--bar-h-base);
+  --logo-h: var(--bar-h);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bar-bg);
+  color: var(--bar-fg);
+  border-bottom: 1px solid var(--bar-border);
+  font-weight: 400;
+  transition:
+    background-color 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.header[data-scrolled="true"] {
+  --bar-bg: #dc2626;
+  --bar-fg: #ffffff;
+  --bar-hover: rgba(255, 255, 255, 0.12);
+  --bar-border: rgba(0, 0, 0, 0.1);
+  --bar-h: calc(var(--bar-h-base) * 0.8);
+  --logo-h: 38px;
+}
+/* Dark theme keeps the cream navbar background (only the scroll state turns it red). */
+:global(.dark) .header {
+  --bar-bg: #f7f4ed;
+  --bar-fg: #1c1c1c;
+  --bar-hover: rgba(28, 28, 28, 0.045);
+  --bar-border: #eceae4;
+  --nav-bg: #1b1b18;
+  --nav-surface: #242420;
+  --nav-text: #f7f4ed;
+  --nav-muted: #b5b2a9;
+  --nav-border: #3b3b34;
+  --nav-hover: rgba(247, 244, 237, 0.06);
+  --nav-inverse: #1b1b18;
+}
+:global(.dark) .header[data-scrolled="true"] {
+  --bar-bg: #b71c1c;
+  --bar-fg: #ffffff;
+  --bar-hover: rgba(255, 255, 255, 0.12);
+  --bar-border: rgba(0, 0, 0, 0.1);
+}
+.header button {
+  cursor: pointer;
+}
+.header button:disabled {
+  cursor: default;
+}
+.header :is(a, button, summary, input) {
+  -webkit-tap-highlight-color: transparent;
+}
+.header :is(a, button, summary, input):focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.bar {
+  max-width: 1504px;
+  height: var(--bar-h);
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  transition: height 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: auto;
+  height: var(--logo-h);
+  border-radius: 8px;
+  background: transparent;
+  transition:
+    height 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.logo img {
+  width: auto;
+  height: 100%;
+  max-width: 190px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: mix-blend-mode 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.header[data-scrolled="true"] .logo {
+  background: #fcfbf8;
+  padding: 4px 8px;
+}
+.header[data-scrolled="true"] .logo img {
+  mix-blend-mode: normal;
+}
+.desktopNav {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.navLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px 10px;
+  white-space: nowrap;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 20px;
+  transition: background-color 160ms;
+}
+.navLink:hover,
+.active {
+  background: var(--bar-hover);
+}
+.active::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 11px;
+  right: 11px;
+  height: 1px;
+  background: var(--bar-fg);
+  opacity: 0.5;
+}
+.rotated {
+  transform: rotate(180deg);
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--nav-text);
+  transition: background-color 160ms;
+}
+.iconButton:hover {
+  background: var(--nav-hover);
+}
+.bar .iconButton {
+  color: var(--bar-fg);
+}
+.bar .iconButton:hover {
+  background: var(--bar-hover);
+}
+.divider {
+  height: 20px;
+  width: 1px;
+  margin: 0 9px;
+  background: var(--bar-border);
+}
+.signIn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 8px 15px;
+  border-radius: 6px;
+  background: var(--bar-fg);
+  color: var(--bar-bg);
+  font-size: 14px;
+  white-space: nowrap;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.2),
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: opacity 160ms;
+}
+.signIn:hover {
+  opacity: 0.85;
+}
+.accountAnchor,
+.sportsAnchor {
+  position: relative;
+}
+.accountButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid var(--bar-border);
+  border-radius: 6px;
+  padding: 4px 9px 4px 5px;
+  background: transparent;
+  transition: border-color 160ms;
+}
+.accountButton:hover {
+  border-color: var(--bar-fg);
+}
+.avatar {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bar-hover);
+  border-radius: 50%;
+}
+.accountName {
+  display: none;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.popover {
+  color: var(--nav-text);
+  background: var(--nav-surface);
+  border: 1px solid var(--nav-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+  z-index: 60;
+}
+.sportsPanel {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: -16px;
+  width: 520px;
+  max-height: calc(100dvh - 112px);
+  overflow-y: auto;
+}
+.panelIntro {
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--nav-border);
+}
+.eyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+  color: var(--nav-muted);
+}
+.panelIntro p {
+  margin-top: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  line-height: 1.3;
+}
+.sportsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 12px;
+  gap: 2px;
+}
+.sportLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+.sportLink > svg:first-child {
+  color: var(--nav-muted);
+  flex-shrink: 0;
+}
+.sportLink > svg:last-child {
+  margin-left: auto;
+  opacity: 0;
+}
+.sportLink:hover {
+  background: var(--nav-hover);
+}
+.sportLink:hover > svg:last-child {
+  opacity: 0.7;
+}
+.panelFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--nav-border);
+  padding: 16px 24px;
+  font-size: 13px;
+}
+.panelFooter:hover {
+  background: var(--nav-hover);
+}
+.accountPanel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 18px);
+  width: 264px;
+  overflow: hidden;
+}
+.userInfo {
+  padding: 18px 18px 15px;
+  border-bottom: 1px solid var(--nav-border);
+}
+.userInfo p {
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.userInfo span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--nav-muted);
+  overflow-wrap: anywhere;
+}
+.accountLinks {
+  padding: 6px;
+}
+.accountLinks > :is(a, button) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 14px;
+}
+.accountLinks > :is(a, button):hover {
+  background: var(--nav-hover);
+}
+.accountLinks .signOut {
+  border-top: 1px solid var(--nav-border);
+  margin-top: 5px;
+  border-radius: 0 0 6px 6px;
+  color: #b24a40;
+}
+:global(.dark) .accountLinks .signOut {
+  color: #efa397;
+}
+.searchPanel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: max(24px, calc((100vw - 1440px) / 2));
+  width: min(520px, calc(100vw - 32px));
+  padding: 24px;
+}
+.searchLabel {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  margin-bottom: 18px;
+}
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 5px 4px 14px;
+  border: 1px solid var(--nav-border);
+  border-radius: 6px;
+  background: var(--nav-bg);
+}
+.searchField > svg {
+  color: var(--nav-muted);
+  flex-shrink: 0;
+}
+.searchField:focus-within {
+  border-color: var(--nav-muted);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+.searchField input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--nav-text);
+  font-size: 15px;
+  line-height: 24px;
+  outline: none !important;
+}
+.searchField input::placeholder {
+  color: var(--nav-muted);
+}
+.searchFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+.searchFooter > span {
+  max-width: 270px;
+  color: var(--nav-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.searchSubmit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.listening {
+  color: #b24a40;
+  background: var(--nav-hover);
+}
+.mobilePanel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 16px;
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 100px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.mobileLinks {
+  padding: 8px 16px;
+}
+.mobileLinks > a,
+.mobileSports summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--nav-border);
+  font-size: 15px;
+  min-height: 49px;
+}
+.mobileLinks > a[aria-current="page"] {
+  font-weight: 600;
+}
+.mobileLinks > a:hover,
+.mobileSports summary:hover {
+  background: var(--nav-hover);
+}
+.mobileLinks > a > svg {
+  color: var(--nav-muted);
+}
+.mobileSports summary {
+  list-style: none;
+  cursor: pointer;
+}
+.mobileSports summary::-webkit-details-marker {
+  display: none;
+}
+.mobileSports[open] summary > svg {
+  transform: rotate(180deg);
+}
+.mobileSports > div {
+  padding: 6px 8px 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  background: var(--nav-hover);
+  border-radius: 0 0 8px 8px;
+}
+.mobileSports a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 7px 8px;
+  font-size: 12px;
+}
+.mobileSports a:hover {
+  text-decoration: underline;
+}
+.mobileFooter {
+  padding: 8px 16px 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--nav-muted);
+}
+@media (min-width: 1280px) {
+  .desktopNav {
+    display: flex;
+  }
+  .mobileToggle,
+  .mobilePanel {
+    display: none;
+  }
+}
+@media (min-width: 1440px) {
+  .accountName {
+    display: block;
+  }
+  .navLink {
+    padding-inline: 12px;
+  }
+}
+@media (max-width: 1279px) {
+  .header {
+    --bar-h-base: 61px;
+  }
+  .bar {
+    padding-inline: 24px;
+  }
+}
+@media (max-width: 599px) {
+  .header {
+    --bar-h-base: 58px;
+  }
+  .bar {
+    padding-inline: 16px;
+    gap: 12px;
+  }
+  .logo img {
+    max-width: 150px;
+  }
+  .actions {
+    gap: 2px;
+  }
+  .themeButton,
+  .divider,
+  .signInArrow {
+    display: none;
+  }
+  .iconButton {
+    width: 38px;
+    height: 40px;
+  }
+  .signIn {
+    padding-inline: 11px;
+    font-size: 12px;
+  }
+  .accountButton {
+    gap: 3px;
+    padding-right: 6px;
+  }
+  .searchPanel {
+    right: 16px;
+    padding: 20px;
+  }
+  .accountPanel {
+    position: fixed;
+    top: 68px;
+    right: 16px;
+    max-width: calc(100vw - 32px);
+  }
+  .searchFooter > span {
+    max-width: 190px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .header,
+  .header * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+:global(.high-contrast) .header {
+  --bar-bg: #000;
+  --bar-fg: #fff;
+  --bar-hover: #252525;
+  --bar-border: #fff;
+  --nav-bg: #000;
+  --nav-surface: #000;
+  --nav-text: #fff;
+  --nav-muted: #fff;
+  --nav-border: #fff;
+  --nav-hover: #252525;
+  --nav-inverse: #000;
+}

@@ -1,0 +1,122 @@
+.rail {
+  padding-block: 26px 28px;
+  border-block: 1px solid var(--news-line);
+}
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.heading h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--news-muted);
+  letter-spacing: 0.04em;
+}
+.controls {
+  display: flex;
+  gap: 6px;
+}
+.controls button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--news-line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--news-ink);
+  cursor: pointer;
+}
+.controls button:hover:not(:disabled) {
+  background: var(--news-tint);
+}
+.controls button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 2px 6px;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.track::-webkit-scrollbar {
+  display: none;
+}
+.item {
+  flex: 0 0 112px;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.sport {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 8px 6px;
+  height: 108px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  text-align: center;
+  color: var(--news-ink);
+  font-size: 12px;
+  line-height: 1.4;
+  transition:
+    background-color 180ms,
+    border-color 180ms;
+}
+.sport:hover {
+  background: var(--news-surface);
+  border-color: var(--news-line);
+}
+.sport[aria-current="page"] {
+  border-color: var(--news-accent);
+  background: var(--news-surface);
+  color: var(--news-accent);
+}
+.logo {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  padding: 7px;
+  border: 1px solid #eceae4;
+  border-radius: 12px;
+  background: #fff;
+}
+.logo img {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+.sport:focus-visible,
+.controls button:focus-visible {
+  outline: 2px solid var(--news-accent);
+  outline-offset: 2px;
+}
+@media (max-width: 639px) {
+  .rail {
+    padding-block: 20px;
+  }
+  .track {
+    gap: 6px;
+  }
+  .item {
+    flex-basis: 98px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sport {
+    transition: none;
+  }
+}

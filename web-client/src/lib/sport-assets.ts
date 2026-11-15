@@ -1,0 +1,111 @@
+export const SPORT_BACKGROUNDS: Record<string, string> = {
+  "dien-kinh": "dien_kinh.jpg",
+  "boi-loi": "boi_loi.jpg",
+  "cu-ta": "cu_ta.jpg",
+  "bong-ban": "bong_ban.jpg",
+  "cau-long": "cau_long.jpg",
+  "bong-ro-xe-lan": "bong_ro.webp",
+  "quan-vot-xe-lan": "quan_vot.webp",
+  "co-vua": "co_vua.webp",
+  "co-tuong": "co_tuong.jpg",
+  "judo-khiem-thi": "judo.jpg",
+  boccia: "boccia.jpg",
+  canoeing: "canoeing.jpg",
+  rowing: "rowing.webp",
+  "ban-sung": "ban_sung.jpg",
+  "3-mon-phoi-hop": "ba_mon_phoi_hop.jpg",
+};
+
+// Each sport has its own editorial caption, independent of its localized name.
+export const SPORT_STORIES: Record<string, [string, string, string, string]> = {
+  "dien-kinh": [
+    "Bứt phá giới hạn",
+    "Từ đường chạy đến sân ném, mỗi chuyển động là một bước tiến của tốc độ, sức bền và ý chí.",
+    "Beyond every limit",
+    "From the track to the throwing field, every movement brings speed, endurance and determination to life.",
+  ],
+  "boi-loi": [
+    "Tự do trong từng sải nước",
+    "Chạm vào nhịp điệu của làn nước. Khám phá kỹ thuật, sức bền và tinh thần vươn tới vạch đích.",
+    "Freedom in every stroke",
+    "Find your rhythm in the water. Explore technique, endurance and the drive to reach the finish.",
+  ],
+  "cu-ta": [
+    "Nâng sức mạnh, vượt chính mình",
+    "Sự tập trung và kỹ thuật hội tụ trong một lần nâng. Mỗi mức tạ mở ra một cột mốc mới.",
+    "Strength beyond the bar",
+    "Focus and technique come together in a single lift. Every weight marks a new personal milestone.",
+  ],
+  "bong-ban": [
+    "Nhanh một nhịp, đổi cuộc chơi",
+    "Những đường bóng nhỏ tạo nên cuộc đấu lớn, nơi phản xạ, chiến thuật và độ chính xác lên tiếng.",
+    "One moment changes the game",
+    "A small ball opens up a world of fast reactions, clever tactics and remarkable precision.",
+  ],
+  "cau-long": [
+    "Làm chủ từng đường cầu",
+    "Theo nhịp những pha cầu đầy tốc độ. Sự linh hoạt và khả năng phán đoán tạo nên dấu ấn trên sân.",
+    "Own every rally",
+    "Follow the pace of every rally, where agility and anticipation leave their mark on the court.",
+  ],
+  "bong-ro-xe-lan": [
+    "Cùng đồng đội, cùng bứt phá",
+    "Những vòng bánh xe, đường chuyền và cú ném kết nối thành một trận đấu của tốc độ và tinh thần đồng đội.",
+    "Move as one",
+    "Wheels, passes and shots come together in a game driven by speed and teamwork.",
+  ],
+  "quan-vot-xe-lan": [
+    "Dấu ấn sau mỗi lần chạm bóng",
+    "Di chuyển, chọn vị trí và tung cú đánh. Từng pha bóng là sự kết hợp của chiến thuật và khả năng kiểm soát.",
+    "Make every shot count",
+    "Move, find your position and strike. Each rally brings strategy and control into play.",
+  ],
+  "co-vua": [
+    "Tầm nhìn đi trước một nước",
+    "Một bàn cờ, vô vàn khả năng. Sự tập trung và tư duy chiến lược mở lối cho từng nước đi.",
+    "Think one move ahead",
+    "One board, countless possibilities. Focus and strategic thinking shape every move.",
+  ],
+  "co-tuong": [
+    "Bản lĩnh trong từng thế cờ",
+    "Đọc thế trận, nắm thời cơ và xây dựng chiến thuật. Khám phá chiều sâu của những cuộc đấu trí.",
+    "Strategy in every position",
+    "Read the board, seize the moment and build your strategy. Discover the depth of the game.",
+  ],
+  "judo-khiem-thi": [
+    "Cảm nhận để làm chủ",
+    "Thăng bằng, kỹ thuật và sự tin tưởng vào cảm giác. Mỗi lần tiếp xúc mở ra một cơ hội trên thảm đấu.",
+    "Feel your way forward",
+    "Balance, technique and trust in your senses turn every contact into an opportunity on the mat.",
+  ],
+  boccia: [
+    "Chính xác tạo khác biệt",
+    "Không cần vội vàng để tạo nên bước ngoặt. Từng đường bóng là một lựa chọn đầy tính toán và tinh tế.",
+    "Precision makes the difference",
+    "A turning point needs no rush. Every ball is a thoughtful choice of placement and control.",
+  ],
+  canoeing: [
+    "Rẽ sóng bằng ý chí",
+    "Tìm nhịp chèo, giữ thăng bằng và hướng về phía trước. Sức mạnh hòa cùng khả năng làm chủ mặt nước.",
+    "Find your forward rhythm",
+    "Find your stroke, hold your balance and move ahead. Strength meets control on the water.",
+  ],
+  rowing: [
+    "Sức mạnh trong nhịp chèo",
+    "Nhịp điệu, kỹ thuật và sức bền kết nối trong từng động tác, đưa con thuyền tiến về phía đích.",
+    "Power in every stroke",
+    "Rhythm, technique and endurance connect in each movement, carrying the boat towards the finish.",
+  ],
+  "ban-sung": [
+    "Tĩnh tâm, vững mục tiêu",
+    "Điều hòa nhịp thở, giữ vững sự tập trung. Độ chính xác bắt đầu từ khả năng làm chủ chính mình.",
+    "Stillness. Focus. Precision.",
+    "Steady your breathing and hold your focus. Accuracy begins with control from within.",
+  ],
+  "3-mon-phoi-hop": [
+    "Ba thử thách, một quyết tâm",
+    "Bơi, đạp xe và chạy bộ nối tiếp trong một hành trình. Bền bỉ qua mỗi chặng, vươn tới mục tiêu của riêng mình.",
+    "Three challenges, one purpose",
+    "Swim, cycle and run through one continuous journey. Keep moving towards your own finish line.",
+  ],
+};

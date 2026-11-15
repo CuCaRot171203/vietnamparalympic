@@ -1,0 +1,50 @@
+.surface {
+  --club-bg: #f7f4ed;
+  --club-surface: #fcfbf8;
+  --club-text: #1c1c1c;
+  --club-muted: #5f5f5d;
+  --club-border: #eceae4;
+  --club-contrast: #1c1c1c;
+  --club-on-contrast: #fcfbf8;
+  color-scheme: light;
+}
+
+:global(.dark) .surface {
+  --club-bg: #1b1b18;
+  --club-surface: #242420;
+  --club-text: #f7f4ed;
+  --club-muted: #b5b2a9;
+  --club-border: #3b3b34;
+  --club-contrast: #f7f4ed;
+  --club-on-contrast: #1b1b18;
+  color-scheme: dark;
+}
+
+.surface :global(label),
+.surface :global(.tiptap) {
+  color: var(--club-muted) !important;
+}
+
+.surface :global(input),
+.surface :global(textarea),
+.surface :global([data-slot="select-trigger"]) {
+  color: var(--club-text) !important;
+  background: var(--club-surface) !important;
+  border-color: var(--club-border) !important;
+}
+
+.surface :global(input)::placeholder,
+.surface :global(textarea)::placeholder {
+  color: var(--club-muted) !important;
+}
+
+.surface :global(.tiptap) {
+  background: var(--club-surface);
+  min-height: 200px;
+}
+
+.surface :global(.tiptap h1),
+.surface :global(.tiptap h2),
+.surface :global(.tiptap h3) {
+  color: var(--club-text);
+}

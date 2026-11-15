@@ -1,0 +1,102 @@
+.brandLogo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 186px;
+  max-width: 100%;
+  padding: 9px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  border: 1px solid #eceae4;
+  border-radius: 9px;
+  background: #fff;
+}
+.brandLogo img {
+  display: block;
+  width: 168px;
+  height: 67.5px;
+  max-width: 100%;
+  object-fit: contain;
+}
+.socialLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+.socialItem {
+  position: relative;
+}
+.tooltip {
+  --tooltip-x: -50%;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  z-index: 2;
+  padding: 8px 11px;
+  border: 1px solid rgb(255 255 255 / 15%);
+  border-radius: 8px;
+  background: #1c1c1c;
+  color: #fcfbf8;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 12%);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(var(--tooltip-x), 4px);
+  transition:
+    opacity 160ms,
+    transform 160ms,
+    visibility 160ms;
+}
+.socialItem:first-child .tooltip {
+  --tooltip-x: 0%;
+  left: 0;
+}
+.socialItem:last-child .tooltip {
+  --tooltip-x: 0%;
+  left: auto;
+  right: 0;
+}
+.socialItem:hover .tooltip,
+.socialItem:focus-within .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(var(--tooltip-x), 0);
+}
+.socialLogo {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  overflow: hidden;
+  transition: transform 180ms;
+}
+.socialLogo img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.socialLogo:hover {
+  transform: translateY(-2px);
+}
+.brandLogo:focus-visible,
+.socialLogo:focus-visible {
+  outline: 2px solid var(--footer-fg, #fff);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .socialLogo,
+  .tooltip {
+    transition: none;
+  }
+}

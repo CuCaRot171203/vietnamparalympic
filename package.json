@@ -1,0 +1,32 @@
+{
+  "name": "vietnam-paralympic-sport",
+  "private": true,
+  "scripts": {
+    "dev:web": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d web",
+    "dev:web:build": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --no-deps --build web",
+    "dev:web:logs": "docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f web",
+    "prod:web": "docker compose up -d --no-deps web"
+  },
+  "workspaces": [
+    "api-server",
+    "web-client",
+    "shared"
+  ],
+  "supportedArchitectures": {
+    "os": [
+      "win32",
+      "linux",
+      "darwin"
+    ],
+    "cpu": [
+      "x64",
+      "arm64"
+    ]
+  },
+  "devDependencies": {
+    "@nestjs/platform-express": "^11.0.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint-plugin-react-hooks": "^7.0.0"
+  }
+}
