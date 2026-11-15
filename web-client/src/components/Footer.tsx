@@ -9,11 +9,11 @@ import { useSettings } from "@/components/SettingsProvider";
 import { usePathname } from "next/navigation";
 
 const socialAssets: Record<string, string> = {
-  facebook: "/social/FACEBOOK.webp",
-  tiktok: "/social/TIKTOK.png",
-  youtube: "/social/YOUTUBE.webp",
-  instagram: "/social/INSTAGRAM.webp",
-  zalo: "/social/ZALO.webp",
+  facebook: "/assets/footer/facebook.c7ae34adcdf0.webp",
+  tiktok: "/assets/footer/tiktok.a7f391cbc47b.webp",
+  youtube: "/assets/footer/youtube.54e47d767f9b.webp",
+  instagram: "/assets/footer/instagram.b92a2d7b539a.webp",
+  zalo: "/assets/footer/zalo.2ab90a76bde0.webp",
 };
 const socialNames: Record<string, string> = {
   facebook: "Facebook",
@@ -81,10 +81,13 @@ export default function Footer() {
                 }
               >
                 <Image
-                  src="/assets/brand/vietnam-parasports-2026-full.png"
+                  src="/assets/footer/brand.01300e2fe39d.webp"
                   width={168}
                   height={68}
                   alt="Vietnam ParaSports 2026"
+                  unoptimized
+                  loading="eager"
+                  fetchPriority="low"
                 />
               </Link>
               <h3 className="text-xl font-bold text-[var(--footer-fg)]">
@@ -237,6 +240,9 @@ export default function Footer() {
                         src={socialAssets[platform]}
                         width={28}
                         height={28}
+                        unoptimized
+                        loading="eager"
+                        fetchPriority="low"
                         alt=""
                       />
                     </a>

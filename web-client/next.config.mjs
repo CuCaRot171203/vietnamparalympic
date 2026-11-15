@@ -30,6 +30,18 @@ const nextConfig = {
   turbopack: {
     root: resolve(__dirname, '../'),
   },
+  async headers() {
+    return [
+      {
+        // Footer filenames contain a content hash, so changed assets get a new URL.
+        source: '/assets/footer/:path*',
+        locale: false,
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     // The web and API servers run in the same deployment process. Use a
     // separate service hostname only when explicitly configured.
