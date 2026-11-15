@@ -1,8 +1,5 @@
 "use client";
 
-import { getApiUrl } from "@/utils/api";
-
-import DOMPurify from "isomorphic-dompurify";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./footer.module.css";
@@ -10,16 +7,6 @@ import * as Icons from "lucide-react";
 import { useLanguage } from "@/hooks/useTranslation";
 import { useSettings } from "@/components/SettingsProvider";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-
-interface SocialLink {
-  id: string;
-  name: string;
-  url: string;
-  icon: string;
-  isActive: boolean;
-  order: number;
-}
 
 const socialAssets: Record<string, string> = {
   facebook: "/social/FACEBOOK.webp",
@@ -36,28 +23,18 @@ const socialNames: Record<string, string> = {
   zalo: "Zalo",
 };
 
+const socialUrls: Record<string, string> = {
+  facebook: "https://www.facebook.com/vietnamparasports.vn",
+  tiktok: "https://www.tiktok.com/@vietnamparasports",
+  youtube: "https://www.youtube.com/@VietnamParasport",
+  instagram: "https://www.facebook.com/vietnamparasports.vn",
+  zalo: "https://www.facebook.com/vietnamparasports.vn",
+};
+
 export default function Footer() {
   const pathname = usePathname();
   const { t, language } = useLanguage();
   const { settings } = useSettings();
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-
-  useEffect(() => {
-    const fetchSocialLinks = async () => {
-      try {
-        const apiUrl = getApiUrl("/");
-        const res = await fetch(`${apiUrl}/social-links?activeOnly=true`);
-        if (res.ok) {
-          const envelope = await res.json();
-          setSocialLinks(envelope?.data || []);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchSocialLinks();
-  }, []);
-
   const isAdminRoute =
     pathname &&
     (pathname.startsWith("/admin") || /^\/[a-z]{2}\/admin/.test(pathname));
@@ -73,12 +50,8 @@ export default function Footer() {
     (language === "vi"
       ? "Vietnam ParaSports là nền tảng thể thao toàn diện dành cho cộng đồng người khuyết tật Việt Nam. Chúng tôi kết nối vận động viên, huấn luyện viên, câu lạc bộ và nhà tài trợ trên một nền tảng duy nhất."
       : "Vietnam ParaSports is a comprehensive sports platform for the community of people with disabilities in Vietnam. We connect athletes, coaches, clubs and sponsors on a single platform.");
-  const footerAddress =
-    language === "vi"
-      ? settings?.footerContent?.addressVi
-      : settings?.footerContent?.addressEn;
-  const footerPhone = settings?.footerContent?.phone;
-  const footerEmail = settings?.footerContent?.email;
+  const footerAddress = "36 Trần Phú Hà Nội";
+  const footerEmail = "FA26.vietnamparasports@gmail.com";
 
   const footerStyle = {
     backgroundColor: settings?.FOOTER_COLOR || "var(--header-bg, #1e3a8a)",
@@ -235,81 +208,49 @@ export default function Footer() {
                 <span>{footerAddress}</span>
               </li>
               <li className="flex items-center gap-3">
-                <Icons.Phone
-                  size={18}
-                  className="text-[var(--footer-fg)]/70 shrink-0"
-                />
-                <span>{footerPhone}</span>
-              </li>
-              <li className="flex items-center gap-3">
                 <Icons.Mail
                   size={18}
                   className="text-[var(--footer-fg)]/70 shrink-0"
                 />
                 <a
                   href={`mailto:${footerEmail}`}
-                  className="hover:text-[var(--footer-fg)] transition-colors"
+                  className="min-w-0 break-all hover:text-[var(--footer-fg)] transition-colors"
                 >
                   {footerEmail}
                 </a>
               </li>
             </ul>
-            {socialLinks.length > 0 && (
-              <div className={styles.socialLinks}>
-                {socialLinks.map((link) => {
-                  const identity = `${link.name} ${link.url}`.toLowerCase();
-                  const platform = Object.keys(socialAssets).find((name) =>
-                    identity.includes(name),
-                  );
-                  const asset = platform ? socialAssets[platform] : undefined;
-                  const platformName = platform
-                    ? socialNames[platform]
-                    : link.name;
-                  const tooltipId = `footer-social-${link.id}`;
-                  const iconVal = (link.icon || "").trim();
-                  const isSvg = iconVal.startsWith("<svg");
-
-                  return (
-                    <div key={link.id} className={styles.socialItem}>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={
-                          asset
-                            ? styles.socialLogo
-                            : `flex items-center justify-center bg-[var(--footer-fg)]/10 hover:bg-[var(--footer-fg)]/20 text-[var(--footer-fg)]/70 hover:text-[var(--footer-fg)] transition-colors ${isSvg ? "w-10 h-10 rounded-full" : "px-3 py-1.5 rounded-full text-xs font-semibold uppercase"}`
-                        }
-                        aria-label={platformName}
-                        aria-describedby={tooltipId}
-                      >
-                        {asset ? (
-                          <Image src={asset} width={28} height={28} alt="" />
-                        ) : isSvg ? (
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: DOMPurify.sanitize(iconVal, {
-                                USE_PROFILES: { svg: true },
-                              }),
-                            }}
-                            className="w-5 h-5 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:fill-current"
-                          />
-                        ) : (
-                          <span>{iconVal || link.name}</span>
-                        )}
-                      </a>
-                      <span
-                        id={tooltipId}
-                        role="tooltip"
-                        className={styles.tooltip}
-                      >
-                        {platformName}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            <div className={styles.socialLinks}>
+              {Object.keys(socialNames).map((platform) => {
+                const tooltipId = `footer-social-${platform}`;
+                return (
+                  <div key={platform} className={styles.socialItem}>
+                    <a
+                      href={socialUrls[platform]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.socialLogo}
+                      aria-label={socialNames[platform]}
+                      aria-describedby={tooltipId}
+                    >
+                      <Image
+                        src={socialAssets[platform]}
+                        width={28}
+                        height={28}
+                        alt=""
+                      />
+                    </a>
+                    <span
+                      id={tooltipId}
+                      role="tooltip"
+                      className={styles.tooltip}
+                    >
+                      {socialNames[platform]}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
