@@ -1,11 +1,11 @@
 .page,
 .drawer {
-  --paper: #f7f4ed;
-  --surface: #fcfbf8;
-  --ink: #1c1c1c;
-  --muted: #666660;
-  --line: rgba(28, 28, 28, 0.1);
-  --accent: #7c293b;
+  --paper: #fff;
+  --surface: #fff;
+  --ink: #291b18;
+  --muted: #80736d;
+  --line: #eee4de;
+  --accent: #e10e20;
 }
 .page {
   min-height: 100vh;
@@ -15,11 +15,11 @@
 :global(.dark) .page,
 :global(.dark) .drawer {
   --paper: #131311;
-  --surface: #1d1d19;
-  --ink: #f7f4ed;
-  --muted: #aaa9a0;
+  --surface: #201b18;
+  --ink: #fff;
+  --muted: #c0b2a8;
   --line: rgba(247, 244, 237, 0.12);
-  --accent: #ef9fb0;
+  --accent: #ff626e;
 }
 .container {
   max-width: 1440px;
@@ -481,8 +481,8 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #fcfbf8;
-  color: #1c1c1c;
+  background: #fff;
+  color: #291b18;
 }
 .tournamentMeta {
   display: flex;
@@ -597,7 +597,7 @@
   justify-content: space-between;
   width: 100%;
   background: #722b3a;
-  color: #fcfbf8;
+  color: #fff;
   border-radius: 8px;
   padding: 14px 18px;
   font-size: 13px;
@@ -763,5 +763,96 @@
 @media (prefers-reduced-motion: reduce) {
   .photo {
     transition: none;
+  }
+}
+
+/* Vietnam ParaSports editorial design */
+.page {
+  font-family: var(--font-home-label), sans-serif;
+}
+.page > .container {
+  padding-top: 24px;
+  padding-inline: clamp(24px, 5vw, 72px);
+  max-width: 1440px;
+}
+.page h2 {
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+.content {
+  border-top: 0;
+  padding-top: 8px;
+}
+.tabs {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--surface);
+}
+.tabs button {
+  padding: 10px 20px;
+  border-radius: 99px;
+  font-size: 12px;
+}
+.tabs button[aria-selected="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+.tabs button[aria-selected="true"]::after {
+  display: none;
+}
+.matchList {
+  padding: 0;
+  background: transparent;
+}
+.match {
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  margin-bottom: 16px;
+  transition: box-shadow 180ms ease;
+}
+.match:hover {
+  box-shadow: 0 10px 26px #29100a0a;
+}
+.matchDate strong {
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-size: 40px;
+}
+.filterButton {
+  border-radius: 99px;
+  background: var(--surface);
+}
+.tournament {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 8px 8px 20px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.tournamentImage {
+  border-radius: 15px;
+}
+.tournament h3,
+.tournamentMeta,
+.tournament .location {
+  margin-inline: 12px;
+}
+.empty {
+  border-radius: 22px;
+}
+@media (max-width: 767px) {
+  .match {
+    padding: 20px;
+  }
+  .tabs button {
+    padding: 9px 15px;
   }
 }

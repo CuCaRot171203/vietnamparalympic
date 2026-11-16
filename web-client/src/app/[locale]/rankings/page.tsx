@@ -18,6 +18,8 @@ import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { SPORT_LOGOS } from "@/lib/sport-logos";
 import { useLanguage } from "@/hooks/useTranslation";
+import PublicPageHero from "@/components/PublicPageHero";
+import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import styles from "./rankings.module.css";
 
 type Entity = {
@@ -368,78 +370,60 @@ export default function PublicRankingsPage() {
       theme={{
         algorithm: dark ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
-          colorPrimary: dark ? "#ef9fb0" : "#7c293b",
-          colorBgContainer: dark ? "#1d1d19" : "#fcfbf8",
-          colorBgElevated: dark ? "#24241f" : "#fcfbf8",
-          colorText: dark ? "#f7f4ed" : "#1c1c1c",
-          colorTextSecondary: dark ? "#aaa9a0" : "#666660",
+          colorPrimary: dark ? "#ff626e" : "#e10e20",
+          colorBgContainer: dark ? "#201b18" : "#fff",
+          colorBgElevated: dark ? "#24241f" : "#fff",
+          colorText: dark ? "#fff" : "#291b18",
+          colorTextSecondary: dark ? "#c0b2a8" : "#80736d",
           colorBorder: dark ? "#393932" : "#dedbd2",
-          borderRadius: 10,
+          borderRadius: 14,
           controlHeight: 42,
           fontFamily: "inherit",
           fontSize: 13,
         },
         components: {
           Table: {
-            headerBg: dark ? "#24241f" : "#eeebe3",
-            rowHoverBg: dark ? "#25251f" : "#f2efe7",
+            headerBg: dark ? "#24241f" : "#faf5f1",
+            rowHoverBg: dark ? "#25251f" : "#fff4ee",
             cellPaddingBlock: 20,
-            headerColor: dark ? "#aaa9a0" : "#666660",
+            headerColor: dark ? "#c0b2a8" : "#80736d",
           },
         },
       }}
     >
-      <main id="main-content" className={styles.page}>
+      <main
+        id="main-content"
+        className={[
+          styles.page,
+          homeBeVietnam.variable,
+          homeNeusharp.variable,
+        ].join(" ")}
+      >
+        <PublicPageHero
+          locale={language}
+          title={vi ? "Bảng xếp hạng" : "Rankings"}
+          tagline={
+            vi
+              ? "Những nỗ lực. Những dấu ấn."
+              : "Every effort. Every achievement."
+          }
+          description={
+            vi
+              ? "Theo dõi thứ hạng, ghi nhận thành tích và đồng hành cùng hành trình bứt phá của vận động viên thể thao người khuyết tật Việt Nam."
+              : "Follow the rankings and celebrate every milestone on the journey of Vietnam’s para athletes."
+          }
+          image="/PAGES/RANKS.jpg"
+          imageAlt={
+            vi
+              ? "Thể thao người khuyết tật và những dấu ấn thi đấu"
+              : "Celebrating para sports achievements"
+          }
+          primary={{
+            label: vi ? "Khám phá bảng xếp hạng" : "Explore the rankings",
+            href: "#rankings-content",
+          }}
+        />
         <div className={styles.container}>
-          <nav
-            className={styles.breadcrumb}
-            aria-label={vi ? "Điều hướng trang" : "Breadcrumb"}
-          >
-            <Link href={`/${language}`}>{vi ? "Trang chủ" : "Home"}</Link>
-            <span>/</span>
-            <span aria-current="page">{vi ? "Bảng xếp hạng" : "Rankings"}</span>
-          </nav>
-          <header className={styles.header}>
-            <Image
-              src="/PAGES/RANKS.jpg"
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 1440px) 100vw, 1300px"
-              className={styles.heroBackground}
-            />
-            <div>
-              <p className={styles.eyebrow}>
-                <span />
-                Vietnam ParaSports Rankings
-              </p>
-              <h1>
-                {vi ? (
-                  <>
-                    Những nỗ lực.
-                    <br />
-                    Những dấu ấn.
-                  </>
-                ) : (
-                  <>
-                    Every effort.
-                    <br />
-                    Every achievement.
-                  </>
-                )}
-              </h1>
-            </div>
-            <div className={styles.intro}>
-              <span className={styles.trophy}>
-                <Trophy size={36} strokeWidth={1.3} />
-              </span>
-              <p>
-                {vi
-                  ? "Theo dõi thứ hạng, ghi nhận thành tích và đồng hành cùng hành trình bứt phá của vận động viên thể thao người khuyết tật Việt Nam."
-                  : "Follow the rankings and celebrate every milestone on the journey of Vietnam’s para athletes."}
-              </p>
-            </div>
-          </header>
           <section
             className={styles.sports}
             aria-labelledby="rankings-sports-heading"
@@ -484,6 +468,7 @@ export default function PublicRankingsPage() {
             </div>
           </section>
           <section
+            id="rankings-content"
             className={styles.results}
             aria-labelledby="rankings-heading"
           >

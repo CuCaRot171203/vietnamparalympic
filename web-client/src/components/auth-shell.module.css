@@ -1,0 +1,214 @@
+.page {
+  --auth-surface: #fff;
+  --auth-ink: #291b18;
+  --auth-muted: #80736d;
+  --auth-line: #eee4de;
+  --auth-soft: #f8f5f2;
+  --auth-accent: #d70e20;
+  --nav-offset: 71px;
+  position: relative;
+  isolation: isolate;
+  background: #230a08;
+  color: var(--auth-ink);
+  font-family: var(--font-home-label), sans-serif;
+  margin-top: calc(-1 * var(--nav-offset));
+  padding: calc(48px + var(--nav-offset)) 0 72px;
+  min-height: calc(100vh + var(--nav-offset));
+}
+:global(.dark) .page {
+  --auth-surface: #201b18;
+  --auth-ink: #fcf5ef;
+  --auth-muted: #c0b2a8;
+  --auth-line: #48332c;
+  --auth-soft: #2a211c;
+  --auth-accent: #ff626e;
+}
+.background {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("/DES/else/CHI_TIET_CLB_BG.webp") center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+.shell {
+  max-width: 1440px;
+  margin: auto;
+  padding: 0 clamp(24px, 5vw, 72px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  gap: 80px;
+  align-items: center;
+}
+.registration .shell {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 650px);
+  gap: 56px;
+}
+.story {
+  color: #fff;
+  min-width: 0;
+}
+.brand {
+  display: block;
+  width: 220px;
+  margin: -34px 0 24px -12px;
+}
+.brand img {
+  width: 100%;
+  height: auto;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ffffff26;
+  background: #ffffff08;
+  border-radius: 99px;
+  padding: 5px 10px;
+  font-size: 10px;
+  color: #e4d0c8;
+}
+.badge i {
+  width: 5px;
+  height: 5px;
+  background: #ff4758;
+  border-radius: 50%;
+}
+.story h2 {
+  font-family: var(--font-auth-calvera), sans-serif;
+  font-weight: 400;
+  font-size: 88px;
+  line-height: 1.12;
+  margin: 28px 0 20px;
+  color: #fff;
+  text-wrap: balance;
+}
+.tagline {
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-size: 22px;
+  line-height: 1.5;
+  color: #ffba53;
+  margin: 0 0 18px;
+}
+.description {
+  color: #e4d0c8;
+  font-size: 14px;
+  line-height: 1.85;
+  margin: 0;
+  max-width: 460px;
+}
+.story ul {
+  padding: 0;
+  margin: 30px 0 0;
+  list-style: none;
+  max-width: 470px;
+}
+.story li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-top: 1px solid #ffffff20;
+  padding: 14px 0;
+  font-size: 12px;
+  color: #f3dcd2;
+}
+.story li > span {
+  color: #ffba53;
+  font-size: 11px;
+}
+.story li > svg {
+  flex: 0 0 14px;
+  margin-left: auto;
+}
+.card {
+  background: var(--auth-surface);
+  padding: 36px;
+  border: 1px solid var(--auth-line);
+  border-radius: 28px;
+  min-width: 0;
+  box-shadow: 0 24px 72px #1705033b;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--auth-muted);
+  font-size: 11px;
+  margin-bottom: 28px;
+}
+.page a:focus-visible {
+  outline: 2px solid #ff626e;
+  outline-offset: 4px;
+}
+@media (max-width: 1279px) {
+  .page {
+    --nav-offset: 62px;
+  }
+  .shell {
+    gap: 48px;
+  }
+  .registration .shell {
+    gap: 32px;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.3fr);
+  }
+  .story h2 {
+    font-size: 76px;
+  }
+  .card {
+    padding: 28px;
+  }
+}
+@media (max-width: 1023px) {
+  .shell,
+  .registration .shell {
+    grid-template-columns: 1fr;
+    max-width: 760px;
+    gap: 32px;
+  }
+  .story h2 {
+    font-size: 70px;
+    margin-top: 20px;
+  }
+  .story ul {
+    display: none;
+  }
+  .brand {
+    width: 170px;
+    margin-top: -22px;
+    margin-bottom: 14px;
+  }
+  .description {
+    max-width: 100%;
+  }
+  .card {
+    padding: 32px;
+  }
+}
+@media (max-width: 599px) {
+  .page {
+    --nav-offset: 59px;
+    padding-top: calc(28px + var(--nav-offset));
+    padding-bottom: 44px;
+  }
+  .shell {
+    gap: 28px;
+  }
+  .story h2 {
+    font-size: 48px;
+  }
+  .brand {
+    display: none;
+  }
+  .tagline {
+    font-size: 19px;
+  }
+  .description {
+    display: none;
+  }
+  .card {
+    border-radius: 22px;
+    padding: 24px 20px;
+  }
+  .back {
+    margin-bottom: 22px;
+  }
+}

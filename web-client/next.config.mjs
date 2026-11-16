@@ -12,9 +12,10 @@ const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   compress: true,
-  allowedDevOrigins: process.env.REPLIT_DEV_DOMAIN
-    ? [process.env.REPLIT_DEV_DOMAIN]
-    : [],
+  allowedDevOrigins: [
+    '172.30.96.1',
+    ...(process.env.REPLIT_DEV_DOMAIN ? [process.env.REPLIT_DEV_DOMAIN] : []),
+  ],
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [

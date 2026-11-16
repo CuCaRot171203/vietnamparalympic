@@ -28,6 +28,8 @@ import { getApiUrl } from "@/utils/api";
 import { useLanguage } from "@/hooks/useTranslation";
 import { SPORT_LOGOS } from "@/lib/sport-logos";
 import NewsImage from "@/components/news/NewsImage";
+import PublicPageHero from "@/components/PublicPageHero";
+import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import styles from "./matches.module.css";
 
 type Entity = {
@@ -315,74 +317,50 @@ export default function PublicMatchesPage() {
       theme={{
         algorithm: dark ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
-          colorPrimary: dark ? "#ef9fb0" : "#7c293b",
-          colorBgContainer: dark ? "#1d1d19" : "#fcfbf8",
-          colorBgElevated: dark ? "#24241f" : "#fcfbf8",
-          colorText: dark ? "#f7f4ed" : "#1c1c1c",
-          colorTextSecondary: dark ? "#aaa9a0" : "#666660",
+          colorPrimary: dark ? "#ff626e" : "#e10e20",
+          colorBgContainer: dark ? "#201b18" : "#fff",
+          colorBgElevated: dark ? "#24241f" : "#fff",
+          colorText: dark ? "#fff" : "#291b18",
+          colorTextSecondary: dark ? "#c0b2a8" : "#80736d",
           colorBorder: dark ? "#393932" : "#dedbd2",
-          borderRadius: 8,
+          borderRadius: 14,
           controlHeight: 44,
           fontFamily: "inherit",
           fontSize: 13,
         },
       }}
     >
-      <main id="main-content" className={styles.page}>
+      <main
+        id="main-content"
+        className={[
+          styles.page,
+          homeBeVietnam.variable,
+          homeNeusharp.variable,
+        ].join(" ")}
+      >
+        <PublicPageHero
+          locale={language}
+          title={vi ? "Lịch thi đấu" : "Match schedule"}
+          tagline={
+            vi ? "Theo nhịp từng cuộc đấu." : "Every match. Every moment."
+          }
+          description={
+            vi
+              ? "Lịch thi đấu, giải đấu và những khoảnh khắc bứt phá. Cùng dõi theo hành trình của thể thao người khuyết tật Việt Nam."
+              : "Follow the fixtures, tournaments and breakthrough moments of Vietnam’s para athletes."
+          }
+          image="/wp169/w3.jpg"
+          imageAlt={
+            vi
+              ? "Các vận động viên tranh tài trên đường đua"
+              : "Athletes competing on the track"
+          }
+          primary={{
+            label: vi ? "Xem lịch thi đấu" : "Explore the schedule",
+            href: "#schedule-content",
+          }}
+        />
         <div className={styles.container}>
-          <nav
-            className={styles.breadcrumb}
-            aria-label={vi ? "Điều hướng trang" : "Breadcrumb"}
-          >
-            <Link href={`/${language}`}>{vi ? "Trang chủ" : "Home"}</Link>
-            <span>/</span>
-            <span aria-current="page">{vi ? "Lịch thi đấu" : "Schedule"}</span>
-          </nav>
-          <header className={styles.hero}>
-            <div>
-              <p className={styles.eyebrow}>
-                <span />
-                Vietnam ParaSports · Competition
-              </p>
-              <h1>
-                {vi ? (
-                  <>
-                    Theo nhịp
-                    <br />
-                    <span>từng cuộc đấu.</span>
-                  </>
-                ) : (
-                  <>
-                    Every match.
-                    <br />
-                    <span>Every moment.</span>
-                  </>
-                )}
-              </h1>
-              <p className={styles.heroText}>
-                {vi
-                  ? "Lịch thi đấu, giải đấu và những khoảnh khắc bứt phá. Cùng dõi theo hành trình của thể thao người khuyết tật Việt Nam."
-                  : "Follow the fixtures, tournaments and breakthrough moments of Vietnam’s para athletes."}
-              </p>
-            </div>
-            <div className={styles.heroAside}>
-              <CalendarDays size={42} strokeWidth={1.2} />
-              <span>
-                {vi
-                  ? "Sẵn sàng cho khoảnh khắc tiếp theo"
-                  : "Ready for the next moment"}
-              </span>
-              <p>
-                {vi
-                  ? "Tìm trận đấu bạn quan tâm. Lưu lịch và cùng tiếp sức cho vận động viên."
-                  : "Find your event, save the date and support the athletes."}
-              </p>
-              <a href="#schedule-content">
-                {vi ? "Khám phá lịch thi đấu" : "Explore the schedule"}
-                <ArrowRight size={16} />
-              </a>
-            </div>
-          </header>
           <section
             className={styles.content}
             id="schedule-content"

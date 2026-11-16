@@ -1,0 +1,126 @@
+.section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 84px 0 52px;
+  background: #250a08 url("/DES/homes/DONG_HANH_DEV.webp") center / 100% 100%
+    no-repeat;
+  color: #fff;
+  font-family: var(--font-home-label), sans-serif;
+  scroll-margin-top: 52px;
+}
+.heading {
+  max-width: 1200px;
+  padding: 0 24px;
+  margin: 0 auto 54px;
+  text-align: center;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #ff424b;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+.badge span {
+  width: 9px;
+  height: 9px;
+  background: #e31624;
+  border-radius: 50%;
+}
+.heading h2 {
+  margin: 0 auto 20px;
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-size: clamp(28px, 3vw, 44px);
+  font-weight: 700;
+  line-height: 1.22;
+  text-wrap: balance;
+}
+.heading p {
+  max-width: 790px;
+  margin: 0 auto 30px;
+  color: #ffffffbd;
+  font-size: 15px;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+.join {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 7px 6px 24px;
+  background: #fff;
+  border: 1px solid #ffffff80;
+  color: #df0c1d;
+  border-radius: 999px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.join span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #df0c1d;
+  color: #fff;
+}
+.join:hover {
+  background: #fff0e5;
+}
+.join:focus-visible {
+  outline: 2px solid #ffc83d;
+  outline-offset: 4px;
+}
+.logos {
+  width: calc(100% - 64px);
+  max-width: 1440px;
+  margin: auto;
+}
+.loading,
+.empty {
+  display: grid;
+  place-items: center;
+  min-height: 280px;
+  margin: 0;
+  color: #ffffffbd;
+  text-align: center;
+}
+.loading {
+  background: linear-gradient(90deg, #ffffff05, #ffffff12, #ffffff05);
+  border-radius: 20px;
+}
+@media (max-width: 767px) {
+  .section {
+    padding: 56px 0 30px;
+    background-size: auto 100%;
+  }
+  .heading {
+    margin-bottom: 34px;
+  }
+  .badge {
+    font-size: 10px;
+    margin-bottom: 18px;
+  }
+  .heading h2 {
+    font-size: 28px;
+  }
+  .heading p {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+  .join {
+    font-size: 12px;
+  }
+  .logos {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .join {
+    transition: none;
+  }
+}

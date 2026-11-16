@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useLanguage } from "@/hooks/useTranslation";
+import PublicPageHero from "@/components/PublicPageHero";
+import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import styles from "./about.module.css";
 
 interface AboutCopy {
@@ -118,17 +120,10 @@ const translations: Record<string, AboutCopy> = {
     heroCardTitle: "A place to begin",
     heroCardText:
       "Read the news, find a club, follow the tournaments and connect with people who walk alongside you — all inside one accessible ecosystem.",
-    pills: [
-      "News",
-      "Clubs",
-      "Tournaments",
-      "Rankings",
-      "Courses",
-      "Partners",
-    ],
+    pills: ["News", "Clubs", "Tournaments", "Rankings", "Courses", "Partners"],
     whatIsTitle: "What is Vietnam ParaSports?",
     whatIsDesc1:
-      "Vietnam ParaSports is a communication and community connection platform for disabled sports in Vietnam. The website was built to spread the spirit of \"Sports Without Barriers\", bringing ParaSports closer to the public, while creating a space where disabled people, athletes, coaches, clubs, and the community can connect with each other.",
+      'Vietnam ParaSports is a communication and community connection platform for disabled sports in Vietnam. The website was built to spread the spirit of "Sports Without Barriers", bringing ParaSports closer to the public, while creating a space where disabled people, athletes, coaches, clubs, and the community can connect with each other.',
     whatIsDesc2:
       "Vietnam ParaSports not only covers disabled sports news, but also aims to build an accessible information ecosystem: a place where everyone can read news, learn about clubs, participate in community activities, learn to build personal channels, and connect with accompanying partners.",
     missionTitle: "Our Mission",
@@ -184,9 +179,7 @@ export default function AboutPage() {
     if (!nodes.length) return;
 
     const show = (id: string) =>
-      setRevealed((prev) =>
-        prev[id] ? prev : { ...prev, [id]: true },
-      );
+      setRevealed((prev) => (prev[id] ? prev : { ...prev, [id]: true }));
 
     if (
       typeof window.matchMedia === "function" &&
@@ -224,10 +217,7 @@ export default function AboutPage() {
 
   const revealClass = useCallback(
     (id: string) =>
-      [
-        ready ? styles.reveal : "",
-        revealed[id] ? styles.revealIn : "",
-      ]
+      [ready ? styles.reveal : "", revealed[id] ? styles.revealIn : ""]
         .filter(Boolean)
         .join(" "),
     [revealed, ready],
@@ -244,47 +234,31 @@ export default function AboutPage() {
   ];
 
   return (
-    <div ref={rootRef} className={styles.page}>
-      <div className={styles.ambient} aria-hidden="true">
-        <span className={`${styles.blob} ${styles.blobOne}`} />
-        <span className={`${styles.blob} ${styles.blobTwo}`} />
-        <span className={`${styles.blob} ${styles.blobThree}`} />
-      </div>
-
-      {/* ---------- HERO (nền tràn ngang) ---------- */}
-      <section className={styles.hero}>
-        <div
-          className={styles.heroMedia}
-          style={{ backgroundImage: "url(/assets/aboutus/AU_01.jpg)" }}
-          aria-hidden="true"
-        />
-        <div className={styles.heroScrim} aria-hidden="true" />
-        <div className={styles.container}>
-          <div className={styles.heroGrid}>
-            <div
-              data-reveal-id="hero-text"
-              className={revealClass("hero-text")}
-            >
-              <span className={styles.eyebrow}>
-                <span className={styles.eyebrowDot} aria-hidden="true" />
-                {tStr.eyebrow}
-              </span>
-              <h1 className={styles.heroTitle}>{tStr.heading}</h1>
-              <p className={styles.heroSubtitle}>{tStr.subheading}</p>
-              <p className={styles.heroLead}>{tStr.heroLead}</p>
-              <div className={styles.heroActions}>
-                <Link href="/sports" className={styles.primaryCta}>
-                  {tStr.ctaPrimary}
-                  <ArrowRight size={16} aria-hidden="true" />
-                </Link>
-                <Link href="/clubs" className={styles.ghostCta}>
-                  {tStr.ctaSecondary}
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div
+      ref={rootRef}
+      className={[
+        styles.page,
+        homeBeVietnam.variable,
+        homeNeusharp.variable,
+      ].join(" ")}
+    >
+      <PublicPageHero
+        locale={language}
+        title={tStr.heading}
+        tagline={tStr.subheading}
+        description={tStr.heroLead}
+        image="/assets/aboutus/AU_01.jpg"
+        imageAlt={
+          language === "vi"
+            ? "Cộng đồng vận động viên thể thao người khuyết tật Việt Nam"
+            : "Vietnam’s para sports community"
+        }
+        primary={{ label: tStr.ctaPrimary, href: "/" + language + "/sports" }}
+        secondary={{
+          label: tStr.ctaSecondary,
+          href: "/" + language + "/clubs",
+        }}
+      />
 
       {/* ---------- THẺ "MỘT NƠI ĐỂ BẮT ĐẦU" (tràn ngang, 2 bên) ---------- */}
       <section className={styles.startBand}>
@@ -370,9 +344,7 @@ export default function AboutPage() {
             <ul className={styles.missionAside}>
               {tStr.missionPoints.map((point, index) => (
                 <li key={point} className={styles.missionItem}>
-                  <span className={styles.missionItemIndex}>
-                    0{index + 1}
-                  </span>
+                  <span className={styles.missionItemIndex}>0{index + 1}</span>
                   <Users
                     size={18}
                     strokeWidth={1.8}

@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -19,6 +17,8 @@ import {
 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { useLanguage } from "@/hooks/useTranslation";
+import PublicPageHero from "@/components/PublicPageHero";
+import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import styles from "./companion.module.css";
 
 const partnershipTypes = [
@@ -209,80 +209,38 @@ export default function CompanionPage() {
     </div>
   );
   return (
-    <main className={styles.page}>
+    <main
+      className={[
+        styles.page,
+        homeBeVietnam.variable,
+        homeNeusharp.variable,
+      ].join(" ")}
+    >
+      <PublicPageHero
+        locale={language}
+        title={vi ? "Đồng hành" : "Partner with us"}
+        tagline={
+          vi
+            ? "Cùng mở rộng những cơ hội."
+            : "Together, we create more possibilities."
+        }
+        description={
+          vi
+            ? "Mỗi sự đồng hành đều có thể mở ra một cơ hội tập luyện, một sân chơi và một câu chuyện được lắng nghe. Cùng tiếp sức cho cộng đồng thể thao người khuyết tật Việt Nam."
+            : "Every partnership can open a door to training, competition and stories worth hearing. Join us in supporting Vietnam’s para sports community."
+        }
+        image="/assets/homepage/creator-lab-summit.jpg"
+        imageAlt={
+          vi
+            ? "Các đại biểu và đối tác tại Vietnam ParaSports Creator Lab Summit"
+            : "Delegates and partners at Vietnam ParaSports Creator Lab Summit"
+        }
+        primary={{
+          label: vi ? "Gửi đề xuất đồng hành" : "Start a partnership",
+          href: "#partnership-form",
+        }}
+      />
       <div className={styles.container}>
-        <nav
-          className={styles.breadcrumb}
-          aria-label={vi ? "Điều hướng trang" : "Breadcrumb"}
-        >
-          <Link href={`/${language}`}>{vi ? "Trang chủ" : "Home"}</Link>
-          <span>/</span>
-          <span aria-current="page">
-            {vi ? "Đồng hành" : "Partner with us"}
-          </span>
-        </nav>
-        <header className={styles.hero}>
-          <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>
-              <span />
-              Vietnam ParaSports · Together
-            </p>
-            <h1>
-              {vi ? (
-                <>
-                  Cùng mở rộng
-                  <br />
-                  <span>những cơ hội.</span>
-                </>
-              ) : (
-                <>
-                  Together, we create
-                  <br />
-                  <span>more possibilities.</span>
-                </>
-              )}
-            </h1>
-            <p className={styles.heroDescription}>
-              {vi
-                ? "Mỗi sự đồng hành đều có thể mở ra một cơ hội tập luyện, một sân chơi và một câu chuyện được lắng nghe. Cùng tiếp sức cho cộng đồng thể thao người khuyết tật Việt Nam."
-                : "Every partnership can open a door to training, competition and stories worth hearing. Join us in supporting Vietnam’s para sports community."}
-            </p>
-            <a href="#partnership-form" className={styles.primary}>
-              {vi ? "Gửi đề xuất đồng hành" : "Start a partnership"}
-              <ArrowUpRight size={18} />
-            </a>
-            <p className={styles.heroNote}>
-              {vi
-                ? "Dành cho cá nhân, tổ chức và doanh nghiệp."
-                : "For individuals, organizations and businesses."}
-            </p>
-          </div>
-          <figure className={styles.heroVisual}>
-            <div className={styles.heroImage}>
-              <Image
-                src="/assets/homepage/creator-lab-summit.jpg"
-                alt={
-                  vi
-                    ? "Các đại biểu và đối tác tại sự kiện Vietnam ParaSports Creator Lab Summit"
-                    : "Delegates and partners at Vietnam ParaSports Creator Lab Summit"
-                }
-                fill
-                priority
-                sizes="(max-width: 767px) 100vw, 50vw"
-                className={styles.photo}
-              />
-              <span className={styles.photoTag}>
-                <Handshake size={14} />
-                {vi ? "Kết nối để cùng tiến xa" : "Connect. Support. Grow."}
-              </span>
-            </div>
-            <figcaption>
-              {vi
-                ? "Cùng tạo nên những kết nối có ý nghĩa cho cộng đồng."
-                : "Building meaningful connections for the community."}
-            </figcaption>
-          </figure>
-        </header>
         <section className={styles.ways} aria-labelledby="ways-heading">
           <div className={styles.sectionHeading}>
             <div>

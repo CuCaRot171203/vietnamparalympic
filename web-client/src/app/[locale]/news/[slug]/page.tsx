@@ -1,7 +1,10 @@
+import { cache } from "react";
+import localFont from "next/font/local";
+import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import { apiClient } from "@/lib/api-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowUpRight, Clock3 } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronRight, Clock3 } from "lucide-react";
 import PostInteractions from "@/components/PostInteractions";
 import TextToSpeech from "@/components/TextToSpeech";
 import BookmarkButton from "@/components/BookmarkButton";
@@ -9,6 +12,13 @@ import ShareButton from "@/components/ShareButton";
 import NewsImage from "@/components/news/NewsImage";
 import DOMPurify from "isomorphic-dompurify";
 import styles from "./article.module.css";
+
+const calvera = localFont({
+  src: "../../../../../public/KV/DL-Calvera-2.otf",
+  weight: "400",
+  display: "swap",
+  variable: "--font-article-calvera",
+});
 
 interface Post {
   id: string;
@@ -26,7 +36,7 @@ interface Post {
 }
 type PageProps = { params: Promise<{ slug: string; locale: string }> };
 
-async function getPost(slug: string): Promise<Post | null> {
+const getPost = cache(async (slug: string): Promise<Post | null> => {
   try {
     const res = await apiClient.request(`/posts/${encodeURIComponent(slug)}`, {
       next: { revalidate: 60 },
@@ -36,7 +46,7 @@ async function getPost(slug: string): Promise<Post | null> {
     console.error(error);
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
@@ -105,68 +115,81 @@ export default async function NewsDetailPage({ params }: PageProps) {
     },
   };
   return (
-    <main id="main-content" className={styles.page}>
+    <main
+      id="main-content"
+      className={[
+        styles.page,
+        calvera.variable,
+        homeBeVietnam.variable,
+        homeNeusharp.variable,
+      ].join(" ")}
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
         }}
       />
-      <div className={styles.container}>
-        <nav
-          className={styles.breadcrumb}
-          aria-label={vi ? "Điều hướng trang" : "Breadcrumb"}
-        >
-          <Link href={`/${locale}`}>{vi ? "Trang chủ" : "Home"}</Link>
-          <span>/</span>
-          <Link href={`/${locale}/news`}>{vi ? "Tin tức" : "News"}</Link>
-          <span>/</span>
-          <span aria-current="page">
-            {post.category?.name || (vi ? "Bài viết" : "Article")}
-          </span>
-        </nav>
-        <header className={styles.header}>
-          <div className={styles.eyebrow}>
-            <span />
-            Vietnam ParaSports Journal
-          </div>
-          <Link href={categoryHref} className={styles.category}>
-            {post.category?.name || (vi ? "Tin tức" : "News")}
-            <ArrowUpRight size={13} />
-          </Link>
-          <h1>{post.title}</h1>
-          {post.excerpt && <p className={styles.excerpt}>{post.excerpt}</p>}
-          <div className={styles.byline}>
-            <div className={styles.author}>
-              <span className={styles.avatar} aria-hidden="true">
-                {(post.author?.fullName || "Vietnam ParaSports").charAt(0)}
-              </span>
-              <div>
-                <span className={styles.caption}>
-                  {vi ? "Bài viết bởi" : "Written by"}
+      <section className={styles.hero} aria-labelledby="news-article-heading">
+        <div className={styles.heroBackground} aria-hidden="true" />
+        <div className={styles.container}>
+          <nav
+            className={styles.breadcrumb}
+            aria-label={vi ? "Điều hướng trang" : "Breadcrumb"}
+          >
+            <Link href={`/${locale}`}>{vi ? "Trang chủ" : "Home"}</Link>
+            <ChevronRight size={12} aria-hidden="true" />
+            <Link href={`/${locale}/news`}>{vi ? "Tin tức" : "News"}</Link>
+            <ChevronRight size={12} aria-hidden="true" />
+            <span aria-current="page">
+              {post.category?.name || (vi ? "Bài viết" : "Article")}
+            </span>
+          </nav>
+          <header className={styles.header}>
+            <div className={styles.eyebrow}>
+              <span />
+              Vietnam ParaSports · {vi ? "Tin tức & Sự kiện" : "News & Events"}
+            </div>
+            <Link href={categoryHref} className={styles.category}>
+              {post.category?.name || (vi ? "Tin tức" : "News")}
+              <ArrowUpRight size={13} />
+            </Link>
+            <h1 id="news-article-heading">{post.title}</h1>
+            {post.excerpt && <p className={styles.excerpt}>{post.excerpt}</p>}
+            <div className={styles.byline}>
+              <div className={styles.author}>
+                <span className={styles.avatar} aria-hidden="true">
+                  {(post.author?.fullName || "Vietnam ParaSports").charAt(0)}
                 </span>
-                <span>{post.author?.fullName || "Vietnam ParaSports"}</span>
+                <div>
+                  <span className={styles.caption}>
+                    {vi ? "Bài viết bởi" : "Written by"}
+                  </span>
+                  <span>{post.author?.fullName || "Vietnam ParaSports"}</span>
+                </div>
+              </div>
+              <div className={styles.date}>
+                <time dateTime={published}>{date(published)}</time>
+                <span>
+                  <Clock3 size={13} />
+                  {minutes} {vi ? "phút đọc" : "min read"}
+                </span>
               </div>
             </div>
-            <div className={styles.date}>
-              <time dateTime={published}>{date(published)}</time>
-              <span>
-                <Clock3 size={13} />
-                {minutes} {vi ? "phút đọc" : "min read"}
-              </span>
-            </div>
-          </div>
-        </header>
-        {post.thumbnail && (
-          <figure className={styles.cover}>
-            <NewsImage
-              src={post.thumbnail}
-              className={styles.photo}
-              sizes="(max-width: 767px) 100vw, 1200px"
-              priority
-            />
-          </figure>
-        )}
+          </header>
+          {post.thumbnail && (
+            <figure className={styles.cover}>
+              <NewsImage
+                src={post.thumbnail}
+                className={styles.photo}
+                sizes="(max-width: 767px) 100vw, 1200px"
+                priority
+              />
+            </figure>
+          )}
+        </div>
+      </section>
+      <div className={styles.container}>
         <div className={styles.layout}>
           <article className={styles.article} aria-label={post.title}>
             <div
@@ -195,10 +218,17 @@ export default async function NewsDetailPage({ params }: PageProps) {
               </div>
             )}
             <div className={styles.articleEnd}>
-              <span>Vietnam ParaSports</span>
+              <div>
+                <span className={styles.endLabel}>Vietnam ParaSports</span>
+                <p>
+                  {vi
+                    ? "Kết nối cộng đồng. Lan tỏa câu chuyện."
+                    : "Connecting communities. Sharing stories."}
+                </p>
+              </div>
               <Link href={`/${locale}/news`}>
-                <ArrowLeft size={15} />
                 {vi ? "Trở về tin tức" : "Back to news"}
+                <ArrowRight size={15} aria-hidden="true" />
               </Link>
             </div>
             <div className={styles.comments}>
@@ -212,7 +242,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
               </span>
               <h2 id="read-next-heading">{vi ? "Đọc tiếp" : "Read next"}</h2>
             </div>
-            {related.map((item, index) => (
+            {related.map((item) => (
               <article key={item.id} className={styles.related}>
                 <Link
                   href={`/${locale}/news/${item.slug}`}
@@ -226,7 +256,9 @@ export default async function NewsDetailPage({ params }: PageProps) {
                   />
                 </Link>
                 <div className={styles.relatedMeta}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <span>
+                    {item.category?.name || (vi ? "Tin tức" : "News")}
+                  </span>
                   <time dateTime={item.publishedAt || item.createdAt}>
                     {date(item.publishedAt || item.createdAt)}
                   </time>

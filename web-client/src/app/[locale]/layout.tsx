@@ -45,11 +45,12 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: [
         {
-          url: "/assets/brand/vietnam-parasports-2026-mark.png",
-          type: "image/png",
+          url: "/favicon.svg",
+          type: "image/svg+xml",
+          sizes: "any",
         },
       ],
-      shortcut: ["/assets/brand/vietnam-parasports-2026-mark.png"],
+      shortcut: ["/favicon.svg"],
       apple: "/assets/brand/vietnam-parasports-2026-mark.png",
     },
     openGraph: {

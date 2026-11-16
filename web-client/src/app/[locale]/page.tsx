@@ -41,22 +41,19 @@ export default async function HomePage() {
   let initialData;
 
   try {
-    const [postsRes, partnersRes, statsRes, sportsRes] = await Promise.all([
-      fetch(`${apiBase}/posts?take=30`, { next: { revalidate: 60 } }),
+    const [partnersRes, statsRes, sportsRes] = await Promise.all([
       fetch(`${apiBase}/partners`, { next: { revalidate: 60 } }),
       fetch(`${apiBase}/statistics/summary`, { next: { revalidate: 60 } }),
       fetch(`${apiBase}/sports`, { next: { revalidate: 60 } }),
     ]);
 
-    const [posts, partners, statistics, sportsShowcase] = await Promise.all([
-      postsRes.ok ? postsRes.json().then(r => r.data || []) : [],
+    const [partners, statistics, sportsShowcase] = await Promise.all([
       partnersRes.ok ? partnersRes.json().then(r => r.data || []) : [],
       statsRes.ok ? statsRes.json().then(r => r.data || []) : [],
       sportsRes.ok ? sportsRes.json().then(r => r.data || []) : [],
     ]);
 
     initialData = {
-      posts: posts.map((p: any) => ({ ...p, category: p.category || { name: 'Tin tức chung' } })),
       partners,
       statistics,
       sportsShowcase,

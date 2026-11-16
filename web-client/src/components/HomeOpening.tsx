@@ -1,89 +1,96 @@
 import Image from "next/image";
-import { ArrowDownRight, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import localFont from "next/font/local";
+import { ArrowRight, Newspaper } from "lucide-react";
 import styles from "./home-opening.module.css";
+import StatsSpotlight from "./StatsSpotlight";
+import HomeClubs from "./HomeClubs";
+import type { Statistic } from "./StatsSpotlight";
 
-export default function HomeOpening({ language }: { language: string }) {
+const calvera = localFont({
+  src: "../../public/KV/DL-Calvera-2.otf",
+  weight: "400",
+  display: "swap",
+  variable: "--font-opening-calvera",
+});
+const neusharp = localFont({
+  src: "../../public/KV/1FTVVIPNeusharp-Italic.ttf",
+  weight: "400",
+  style: "italic",
+  display: "swap",
+  variable: "--font-opening-neusharp",
+});
+
+export default function HomeOpening({
+  language,
+  statistics,
+  sports,
+}: {
+  language: string;
+  statistics: Statistic[];
+  sports: { nameVi: string; nameEn?: string }[];
+}) {
   const vi = language === "vi";
   return (
-    <>
-      <section className={styles.hero} aria-labelledby="opening-heading">
-        <Image
-          src="/KV/COVER FACEBOOK.jpg"
-          alt="Di sản vinh quang – Khơi lửa đam mê, Vietnam ParaSports"
-          fill
-          priority
-          sizes="100vw"
-          className={styles.image}
-        />
-        <div className={styles.shade} />
-        <div className={styles.content}>
-          <div>
-            <p>
-              Vietnam ParaSports ·{" "}
-              {vi ? "Di sản & khát vọng" : "Heritage & ambition"}
-            </p>
-            <h1 id="opening-heading">
-              {vi ? (
-                <>
-                  Tiếp nối di sản.
-                  <br />
-                  Thắp sáng tương lai.
-                </>
-              ) : (
-                <>
-                  Honour the legacy.
-                  <br />
-                  Inspire what comes next.
-                </>
-              )}
-            </h1>
-          </div>
-          <a href="#sports-without-barriers">
-            {vi ? "Cùng viết tiếp hành trình" : "Discover the journey"}
-            <ArrowDownRight size={20} />
-          </a>
-        </div>
-      </section>
+    <div className={styles.opening}>
+      <Image
+        src="/DES/homes/HEADER_CLB_DEV.webp"
+        alt=""
+        width={5760}
+        height={7008}
+        priority
+        sizes="100vw"
+        className={styles.image}
+      />
       <section
-        className={styles.bridge}
-        aria-labelledby="opening-bridge-heading"
+        className={`${styles.hero} ${calvera.variable} ${neusharp.variable}`}
+        aria-labelledby="opening-heading"
       >
-        <p className={styles.eyebrow}>
-          {vi
-            ? "Từ di sản đến những cơ hội mới"
-            : "From heritage to new possibilities"}
-        </p>
-        <div className={styles.bridgeContent}>
-          <h2 id="opening-bridge-heading">
-            {vi ? (
-              <>
-                Đam mê được tiếp nối
-                <br />
-                khi cơ hội được mở ra.
-              </>
-            ) : (
-              <>
-                Passion carries on
-                <br />
-                when opportunity opens up.
-              </>
-            )}
-          </h2>
-          <div>
-            <p>
-              {vi
-                ? "Từ những thành tựu đáng tự hào đến từng buổi tập hôm nay, thể thao luôn bắt đầu bằng niềm tin vào khả năng của mỗi người. Vietnam ParaSports kết nối vận động viên, câu lạc bộ và những người đồng hành để cùng xây dựng một cộng đồng thể thao không rào cản."
-                : "From proud achievements to today’s training sessions, sport begins with belief in every person’s potential. Vietnam ParaSports brings athletes, clubs and supporters together to build a sporting community without barriers."}
-            </p>
-            <a href="#sports-without-barriers">
-              {vi
-                ? "Khám phá Vietnam ParaSports"
-                : "Explore Vietnam ParaSports"}
-              <ArrowRight size={16} />
-            </a>
+        <div className={styles.shade} aria-hidden="true" />
+        <div className={styles.heroBody}>
+          <div className={styles.content}>
+            <div className={styles.identity}>
+              <span className={styles.badge}>
+                <span aria-hidden="true" />
+                Vietnam ParaSports 2026
+              </span>
+              <h1 id="opening-heading" className={styles.headline}>
+                {vi ? "DI SẢN VINH QUANG" : "A LEGACY OF GLORY"}
+              </h1>
+              <p className={styles.tagline}>
+                {vi ? "KHƠI LỬA ĐAM MÊ" : "IGNITING PASSION"}
+              </p>
+            </div>
+            <div className={styles.introduction}>
+              <p className={styles.description}>
+                {vi
+                  ? "Tiếp nối những giá trị của thể thao người khuyết tật Việt Nam, cùng khám phá các môn thể thao, kết nối cộng đồng và mở thêm cơ hội tập luyện cho người khuyết tật."
+                  : "Building on the values of para sport in Vietnam, discover sports, connect with the community and open up more opportunities for people with disabilities to train."}
+              </p>
+              <div className={styles.actions}>
+                <Link
+                  href={`/${language}/clubs`}
+                  className={styles.primaryAction}
+                >
+                  {vi ? "Khám phá câu lạc bộ" : "Explore sports clubs"}
+                  <span aria-hidden="true">
+                    <ArrowRight size={18} strokeWidth={1.7} />
+                  </span>
+                </Link>
+                <Link
+                  href={`/${language}/news`}
+                  className={styles.secondaryAction}
+                >
+                  <Newspaper size={15} strokeWidth={1.5} aria-hidden="true" />
+                  {vi ? "Tin tức & Sự kiện" : "News & Events"}
+                </Link>
+              </div>
+            </div>
           </div>
+          <StatsSpotlight statistics={statistics} language={language} />
         </div>
       </section>
-    </>
+      <HomeClubs language={language} sports={sports} />
+    </div>
   );
 }

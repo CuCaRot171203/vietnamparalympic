@@ -3,7 +3,7 @@
    Bộ icon: lucide-react (cùng bộ với phần còn lại của hệ thống). */
 
 .page {
-  --cream: #f7f4ed;
+  --cream: #fff;
   --surface: #fcfbf8;
   --ink: #1c1c1c;
   --ink-soft: rgba(28, 28, 28, 0.82);

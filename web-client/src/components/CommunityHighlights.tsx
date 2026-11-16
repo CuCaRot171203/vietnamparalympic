@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Bell, CalendarDays, Users } from "lucide-react";
-import { apiClient } from "@/lib/api-client";
+import { ArrowUpRight, Bell, Users } from "lucide-react";
 import styles from "./community-highlights.module.css";
 
 interface CommunityPost {
@@ -15,15 +13,6 @@ interface CommunityPost {
   createdAt: string;
   category?: { name: string; slug?: string };
   tags?: { slug: string }[];
-}
-interface UpcomingEvent {
-  id: string;
-  title: string;
-  description: string;
-  location?: string;
-  startDate: string;
-  isPublished: boolean;
-  status: string;
 }
 interface Entry {
   title: string;
@@ -39,40 +28,7 @@ export default function CommunityHighlights({
   posts: CommunityPost[];
   language: string;
 }) {
-  const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const vi = language === "vi";
-  useEffect(() => {
-    let cancelled = false;
-    apiClient
-      .request("/events")
-      .then(async (response) => {
-        if (!response.ok) return;
-        const data = await response.json();
-        if (!cancelled && Array.isArray(data)) {
-          setEvents(
-            data
-              .filter(
-                (event: UpcomingEvent) =>
-                  event.isPublished &&
-                  event.status === "UPCOMING" &&
-                  new Date(event.startDate).getTime() >= Date.now(),
-              )
-              .sort(
-                (a: UpcomingEvent, b: UpcomingEvent) =>
-                  new Date(a.startDate).getTime() -
-                  new Date(b.startDate).getTime(),
-              )
-              .slice(0, 2),
-          );
-        }
-      })
-      .catch(() => {
-        /* The editorial links remain useful when the event feed is unavailable. */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const postEntries = (items: CommunityPost[]): Entry[] =>
     items.slice(0, 2).map((post) => ({
@@ -93,64 +49,6 @@ export default function CommunityHighlights({
       ),
   );
   const sections = [
-    {
-      key: "events",
-      icon: CalendarDays,
-      eyebrow: vi ? "Cùng nhịp thể thao" : "The sporting calendar",
-      title: vi ? "Sự kiện sắp diễn ra" : "Upcoming events",
-      description: vi
-        ? "Đón những cuộc hẹn mới của thể thao người khuyết tật. Theo dõi lịch thi đấu và các hoạt động kết nối cộng đồng."
-        : "Discover what is next in disability sport, from competitions to activities that bring our community together.",
-      image: "/uploads/1781644852147-pcy2n1.jpg",
-      alt: vi
-        ? "Khoảnh khắc trao giải tại một giải cờ vua quốc tế cho người khuyết tật"
-        : "An awards moment at an international chess competition for athletes with disabilities",
-      entries: events.length
-        ? events.map(
-            (event): Entry => ({
-              title: event.title,
-              description: event.description,
-              meta: [
-                new Date(event.startDate).toLocaleDateString(
-                  vi ? "vi-VN" : "en-GB",
-                  {
-                    day: "2-digit",
-                    month: "short",
-                    timeZone: "Asia/Ho_Chi_Minh",
-                  },
-                ),
-                event.location,
-              ]
-                .filter(Boolean)
-                .join(" · "),
-            }),
-          )
-        : [
-            {
-              title: vi ? "Lịch thi đấu & giải đấu" : "Matches & tournaments",
-              description: vi
-                ? "Tra cứu bộ môn, thời gian và địa điểm thi đấu trên lịch của hệ thống."
-                : "Find sports, dates and venues in the competition calendar.",
-            },
-            {
-              title: vi
-                ? "Hẹn gặp ở sự kiện tiếp theo"
-                : "See you at the next event",
-              description: vi
-                ? "Lịch sự kiện mới sẽ xuất hiện tại đây khi được công bố."
-                : "New events will appear here once their schedules are published.",
-            },
-          ],
-      cta: vi ? "Xem lịch thi đấu" : "View the calendar",
-      href: `/${language}/matches`,
-      listLabel: events.length
-        ? vi
-          ? "Lịch sắp tới"
-          : "Coming up"
-        : vi
-          ? "Theo dõi & khám phá"
-          : "Follow & explore",
-    },
     {
       key: "clubs",
       icon: Users,
@@ -235,11 +133,7 @@ export default function CommunityHighlights({
     <section
       id="community-highlights"
       className={styles.section}
-      aria-label={
-        vi
-          ? "Sự kiện, câu lạc bộ và Creator Lab"
-          : "Events, clubs and Creator Lab"
-      }
+      aria-label={vi ? "Câu lạc bộ và Creator Lab" : "Clubs and Creator Lab"}
     >
       <div className={styles.ambient} aria-hidden="true">
         <Image
@@ -270,7 +164,7 @@ export default function CommunityHighlights({
                 src={item.image}
                 alt={item.alt}
                 fill
-                sizes="(max-width: 767px) 100vw, 33vw"
+                sizes="(max-width: 767px) 100vw, 50vw"
               />
               <span className={styles.imageShade} />
             </div>

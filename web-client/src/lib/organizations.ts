@@ -24,6 +24,9 @@ export interface Organization {
   description: string | null;
   isApproved: boolean;
   details?: Partial<ClubDetails> | null;
+  lat?: number | null;
+  lng?: number | null;
+  updatedAt?: string;
 }
 
 export const emptyClubDetails: ClubDetails = {
@@ -39,7 +42,9 @@ export const emptyClubDetails: ClubDetails = {
   phone: "",
 };
 
-export function normalizeClubDetails(value: Organization["details"]): ClubDetails {
+export function normalizeClubDetails(
+  value: Organization["details"],
+): ClubDetails {
   const result = { ...emptyClubDetails };
   if (!value || typeof value !== "object") return result;
   for (const key of Object.keys(emptyClubDetails) as (keyof ClubDetails)[]) {

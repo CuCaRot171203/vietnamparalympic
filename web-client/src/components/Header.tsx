@@ -192,6 +192,7 @@ export function Header() {
       ref={rootRef}
       className={styles.header}
       data-scrolled={scrolled}
+      data-home={pathname === "/" || pathname === `/${language}` || pathname === `/${language}/`}
       onKeyDown={(event) => {
         if (event.key !== "Escape") return;
         setPanel(null);
@@ -217,7 +218,12 @@ export function Header() {
           aria-label={vi ? "Trang chủ Vietnam ParaSports" : "Vietnam ParaSports home"}
           onClick={() => setPanel(null)}
         >
-          <img src={LOGO} alt="Vietnam ParaSports 2026" width={159} height={64} />
+          <img
+            src={scrolled ? "/KV/logo_white.png" : LOGO}
+            alt="Vietnam ParaSports 2026"
+            width={scrolled ? 124 : 159}
+            height={scrolled ? 62 : 64}
+          />
         </Link>
         <nav className={styles.desktopNav} aria-label={vi ? "Menu chính" : "Main navigation"}>
           {menu.map((id) =>

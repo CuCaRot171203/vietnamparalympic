@@ -1,0 +1,233 @@
+.hero {
+  --hero-paper: #fff;
+  --nav-offset: 71px;
+  position: relative;
+  isolation: isolate;
+  margin-top: calc(-1 * var(--nav-offset));
+  padding: calc(34px + var(--nav-offset)) 0 90px;
+  color: #fff;
+  background: var(--hero-paper);
+  font-family: var(--font-home-label), sans-serif;
+}
+:global(.dark) .hero {
+  --hero-paper: #131311;
+}
+.background {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    url("/DES/else/CHI_TIET_CLB_BG.webp") center / 100% 100% no-repeat,
+    linear-gradient(#230a08 80%, transparent 80%);
+}
+.container {
+  max-width: 1440px;
+  margin: auto;
+  padding: 0 clamp(24px, 5vw, 72px);
+}
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: #dfc9c1;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.breadcrumb [aria-current] {
+  color: #fff;
+}
+.breadcrumb a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 60px;
+  margin-top: 38px;
+}
+.copy {
+  min-width: 0;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 5px 10px;
+  background: #ffffff0a;
+  border: 1px solid #ffffff24;
+  border-radius: 99px;
+}
+.badge i {
+  width: 5px;
+  height: 5px;
+  background: #ff3948;
+  border-radius: 50%;
+}
+.copy h1 {
+  font-family: var(--font-public-calvera), sans-serif;
+  font-size: 100px;
+  font-weight: 400;
+  line-height: 1.08;
+  text-transform: uppercase;
+  margin: 24px 0 20px;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  color: #fff;
+}
+.tagline {
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-size: clamp(19px, 2.1vw, 28px);
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0 0 18px;
+  color: #ffba53;
+  text-wrap: balance;
+}
+.description {
+  max-width: 580px;
+  color: #e4d0c8;
+  font-size: 14px;
+  line-height: 1.85;
+  margin: 0;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  min-height: 44px;
+  border-radius: 99px;
+  padding: 5px 5px 5px 20px;
+  font-weight: 600;
+}
+.primary {
+  color: #fff;
+  background: #e10e20;
+}
+.secondary {
+  color: #281714;
+  background: #fff;
+}
+.primary > span,
+.secondary > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+.primary > span {
+  background: #fff;
+  color: #e10e20;
+}
+.secondary > span {
+  background: #281714;
+  color: #fff;
+}
+.primary:hover {
+  background: #bb0a1b;
+}
+.secondary:hover {
+  background: #f7e8df;
+}
+.visual {
+  position: relative;
+  aspect-ratio: 1.15;
+  overflow: hidden;
+  border-radius: 26px;
+  background: #381d15;
+  box-shadow: 0 18px 48px #17060324;
+}
+.photo {
+  object-fit: cover;
+}
+.hero a:focus-visible {
+  outline: 2px solid #ffba53;
+  outline-offset: 4px;
+}
+@media (max-width: 1279px) {
+  .hero {
+    --nav-offset: 62px;
+  }
+  .grid {
+    gap: 38px;
+  }
+  .copy h1 {
+    font-size: 86px;
+  }
+}
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 28px;
+  }
+  .copy h1 {
+    font-size: 72px;
+  }
+  .visual {
+    aspect-ratio: 0.9;
+  }
+  .description {
+    font-size: 13px;
+  }
+}
+@media (max-width: 767px) {
+  .hero {
+    padding-top: calc(26px + var(--nav-offset));
+    padding-bottom: 64px;
+  }
+  .background {
+    background-size: auto 100%;
+    background-position: center top;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-top: 28px;
+  }
+  .copy h1 {
+    font-size: clamp(62px, 11vw, 82px);
+    margin-top: 18px;
+  }
+  .tagline {
+    font-size: 21px;
+  }
+  .description {
+    font-size: 14px;
+  }
+  .visual {
+    aspect-ratio: 1.5;
+    border-radius: 20px;
+  }
+}
+@media (max-width: 599px) {
+  .hero {
+    --nav-offset: 59px;
+  }
+  .copy h1 {
+    font-size: 62px;
+  }
+  .primary,
+  .secondary {
+    font-size: 11px;
+    padding-left: 14px;
+    gap: 10px;
+  }
+}

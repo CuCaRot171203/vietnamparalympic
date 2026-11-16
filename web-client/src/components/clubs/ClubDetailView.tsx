@@ -1,315 +1,618 @@
 "use client";
 
-import styles from "./club-editor.module.css";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import localFont from "next/font/local";
 import DOMPurify from "isomorphic-dompurify";
+import { ConfigProvider, Modal, theme } from "antd";
+import { useTheme } from "next-themes";
 import {
-  ArrowLeft,
-  ArrowUpRight,
+  ArrowRight,
   CalendarDays,
-  Check,
+  CheckCircle2,
+  ChevronRight,
+  Coins,
   Globe,
   Mail,
   MapPin,
   Phone,
+  Share2,
   Users,
-  Activity,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useLanguage } from "@/hooks/useTranslation";
-import { normalizeClubDetails, Organization, safeMediaUrl, splitClubSports } from "@/lib/organizations";
+import {
+  normalizeClubDetails,
+  type Organization,
+  safeMediaUrl,
+  splitClubSports,
+} from "@/lib/organizations";
+import { clubCover, trainingSessions } from "@/lib/club-presentation";
+import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
+import { ClubSummaryCard } from "./ClubsDirectory";
+import styles from "./club-detail.module.css";
 
+const calvera = localFont({
+  src: "../../../public/KV/DL-Calvera-2.otf",
+  weight: "400",
+  display: "swap",
+  variable: "--font-club-calvera",
+});
+function Badge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className={styles.badge}>
+      <i aria-hidden="true" />
+      {children}
+    </span>
+  );
+}
+function ClubImage({
+  src,
+  alt,
+  priority = false,
+  sizes = "100vw",
+}: {
+  src: string;
+  alt: string;
+  priority?: boolean;
+  sizes?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]);
+  return (
+    <Image
+      src={failed ? "/CLUB/CLUB_02.jpg" : src}
+      alt={alt}
+      fill
+      unoptimized
+      priority={priority}
+      sizes={sizes}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 export function ClubDetailView({
   club,
+  related = [],
   preview = false,
 }: {
   club: Organization;
+  related?: Organization[];
   preview?: boolean;
 }) {
   const { language } = useLanguage();
+  const { resolvedTheme } = useTheme();
   const vi = language === "vi";
   const d = normalizeClubDetails(club.details);
-  const image = safeMediaUrl(d.coverImage) || safeMediaUrl(club.imageUrl);
-  const gallery = d.gallery.filter(safeMediaUrl);
-  const phone = /^[+\d\s().-]+$/.test(d.phone) ? d.phone.replace(/[^+\d]/g, "") : "";
-  const website = /^https?:\/\//i.test(d.website) ? d.website : "";
-  const facts = [
-    { icon: MapPin, title: vi ? "Địa điểm tập luyện" : "Training location", value: club.location },
-    {
-      icon: CalendarDays,
-      title: vi ? "Lịch sinh hoạt" : "Training schedule",
-      value: club.schedule,
-    },
-    { icon: Users, title: vi ? "Dành cho" : "Who can join", value: club.suitableFor },
+  const [contactMode, setContactMode] = useState<"join" | "contact" | null>(
+    null,
+  );
+  const [shareStatus, setShareStatus] = useState("");
+  const cover = clubCover(club);
+  const gallery = [
+    ...new Set(
+      d.gallery
+        .map(safeMediaUrl)
+        .filter((value): value is string => Boolean(value)),
+    ),
   ];
+  const galleryImages = gallery.length
+    ? gallery
+    : [
+        ...new Set(
+          [safeMediaUrl(d.coverImage), safeMediaUrl(club.imageUrl)].filter(
+            (value): value is string => Boolean(value),
+          ),
+        ),
+      ];
+  const phoneSource =
+    d.phone || club.contactInfo?.match(/(?:\+84|0)[\d ().-]{8,20}/)?.[0] || "";
+  const phone = /^[+\d\s().-]+$/.test(phoneSource)
+    ? phoneSource.replace(/[^+\d]/g, "")
+    : "";
+  const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email) ? d.email : "";
+  const website = /^https?:\/\//i.test(d.website) ? d.website : "";
+  const canMap =
+    Boolean(club.location?.trim()) ||
+    (typeof club.lat === "number" && typeof club.lng === "number");
+  const mapQuery =
+    typeof club.lat === "number" && typeof club.lng === "number"
+      ? club.lat + "," + club.lng
+      : club.location || "";
+  const mapUrl =
+    "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(mapQuery);
+  const sessions = trainingSessions(club.schedule, vi);
+  const joinItems = [
+    club.suitableFor,
+    ...d.joiningInstructions.split(/\n/),
+  ].filter((value): value is string => Boolean(value?.trim()));
+  const updated =
+    club.updatedAt && Number.isFinite(new Date(club.updatedAt).getTime())
+      ? new Intl.DateTimeFormat(vi ? "vi-VN" : "en-GB", {
+          timeZone: "Asia/Ho_Chi_Minh",
+        }).format(new Date(club.updatedAt))
+      : "";
+  const facts = [
+    {
+      Icon: MapPin,
+      label: vi ? "Địa điểm" : "Location",
+      value: club.location || (vi ? "Đang cập nhật" : "Coming soon"),
+    },
+    {
+      Icon: CalendarDays,
+      label: vi ? "Lịch tập" : "Training",
+      value: club.schedule || (vi ? "Liên hệ CLB" : "Contact the club"),
+    },
+    {
+      Icon: Coins,
+      label: vi ? "Học phí" : "Training fee",
+      value: vi ? "Liên hệ CLB" : "Contact the club",
+    },
+    {
+      Icon: Users,
+      label: vi ? "Đối tượng" : "Who can join",
+      value:
+        club.suitableFor ||
+        (vi ? "Liên hệ để được tư vấn" : "Contact for guidance"),
+    },
+  ];
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareStatus(vi ? "Đã sao chép liên kết CLB" : "Club link copied");
+    } catch {
+      setShareStatus(
+        vi
+          ? "Bạn có thể sao chép địa chỉ trang để chia sẻ."
+          : "Copy this page’s address to share it.",
+      );
+    }
+  };
+  const ContactLinks = () => (
+    <div className={styles.contactLinks}>
+      {phone && (
+        <a href={"tel:" + phone}>
+          <Phone size={17} aria-hidden="true" />
+          <span>{phoneSource}</span>
+          <ArrowRight size={16} aria-hidden="true" />
+        </a>
+      )}
+      {email && (
+        <a href={"mailto:" + email}>
+          <Mail size={17} aria-hidden="true" />
+          <span>{email}</span>
+          <ArrowRight size={16} aria-hidden="true" />
+        </a>
+      )}
+      {website && (
+        <a href={website} target="_blank" rel="noopener noreferrer">
+          <Globe size={17} aria-hidden="true" />
+          <span>{vi ? "Website câu lạc bộ" : "Club website"}</span>
+          <ArrowRight size={16} aria-hidden="true" />
+        </a>
+      )}
+    </div>
+  );
   return (
-    <div
-      className={`${styles.surface} min-h-screen bg-[var(--club-bg)] text-[var(--club-text)] selection:bg-[var(--club-border)]`}
+    <ConfigProvider
+      theme={{
+        algorithm:
+          resolvedTheme === "dark"
+            ? theme.darkAlgorithm
+            : theme.defaultAlgorithm,
+        token: {
+          colorPrimary: "#e10e20",
+          borderRadius: 20,
+          fontFamily: "inherit",
+        },
+      }}
     >
-      <div className="mx-auto max-w-[1200px] px-5 py-8 sm:px-8 sm:py-12">
-        {!preview && (
-          <Link
-            href="/clubs"
-            className="mb-10 inline-flex min-h-11 items-center gap-2 text-sm text-[var(--club-muted)] hover:underline"
-          >
-            <ArrowLeft size={16} />
-            {vi ? "Tất cả câu lạc bộ" : "All clubs"}
-          </Link>
-        )}
-        <header className="grid items-end gap-8 pb-10 md:grid-cols-[1fr_auto]">
-          <div>
-            <div className="mb-5 flex flex-wrap items-center gap-3 text-sm text-[var(--club-muted)]">
-              {splitClubSports(club.sport).length > 0 ? (
-                splitClubSports(club.sport).map((clubSport) => (
-                  <span
-                    key={clubSport}
-                    className="rounded-full border border-[var(--club-text)]/20 px-3 py-1"
-                  >
-                    {clubSport}
-                  </span>
-                ))
-              ) : (
-                <span className="rounded-full border border-[var(--club-text)]/20 px-3 py-1">
-                  {vi ? "Thể thao cộng đồng" : "Community sports"}
-                </span>
-              )}
-              <span>Vietnam ParaSports · {vi ? "Câu lạc bộ" : "Club"}</span>
-            </div>
-            <h1 className="max-w-4xl text-4xl font-semibold leading-[1.08] tracking-[-1.2px] sm:text-5xl lg:text-6xl">
-              {club.name}
-            </h1>
-            {d.tagline && (
-              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--club-muted)]">
-                {d.tagline}
-              </p>
-            )}
+      <div
+        className={[
+          styles.page,
+          calvera.variable,
+          homeBeVietnam.variable,
+          homeNeusharp.variable,
+          preview ? styles.preview : "",
+        ].join(" ")}
+      >
+        <section className={styles.hero} aria-labelledby="club-detail-title">
+          <div className={styles.heroBackground} aria-hidden="true" />
+          <div className={styles.cover} aria-hidden="true">
+            <ClubImage src={cover} alt="" priority />
           </div>
-          <a
-            href="#club-contact"
-            className="inline-flex min-h-12 w-fit items-center justify-center gap-4 rounded-md bg-[var(--club-contrast)] px-6 py-3 text-[var(--club-on-contrast)] shadow-[inset_0_0.5px_0_rgba(255,255,255,0.2)] transition hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4"
-          >
-            {vi ? "Kết nối với câu lạc bộ" : "Connect with the club"}
-            <ArrowUpRight size={18} />
-          </a>
-        </header>
-
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--club-border)] bg-[linear-gradient(120deg,#e9e1d3,#eee5df_45%,#dce3df)] dark:bg-[linear-gradient(120deg,#303028,#302a29_45%,#263330)]">
-          {image ? (
-            <img
-              src={image}
-              alt={club.name}
-              className="aspect-[16/7] max-h-[480px] w-full object-cover"
-            />
-          ) : (
-            <div className="flex aspect-[16/7] max-h-[400px] items-center justify-center">
-              <Activity className="h-24 w-24 text-[var(--club-text)]/25" strokeWidth={1} />
-            </div>
-          )}
-          {d.foundedYear && (
-            <span className="absolute bottom-5 left-5 rounded-md bg-[var(--club-bg)] px-4 py-2 text-sm">
-              {vi ? "Đồng hành từ" : "Together since"} {d.foundedYear}
-            </span>
-          )}
-        </div>
-
-        <div className="grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-16 lg:py-16">
-          <div className="min-w-0 space-y-14">
-            <nav
-              aria-label={vi ? "Nội dung trang" : "Page sections"}
-              className="flex flex-wrap gap-5 border-b border-[var(--club-border)] pb-5 text-sm text-[var(--club-muted)]"
-            >
-              <a href="#club-about" className="hover:underline">
-                {vi ? "Giới thiệu" : "About"}
-              </a>
-              {d.facilities.length > 0 && (
-                <a href="#club-facilities" className="hover:underline">
-                  {vi ? "Tiện ích" : "Facilities"}
-                </a>
-              )}
-              {gallery.length > 0 && (
-                <a href="#club-gallery" className="hover:underline">
-                  {vi ? "Hình ảnh" : "Gallery"}
-                </a>
-              )}
-              <a href="#club-join" className="hover:underline">
-                {vi ? "Tham gia" : "Joining"}
-              </a>
-            </nav>
-            <section id="club-about" className="scroll-mt-44">
-              <p className="mb-3 text-sm text-[var(--club-muted)]">
-                01 / {vi ? "Câu chuyện của chúng tôi" : "Our story"}
-              </p>
-              <h2 className="mb-6 text-3xl font-semibold tracking-[-0.9px]">
-                {vi ? "Một cộng đồng. Nhiều khả năng." : "One community. Many possibilities."}
-              </h2>
-              {club.description && (
-                <div
-                  className="prose max-w-none text-[var(--club-muted)] prose-headings:font-semibold prose-headings:text-[var(--club-text)]"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(club.description) }}
-                />
-              )}
-              {d.content && (
-                <div
-                  className="prose mt-6 max-w-none text-[var(--club-text)]/80 prose-headings:font-semibold prose-headings:text-[var(--club-text)] prose-img:rounded-xl"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(d.content) }}
-                />
-              )}
-              {!club.description && !d.content && (
-                <p className="text-[var(--club-muted)]">
-                  {vi
-                    ? "Thông tin giới thiệu đang được cập nhật. Bạn có thể liên hệ trực tiếp để tìm hiểu thêm."
-                    : "An introduction is coming soon. Contact the club to learn more."}
-                </p>
-              )}
-            </section>
-            {d.facilities.length > 0 && (
-              <section id="club-facilities" className="scroll-mt-44">
-                <p className="mb-3 text-sm text-[var(--club-muted)]">
-                  02 / {vi ? "Không gian cho bạn" : "A space for you"}
-                </p>
-                <h2 className="mb-6 text-3xl font-semibold tracking-[-0.9px]">
-                  {vi ? "Tiện ích & hỗ trợ" : "Facilities & support"}
-                </h2>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {d.facilities.map((facility, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-3 rounded-xl border border-[var(--club-border)] p-4"
-                    >
-                      <Check size={18} className="mt-0.5 shrink-0" />
-                      <span>{facility}</span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-            {gallery.length > 0 && (
-              <section id="club-gallery" className="scroll-mt-44">
-                <h2 className="mb-6 text-3xl font-semibold tracking-[-0.9px]">
-                  {vi ? "Những khoảnh khắc cùng nhau" : "Moments together"}
-                </h2>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {gallery.map((url, index) => (
-                    <a
-                      key={`${url}-${index}`}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${vi ? "Mở ảnh" : "Open image"} ${index + 1}`}
-                    >
-                      <img
-                        src={url}
-                        alt={`${club.name} — ${vi ? "hoạt động" : "activity"} ${index + 1}`}
-                        loading="lazy"
-                        className="aspect-[4/3] w-full rounded-xl border border-[var(--club-border)] object-cover transition hover:opacity-80"
-                      />
-                    </a>
-                  ))}
-                </div>
-              </section>
-            )}
-            <section
-              id="club-join"
-              className="scroll-mt-44 rounded-2xl border border-[var(--club-border)] p-6 sm:p-8"
-            >
-              <p className="mb-3 text-sm text-[var(--club-muted)]">
-                {vi ? "Bước đầu tiên" : "Your first step"}
-              </p>
-              <h2 className="mb-4 text-3xl font-semibold tracking-[-0.9px]">
-                {vi ? "Hẹn gặp bạn ở buổi tập tới." : "See you at the next session."}
-              </h2>
-              <p className="whitespace-pre-line leading-relaxed text-[var(--club-muted)]">
-                {d.joiningInstructions ||
-                  (vi
-                    ? "Liên hệ với người phụ trách để được tư vấn lịch tập và điều kiện tham gia phù hợp với bạn."
-                    : "Contact the club coordinator to find a training session and participation options that suit you.")}
-              </p>
-              <a
-                href="#club-contact"
-                className="mt-6 inline-flex min-h-11 items-center gap-2 underline underline-offset-4"
+          <div className={styles.texture} aria-hidden="true" />
+          <div className={styles.container}>
+            {!preview && (
+              <nav
+                className={styles.breadcrumb}
+                aria-label={vi ? "Đường dẫn" : "Breadcrumb"}
               >
-                {vi ? "Thông tin liên hệ" : "Contact details"}
-                <ArrowUpRight size={16} />
-              </a>
-            </section>
-          </div>
-
-          <aside className="space-y-5 lg:sticky lg:top-44 lg:self-start">
-            <div className="rounded-2xl border border-[var(--club-border)] p-6">
-              <h2 className="mb-6 text-xl font-semibold">
-                {vi ? "Thông tin nhanh" : "At a glance"}
-              </h2>
-              <dl className="space-y-6">
-                {facts.map(({ icon: Icon, title, value }) => (
-                  <div key={title} className="flex gap-3">
-                    <Icon size={19} className="mt-0.5 shrink-0 text-[var(--club-muted)]" />
-                    <div>
-                      <dt className="mb-1 text-sm text-[var(--club-muted)]">{title}</dt>
-                      <dd className="whitespace-pre-line leading-relaxed">
-                        {value || (vi ? "Đang cập nhật" : "Coming soon")}
-                      </dd>
-                    </div>
-                  </div>
+                <Link href="/">{vi ? "Trang chủ" : "Home"}</Link>
+                <ChevronRight size={12} aria-hidden="true" />
+                <Link href="/clubs">{vi ? "Câu lạc bộ" : "Clubs"}</Link>
+                <ChevronRight size={12} aria-hidden="true" />
+                <span aria-current="page">{club.name}</span>
+              </nav>
+            )}
+            <div className={styles.heroCopy}>
+              <div className={styles.tags}>
+                {splitClubSports(club.sport).map((sport) => (
+                  <span key={sport}>{sport}</span>
                 ))}
-              </dl>
-            </div>
-            <section
-              id="club-contact"
-              className="scroll-mt-44 rounded-2xl bg-[var(--club-contrast)] p-6 text-[var(--club-on-contrast)]"
-            >
-              <p className="mb-2 text-sm text-[var(--club-on-contrast)]/65">
-                {vi ? "Chúng tôi luôn sẵn lòng" : "We are here to help"}
-              </p>
-              <h2 className="mb-5 text-2xl font-semibold">
-                {vi ? "Cùng bắt đầu nhé." : "Let’s get started."}
-              </h2>
-              {club.contactInfo && (
-                <p className="mb-5 whitespace-pre-line break-words text-sm leading-relaxed text-[var(--club-on-contrast)]/80">
-                  {club.contactInfo}
+                {club.location && <span>{club.location}</span>}
+              </div>
+              <h1 id="club-detail-title">
+                {club.name.split(/(khuyết tật)/gi).map((part, index) =>
+                  /khuyết tật/i.test(part) ? (
+                    <span className={styles.keepTogether} key={index}>
+                      {part}
+                    </span>
+                  ) : (
+                    part
+                  ),
+                )}
+              </h1>
+              {d.tagline && <p className={styles.tagline}>{d.tagline}</p>}
+              <div className={styles.heroBottom}>
+                <p className={styles.history}>
+                  {d.foundedYear && (
+                    <span>
+                      {vi ? "Thành lập" : "Founded"} {d.foundedYear}
+                    </span>
+                  )}
+                  {updated && (
+                    <span>
+                      {vi ? "Cập nhật" : "Updated"} {updated}
+                    </span>
+                  )}
+                  {!d.foundedYear && !updated && (
+                    <span>
+                      Vietnam ParaSports ·{" "}
+                      {vi
+                        ? "Kết nối cộng đồng thể thao"
+                        : "Connecting the sports community"}
+                    </span>
+                  )}
                 </p>
-              )}
-              <div className="space-y-3 text-sm">
-                {phone && (
-                  <a
-                    href={`tel:${phone}`}
-                    className="flex min-h-11 items-center gap-3 break-all rounded-md border border-[var(--club-on-contrast)]/20 px-3 py-2 hover:bg-[var(--club-on-contrast)]/5"
-                  >
-                    <Phone size={17} />
-                    {d.phone}
-                  </a>
-                )}
-                {d.email && (
-                  <a
-                    href={`mailto:${d.email}`}
-                    className="flex min-h-11 items-center gap-3 break-all rounded-md border border-[var(--club-on-contrast)]/20 px-3 py-2 hover:bg-[var(--club-on-contrast)]/5"
-                  >
-                    <Mail size={17} />
-                    {d.email}
-                  </a>
-                )}
-                {website && (
-                  <a
-                    href={website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex min-h-11 items-center gap-3 rounded-md border border-[var(--club-on-contrast)]/20 px-3 py-2 hover:bg-[var(--club-on-contrast)]/5"
-                  >
-                    <Globe size={17} />
-                    {vi ? "Website câu lạc bộ" : "Club website"}
-                    <ArrowUpRight size={15} />
-                  </a>
-                )}
-                {!club.contactInfo && !phone && !d.email && !website && (
-                  <p className="text-[var(--club-on-contrast)]/70">
-                    {vi
-                      ? "Thông tin liên hệ đang được cập nhật."
-                      : "Contact information is coming soon."}
-                  </p>
+                {!preview && (
+                  <div className={styles.share}>
+                    <span role="status">{shareStatus}</span>
+                    <button
+                      type="button"
+                      onClick={copyLink}
+                      aria-label={
+                        vi ? "Sao chép liên kết chia sẻ CLB" : "Copy club link"
+                      }
+                    >
+                      <Share2 size={18} aria-hidden="true" />
+                    </button>
+                  </div>
                 )}
               </div>
+            </div>
+            <dl className={styles.facts}>
+              {facts.map(({ Icon, label, value }) => (
+                <div key={label}>
+                  <span className={styles.factIcon}>
+                    <Icon size={20} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <dt>{label}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+        <div className={styles.container}>
+          <div className={styles.contentGrid}>
+            <div className={styles.storyColumn}>
+              <section id="club-about" className={styles.section}>
+                <Badge>{vi ? "Giới thiệu" : "About"}</Badge>
+                <h2>{vi ? "CÂU CHUYỆN CỦA CHÚNG TÔI" : "OUR STORY"}</h2>
+                {club.description && (
+                  <div
+                    className={styles.description}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(club.description),
+                    }}
+                  />
+                )}
+                {d.content && (
+                  <div
+                    className={styles.richText}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(d.content),
+                    }}
+                  />
+                )}
+                {!club.description && !d.content && (
+                  <p className={styles.muted}>
+                    {vi
+                      ? "Thông tin giới thiệu đang được cập nhật. Liên hệ người phụ trách để tìm hiểu thêm về câu lạc bộ."
+                      : "An introduction is coming soon. Contact the club coordinator to learn more."}
+                  </p>
+                )}
+                <div id="club-join" className={styles.joinBox}>
+                  <h3>{vi ? "Điều kiện tham gia" : "Joining the club"}</h3>
+                  <ul>
+                    {(joinItems.length
+                      ? joinItems
+                      : [
+                          vi
+                            ? "Liên hệ người phụ trách để được tư vấn lịch tập và điều kiện tham gia phù hợp với bạn."
+                            : "Contact the coordinator for a suitable training session and participation options.",
+                        ]
+                    ).map((item, index) => (
+                      <li key={index}>
+                        <CheckCircle2 size={15} aria-hidden="true" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+              {d.facilities.length > 0 && (
+                <section className={styles.section} id="club-facilities">
+                  <Badge>{vi ? "Tiện ích" : "Facilities"}</Badge>
+                  <h2>{vi ? "KHÔNG GIAN & HỖ TRỢ" : "FACILITIES & SUPPORT"}</h2>
+                  <ul className={styles.facilities}>
+                    {d.facilities.map((facility, index) => (
+                      <li key={index}>
+                        <CheckCircle2 size={17} aria-hidden="true" />
+                        {facility}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+              <section className={styles.section} id="club-gallery">
+                <Badge>{vi ? "Hình ảnh" : "Gallery"}</Badge>
+                <h2>{vi ? "KHOẢNH KHẮC TẬP LUYỆN" : "TRAINING MOMENTS"}</h2>
+                {galleryImages.length ? (
+                  <div
+                    className={styles.gallery}
+                    data-count={Math.min(galleryImages.length, 3)}
+                  >
+                    {galleryImages.map((src, index) => (
+                      <a
+                        key={src}
+                        href={src}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={
+                          (vi ? "Mở ảnh hoạt động " : "Open activity photo ") +
+                          (index + 1)
+                        }
+                      >
+                        <ClubImage
+                          src={src}
+                          alt={
+                            club.name +
+                            " — " +
+                            (vi ? "hoạt động " : "activity ") +
+                            (index + 1)
+                          }
+                          sizes="(max-width:767px) 90vw, 45vw"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.galleryPlaceholder}>
+                    <div>
+                      <ClubImage
+                        src={cover}
+                        alt={
+                          vi
+                            ? "Ảnh minh họa bộ môn thể thao"
+                            : "Sport illustration"
+                        }
+                        sizes="(max-width:767px) 90vw, 60vw"
+                      />
+                    </div>
+                    <p>
+                      {vi
+                        ? "Ảnh minh họa bộ môn. Hình ảnh hoạt động riêng của câu lạc bộ đang được cập nhật."
+                        : "Sport illustration. Club activity photos are coming soon."}
+                    </p>
+                  </div>
+                )}
+              </section>
+              <section className={styles.section} id="club-location">
+                <Badge>{vi ? "Địa điểm" : "Location"}</Badge>
+                <div className={styles.location}>
+                  {canMap ? (
+                    <a
+                      className={styles.map}
+                      href={mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={
+                        vi
+                          ? "Xem địa điểm trên Google Maps"
+                          : "View location on Google Maps"
+                      }
+                    >
+                      <span>
+                        <MapPin size={24} aria-hidden="true" />
+                      </span>
+                    </a>
+                  ) : (
+                    <div className={styles.map}>
+                      <span>
+                        <MapPin size={24} aria-hidden="true" />
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <h3>
+                      {club.location ||
+                        (vi
+                          ? "Địa điểm đang cập nhật"
+                          : "Location coming soon")}
+                    </h3>
+                    {canMap ? (
+                      <a
+                        href={mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {vi ? "Chỉ đường" : "Get directions"}
+                        <ArrowRight size={15} aria-hidden="true" />
+                      </a>
+                    ) : (
+                      <p className={styles.muted}>
+                        {vi
+                          ? "Liên hệ CLB để biết địa điểm tập luyện."
+                          : "Contact the club for its training location."}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </section>
+            </div>
+            <aside className={styles.sidebar}>
+              <section
+                id="club-contact"
+                className={styles.contactCard}
+                aria-label={vi ? "Liên hệ câu lạc bộ" : "Contact club"}
+              >
+                <button
+                  className={styles.joinButton}
+                  type="button"
+                  onClick={() => setContactMode("join")}
+                >
+                  {vi ? "Đăng ký tham gia" : "Join this club"}
+                  <span>
+                    <ArrowRight size={17} aria-hidden="true" />
+                  </span>
+                </button>
+                {email ? (
+                  <a className={styles.messageButton} href={"mailto:" + email}>
+                    {vi ? "Nhắn tin cho CLB" : "Message the club"}
+                    <span>
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </span>
+                  </a>
+                ) : (
+                  <button
+                    className={styles.messageButton}
+                    type="button"
+                    onClick={() => setContactMode("contact")}
+                  >
+                    {vi ? "Liên hệ CLB" : "Contact the club"}
+                    <span>
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </span>
+                  </button>
+                )}
+                <div className={styles.coordinator}>
+                  <span className={styles.avatar}>
+                    <Users size={19} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h3>{vi ? "Người phụ trách CLB" : "Club coordinator"}</h3>
+                    <p>
+                      {club.contactInfo ||
+                        (vi
+                          ? "Thông tin đang được cập nhật"
+                          : "Contact details coming soon")}
+                    </p>
+                  </div>
+                </div>
+                <ContactLinks />
+              </section>
+              <section
+                className={styles.schedule}
+                aria-labelledby="club-schedule-heading"
+              >
+                <Badge>{vi ? "Lịch tập" : "Training"}</Badge>
+                <h2 id="club-schedule-heading" className={styles.srOnly}>
+                  {vi ? "Lịch tập của câu lạc bộ" : "Club training schedule"}
+                </h2>
+                {sessions.length ? (
+                  <div>
+                    {sessions.map((session, index) => (
+                      <article key={index}>
+                        <h3>{session.day}</h3>
+                        {session.time && <strong>{session.time}</strong>}
+                        <p>{session.note}</p>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.scheduleEmpty}>
+                    {vi
+                      ? "Lịch tập đang được cập nhật. Liên hệ CLB để được tư vấn."
+                      : "Training times are coming soon. Contact the club for guidance."}
+                  </p>
+                )}
+              </section>
+            </aside>
+          </div>
+          {!preview && related.length > 0 && (
+            <section
+              className={styles.related}
+              aria-labelledby="related-clubs-heading"
+            >
+              <Badge>{vi ? "Gợi ý" : "Discover"}</Badge>
+              <div className={styles.relatedHeading}>
+                <h2 id="related-clubs-heading">
+                  {vi ? "KHÁM PHÁ CÂU LẠC BỘ KHÁC" : "EXPLORE MORE CLUBS"}
+                </h2>
+                <Link href="/clubs">
+                  {vi ? "Xem tất cả câu lạc bộ" : "View all clubs"}
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
+              <div className={styles.relatedGrid}>
+                {related.map((other) => (
+                  <ClubSummaryCard key={other.id} club={other} vi={vi} />
+                ))}
+              </div>
             </section>
-          </aside>
+          )}
         </div>
+        <Modal
+          open={contactMode !== null}
+          onCancel={() => setContactMode(null)}
+          footer={null}
+          title={
+            contactMode === "join"
+              ? vi
+                ? "Đăng ký tham gia câu lạc bộ"
+                : "Join this club"
+              : vi
+                ? "Liên hệ câu lạc bộ"
+                : "Contact the club"
+          }
+        >
+          <div className={styles.contactDialog}>
+            <h3>{club.name}</h3>
+            <p>
+              {vi
+                ? "Liên hệ người phụ trách để được tư vấn và xác nhận đăng ký tham gia."
+                : "Contact the coordinator for guidance and to confirm your registration."}
+            </p>
+            {club.contactInfo && <p>{club.contactInfo}</p>}
+            {d.joiningInstructions && (
+              <p className={styles.instructions}>{d.joiningInstructions}</p>
+            )}
+            <ContactLinks />
+            {!phone && !email && !website && !club.contactInfo && (
+              <p>
+                {vi
+                  ? "Thông tin liên hệ đang được cập nhật."
+                  : "Contact details are coming soon."}
+              </p>
+            )}
+          </div>
+        </Modal>
       </div>
-    </div>
+    </ConfigProvider>
   );
 }

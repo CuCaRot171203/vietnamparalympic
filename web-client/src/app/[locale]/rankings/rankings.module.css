@@ -1,21 +1,21 @@
 .page {
-  --paper: #f7f4ed;
-  --surface: #fcfbf8;
-  --ink: #1c1c1c;
-  --muted: #666660;
-  --line: rgba(28, 28, 28, 0.12);
-  --accent: #7c293b;
+  --paper: #fff;
+  --surface: #fff;
+  --ink: #291b18;
+  --muted: #80736d;
+  --line: #eee4de;
+  --accent: #e10e20;
   background: var(--paper);
   color: var(--ink);
   min-height: 100vh;
 }
 :global(.dark) .page {
   --paper: #131311;
-  --surface: #1d1d19;
-  --ink: #f7f4ed;
-  --muted: #aaa9a0;
+  --surface: #201b18;
+  --ink: #fff;
+  --muted: #c0b2a8;
   --line: rgba(247, 244, 237, 0.15);
-  --accent: #ef9fb0;
+  --accent: #ff626e;
 }
 .container {
   max-width: 1440px;
@@ -38,7 +38,7 @@
   border-radius: 12px;
   min-height: 440px;
   margin-block: 28px 32px;
-  color: #fcfbf8;
+  color: #fff;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -611,5 +611,80 @@
 @media (prefers-reduced-motion: reduce) {
   .sport {
     transition: none;
+  }
+}
+
+/* Vietnam ParaSports editorial design */
+.page {
+  font-family: var(--font-home-label), sans-serif;
+}
+.page > .container {
+  padding-top: 24px;
+  padding-inline: clamp(24px, 5vw, 72px);
+  max-width: 1440px;
+}
+.page h2 {
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+.sports {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  padding: 24px;
+}
+.sport {
+  border-radius: 99px;
+  padding: 8px 16px 8px 8px;
+}
+.sportLogo {
+  border-radius: 50%;
+}
+.sport[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: none;
+}
+.filterPanel {
+  border-radius: 22px;
+  padding: 26px;
+  box-shadow: 0 8px 24px #29100a04;
+}
+.results {
+  scroll-margin-top: 96px;
+  padding-top: 40px;
+}
+.filterToggle {
+  border-radius: 99px;
+  background: var(--surface);
+}
+.table :global(.ant-table) {
+  border-radius: 20px;
+  overflow: hidden;
+}
+.table :global(.ant-table-thead > tr > th) {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.summary {
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.summary strong {
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-size: 24px;
+}
+@media (max-width: 767px) {
+  .sports {
+    padding: 18px;
+  }
+  .filterPanel {
+    padding: 20px;
+  }
+  .summary > span + span {
+    padding-left: 18px;
   }
 }

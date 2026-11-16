@@ -1,25 +1,25 @@
 .page {
-  --paper: #f7f4ed;
-  --surface: #fcfbf8;
-  --ink: #1c1c1c;
-  --muted: #66665e;
-  --line: #e5e1d7;
+  --paper: #fff;
+  --surface: #fff;
+  --ink: #291b18;
+  --muted: #80736d;
+  --line: #eee4de;
   --input: #d8d3c7;
-  --accent: #7c293b;
-  --tint: #f0e5e6;
+  --accent: #e10e20;
+  --tint: #fff0f0;
   background: var(--paper);
   color: var(--ink);
   min-height: 100vh;
 }
 :global(.dark) .page {
-  --paper: #151512;
-  --surface: #1d1d19;
-  --ink: #f7f4ed;
-  --muted: #aaa99e;
-  --line: #33332b;
+  --paper: #131311;
+  --surface: #201b18;
+  --ink: #fff;
+  --muted: #c0b2a8;
+  --line: #3e302a;
   --input: #4b4b40;
-  --accent: #ef9fb0;
-  --tint: #38262c;
+  --accent: #ff626e;
+  --tint: #361f23;
 }
 .container {
   max-width: 1400px;
@@ -81,8 +81,8 @@
   gap: 26px;
   margin-top: 28px;
   padding: 14px 20px;
-  background: #7c293b;
-  color: #fcfbf8;
+  background: #e10e20;
+  color: #fff;
   border-radius: 999px;
   font-size: 12px;
   box-shadow: inset 0 0.5px 0 #ffffff26;
@@ -120,8 +120,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #1c1c1c;
-  background: #fcfbf8;
+  color: #291b18;
+  background: #fff;
   padding: 9px 12px;
   border-radius: 999px;
   font-size: 10px;
@@ -427,8 +427,8 @@
   min-height: 46px;
   padding: 12px 18px;
   border-radius: 8px;
-  background: #7c293b;
-  color: #fcfbf8;
+  background: #e10e20;
+  color: #fff;
   font-size: 13px;
   cursor: pointer;
   box-shadow: inset 0 0.5px 0 #ffffff26;
@@ -674,5 +674,100 @@
 @media (prefers-reduced-motion: reduce) {
   .field :is(input, select, textarea) {
     transition: none;
+  }
+}
+
+/* Vietnam ParaSports editorial design */
+.page {
+  font-family: var(--font-home-label), sans-serif;
+}
+.page > .container {
+  padding-top: 24px;
+  padding-inline: clamp(24px, 5vw, 72px);
+  max-width: 1440px;
+}
+.page h2 {
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+.ways {
+  border-top: 0;
+  padding-top: 12px;
+}
+.waysGrid {
+  gap: 20px;
+}
+.way {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 26px;
+  background: var(--surface);
+  box-shadow: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.way:hover {
+  border-color: var(--accent);
+  box-shadow: 0 12px 30px #29100a08;
+}
+.wayTop > span {
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-size: 24px;
+  color: var(--muted);
+}
+.way h3 {
+  font-size: 19px;
+  line-height: 1.5;
+}
+.way p {
+  font-size: 13px;
+  line-height: 1.8;
+}
+.wayAction {
+  font-size: 12px;
+  padding-top: 18px;
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.formPanel {
+  border-radius: 24px;
+  box-shadow: 0 18px 42px #29100a08;
+}
+.formHeading h3 {
+  font-size: 24px;
+  letter-spacing: 0;
+}
+.field input,
+.field textarea {
+  border-radius: 12px;
+}
+.submit {
+  border-radius: 99px;
+  background: #e10e20;
+  color: #fff;
+  padding-inline: 24px;
+}
+.submit:hover {
+  background: #ba0a1b;
+}
+.closing {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 30px;
+  background: var(--surface);
+  margin-bottom: 32px;
+}
+@media (max-width: 767px) {
+  .way {
+    padding: 22px;
+  }
+  .formPanel {
+    padding: 22px;
+  }
+  .closing {
+    padding: 22px;
   }
 }

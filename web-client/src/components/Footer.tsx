@@ -2,273 +2,146 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import styles from "./footer.module.css";
-import * as Icons from "lucide-react";
-import { useLanguage } from "@/hooks/useTranslation";
-import { useSettings } from "@/components/SettingsProvider";
+import { Mail, MapPin } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useLanguage } from "@/hooks/useTranslation";
+import { homeBeVietnam } from "@/lib/home-fonts";
+import styles from "./footer.module.css";
 
-const socialAssets: Record<string, string> = {
-  facebook: "/assets/footer/facebook.c7ae34adcdf0.webp",
-  tiktok: "/assets/footer/tiktok.a7f391cbc47b.webp",
-  youtube: "/assets/footer/youtube.54e47d767f9b.webp",
-  instagram: "/assets/footer/instagram.b92a2d7b539a.webp",
-  zalo: "/assets/footer/zalo.2ab90a76bde0.webp",
-};
-const socialNames: Record<string, string> = {
-  facebook: "Facebook",
-  tiktok: "TikTok",
-  youtube: "YouTube",
-  instagram: "Instagram",
-  zalo: "Zalo",
-};
-
-const socialUrls: Record<string, string> = {
-  facebook: "https://www.facebook.com/vietnamparasports.vn",
-  tiktok: "https://www.tiktok.com/@vietnamparasports",
-  youtube: "https://www.youtube.com/@VietnamParasport",
-  instagram: "https://www.facebook.com/vietnamparasports.vn",
-  zalo: "https://www.facebook.com/vietnamparasports.vn",
-};
+const socials = [
+  { name: "Facebook", href: "https://www.facebook.com/vietnamparasports.vn" },
+  { name: "TikTok", href: "https://www.tiktok.com/@vietnamparasports" },
+  { name: "YouTube", href: "https://www.youtube.com/@VietnamParasport" },
+];
 
 export default function Footer() {
   const pathname = usePathname();
-  const { t, language } = useLanguage();
-  const { settings } = useSettings();
-  const isAdminRoute =
+  const { language } = useLanguage();
+  if (
     pathname &&
-    (pathname.startsWith("/admin") || /^\/[a-z]{2}\/admin/.test(pathname));
-  if (isAdminRoute) {
+    (pathname.startsWith("/admin") || /^\/[a-z]{2}\/admin/.test(pathname))
+  )
     return null;
-  }
-
-  const footerAbout =
-    (language === "vi"
-      ? settings?.footerContent?.aboutVi
-      : settings?.footerContent?.aboutEn
-    )?.trim() ||
-    (language === "vi"
-      ? "Vietnam ParaSports là nền tảng thể thao toàn diện dành cho cộng đồng người khuyết tật Việt Nam. Chúng tôi kết nối vận động viên, huấn luyện viên, câu lạc bộ và nhà tài trợ trên một nền tảng duy nhất."
-      : "Vietnam ParaSports is a comprehensive sports platform for the community of people with disabilities in Vietnam. We connect athletes, coaches, clubs and sponsors on a single platform.");
-  const footerAddress = "36 Trần Phú Hà Nội";
-  const footerEmail = "FA26.vietnamparasports@gmail.com";
-
-  const footerStyle = {
-    backgroundColor: settings?.FOOTER_COLOR || "var(--header-bg, #1e3a8a)",
-    "--footer-fg":
-      settings?.FOOTER_TEXT_COLOR || "var(--header-fg-default, #ffffff)",
-  } as React.CSSProperties;
-
+  const vi = language === "vi";
+  const links = [
+    { href: `/${language}`, label: vi ? "Trang chủ" : "Home" },
+    { href: `/${language}/about`, label: vi ? "Về chúng tôi" : "About us" },
+    { href: `/${language}#sports-frames`, label: vi ? "Bộ môn" : "Sports" },
+    { href: `/${language}/creator-lab`, label: "Creator Lab" },
+    { href: `/${language}/clubs`, label: vi ? "Câu lạc bộ" : "Clubs" },
+    {
+      href: `/${language}/companion`,
+      label: vi ? "Đồng hành" : "Get involved",
+    },
+    {
+      href: `/${language}/news`,
+      label: vi ? "Tin tức & Sự kiện" : "News & Events",
+      emphasis: true,
+    },
+  ];
+  const email = "FA26.vietnamparasports@gmail.com";
   return (
     <footer
-      className="text-[var(--footer-fg)]/85 pt-16 pb-8 border-t border-[var(--footer-fg)]/10 transition-colors duration-300"
-      role="contentinfo"
-      aria-label="Chân trang"
-      style={footerStyle}
+      id="site-footer"
+      className={`${styles.footer} ${homeBeVietnam.variable}`}
+      aria-label={vi ? "Chân trang" : "Footer"}
     >
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Cột 1: Thông tin */}
-          <div>
-            <div className="mb-4">
-              <Link
-                href={`/${language}`}
-                className={styles.brandLogo}
-                aria-label={
-                  language === "vi"
-                    ? "Trang chủ Vietnam ParaSports"
-                    : "Vietnam ParaSports home"
-                }
-              >
-                <Image
-                  src="/assets/footer/brand.01300e2fe39d.webp"
-                  width={168}
-                  height={68}
-                  alt="Vietnam ParaSports 2026"
-                  unoptimized
-                  loading="eager"
-                  fetchPriority="low"
-                />
-              </Link>
-              <h3 className="text-xl font-bold text-[var(--footer-fg)]">
-                Vietnam ParaSports
-              </h3>
-            </div>
-            <p className="text-[var(--footer-fg)]/70 mb-6 text-sm leading-relaxed whitespace-pre-wrap">
-              {footerAbout}
+      <div className={styles.container}>
+        <div className={styles.grid}>
+          <div className={styles.brand}>
+            <Link
+              href={`/${language}`}
+              className={styles.brandLogo}
+              aria-label={
+                vi ? "Trang chủ Vietnam ParaSports" : "Vietnam ParaSports home"
+              }
+            >
+              <Image
+                src="/KV/logo_white.png"
+                width={250}
+                height={125}
+                alt="Vietnam ParaSports 2026"
+                unoptimized
+                loading="eager"
+                fetchPriority="low"
+              />
+            </Link>
+            <p>
+              {vi
+                ? "Di sản Vinh Quang – Khơi lửa đam mê. Tiếp nối giá trị của thể thao người khuyết tật Việt Nam."
+                : "A legacy of glory. A passion ignited. Carrying forward the values of sports for people with disabilities in Vietnam."}
             </p>
           </div>
-
-          {/* Cột 2: Liên kết nhanh */}
-          <div>
-            <h3 className="text-lg font-bold text-[var(--footer-fg)] mb-4">
-              {t("footerQuickLinks")}
-            </h3>
-            <ul className="space-y-3 text-sm">
+          <nav
+            aria-labelledby="footer-explore-heading"
+            className={styles.column}
+          >
+            <h2 id="footer-explore-heading">{vi ? "KHÁM PHÁ" : "EXPLORE"}</h2>
+            <ul>
+              {links.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={link.emphasis ? styles.emphasis : undefined}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <nav
+            aria-labelledby="footer-support-heading"
+            className={styles.column}
+          >
+            <h2 id="footer-support-heading">{vi ? "HỖ TRỢ" : "SUPPORT"}</h2>
+            <ul>
               <li>
-                <Link
-                  href="/"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("footerHome")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("navAbout")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/creator-lab"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("navCreatorLab")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/news"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("navNews")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/clubs"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("navClubs")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/companion"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("navCompanion")}
+                <Link href={`/${language}/faq`}>
+                  {vi ? "Câu hỏi thường gặp" : "Frequently asked questions"}
                 </Link>
               </li>
             </ul>
-          </div>
-
-          {/* Cột 3: Hỗ trợ */}
-          <div>
-            <h3 className="text-lg font-bold text-[var(--footer-fg)] mb-4">
-              {t("footerSupport")}
-            </h3>
-            <ul className="space-y-3 text-sm">
+          </nav>
+          <div className={`${styles.column} ${styles.contact}`}>
+            <h2>
+              {vi
+                ? "THÔNG TIN LIÊN HỆ CHÍNH THỨC"
+                : "OFFICIAL CONTACT INFORMATION"}
+            </h2>
+            <ul>
               <li>
-                <Link
-                  href="/faq"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("footerFaq")}
-                </Link>
+                <MapPin size={17} strokeWidth={1.7} aria-hidden="true" />
+                <span>36 Trần Phú Hà Nội</span>
               </li>
               <li>
-                <Link
-                  href="/terms"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("footerTerms")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("footerPrivacy")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/accessibility"
-                  className="hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {t("footerAccess")}
-                </Link>
+                <Mail size={17} strokeWidth={1.7} aria-hidden="true" />
+                <a href={`mailto:${email}`}>{email}</a>
               </li>
             </ul>
-          </div>
-
-          {/* Cột 4: Liên hệ */}
-          <div>
-            <h3 className="text-lg font-bold text-[var(--footer-fg)] mb-4">
-              {t("footerContact")}
-            </h3>
-            <ul className="space-y-4 text-sm text-[var(--footer-fg)]/70">
-              <li className="flex items-start gap-3">
-                <Icons.MapPin
-                  size={18}
-                  className="text-[var(--footer-fg)]/70 shrink-0 mt-0.5"
-                />
-                <span>{footerAddress}</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Icons.Mail
-                  size={18}
-                  className="text-[var(--footer-fg)]/70 shrink-0"
-                />
-                <a
-                  href={`mailto:${footerEmail}`}
-                  className="min-w-0 break-all hover:text-[var(--footer-fg)] transition-colors"
-                >
-                  {footerEmail}
-                </a>
-              </li>
-            </ul>
-            <div className={styles.socialLinks}>
-              {Object.keys(socialNames).map((platform) => {
-                const tooltipId = `footer-social-${platform}`;
-                return (
-                  <div key={platform} className={styles.socialItem}>
-                    <a
-                      href={socialUrls[platform]}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.socialLogo}
-                      aria-label={socialNames[platform]}
-                      aria-describedby={tooltipId}
-                    >
-                      <Image
-                        src={socialAssets[platform]}
-                        width={28}
-                        height={28}
-                        unoptimized
-                        loading="eager"
-                        fetchPriority="low"
-                        alt=""
-                      />
-                    </a>
-                    <span
-                      id={tooltipId}
-                      role="tooltip"
-                      className={styles.tooltip}
-                    >
-                      {socialNames[platform]}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </div>
-
-        <div className="pt-8 border-t border-[var(--footer-fg)]/10 text-center flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-[var(--footer-fg)]/60">
-            &copy; {new Date().getFullYear()} {t("footerCopyright")}
+        <div className={styles.bottom}>
+          <p>
+            © {new Date().getFullYear()} Vietnam Parasports. All rights
+            reserved.
           </p>
-          <div className="flex gap-4 text-sm text-[var(--footer-fg)]/60">
-            <span className="flex items-center gap-1">
-              {t("footerDesignedBy")}
-            </span>
-          </div>
+          <nav aria-label={vi ? "Mạng xã hội" : "Social media"}>
+            <ul className={styles.socialLinks}>
+              {socials.map((social) => (
+                <li key={social.name}>
+                  <a
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={social.name}
+                  >
+                    {social.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </div>
     </footer>

@@ -1,15 +1,12 @@
 "use client";
 
-import { Link } from "@/i18n/routing";
-import { clubSlug, joinClubSports, splitClubSports } from "@/lib/organizations";
+import { joinClubSports, splitClubSports } from "@/lib/organizations";
 import { apiClient } from "@/lib/api-client";
 import { getApiUrl } from "@/utils/api";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Users,
-  Filter,
-  PlusCircle,
   CheckCircle2,
   AlertCircle,
   X,
@@ -17,15 +14,15 @@ import {
   Calendar,
   CheckSquare,
   PhoneCall,
-  Compass,
-  ArrowUpRight,
-  Search,
 } from "lucide-react";
 import { ConfigProvider, Select, theme as antTheme } from "antd";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/hooks/useTranslation";
 import styles from "./clubs.module.css";
-import ClubsHeroBackground from "@/components/clubs/ClubsHeroBackground";
+import ClubsPageHero from "@/components/clubs/ClubsPageHero";
+import ClubsDirectory, {
+  type ClubSort,
+} from "@/components/clubs/ClubsDirectory";
 
 interface Club {
   id: string;
@@ -37,6 +34,10 @@ interface Club {
   suitableFor: string;
   contactInfo: string;
   description: string;
+  imageUrl?: string | null;
+  details?: import("@/lib/organizations").Organization["details"];
+  lat?: number | null;
+  lng?: number | null;
 }
 
 const translations: Record<string, Record<string, string>> = {
@@ -149,12 +150,22 @@ export default function ClubsPage() {
 
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
+  const [sort, setSort] = useState<ClubSort>("latest");
 
   // Filters
   const [selectedRegion, setSelectedRegion] = useState("");
   const [selectedSport, setSelectedSport] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [nearPosition, setNearPosition] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const locationRequest = useRef(0);
+  const [locationMessage, setLocationMessage] = useState("");
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -193,14 +204,18 @@ export default function ClubsPage() {
   };
 
   const regions = [
-    { label: language === "vi" ? "Miền Bắc" : "North", value: "Bắc" },
-    { label: language === "vi" ? "Miền Trung" : "Central", value: "Trung" },
-    { label: language === "vi" ? "Miền Nam" : "South", value: "Nam" },
+    { label: language === "vi" ? "Miền Bắc" : "North", value: "Miền Bắc" },
+    {
+      label: language === "vi" ? "Miền Trung" : "Central",
+      value: "Miền Trung",
+    },
+    { label: language === "vi" ? "Miền Nam" : "South", value: "Miền Nam" },
   ];
 
   // Fetch approved clubs
-  const fetchClubs = async () => {
+  const fetchClubs = async (signal?: AbortSignal) => {
     setLoading(true);
+    setFetchError("");
     try {
       let url = getApiUrl("/organizations");
       const params = new URLSearchParams();
@@ -213,15 +228,23 @@ export default function ClubsPage() {
         url += `?${params.toString()}`;
       }
 
-      const res = await fetch(url);
-      if (res.ok) {
+      const res = await fetch(url, { signal });
+      if (!res.ok) throw new Error("Failed to load clubs");
+      if (!signal?.aborted) {
         const envelope = await res.json();
-        setClubs(envelope?.data || []);
+        setClubs(Array.isArray(envelope?.data) ? envelope.data : []);
       }
     } catch (error) {
-      console.error("Failed to fetch clubs:", error);
+      if (!signal?.aborted) {
+        console.error("Failed to fetch clubs:", error);
+        setFetchError(
+          language === "vi"
+            ? "Chưa tải được danh sách câu lạc bộ. Vui lòng thử lại."
+            : "Unable to load clubs. Please try again.",
+        );
+      }
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
@@ -236,7 +259,9 @@ export default function ClubsPage() {
   }, [language]);
 
   useEffect(() => {
-    fetchClubs();
+    const controller = new AbortController();
+    fetchClubs(controller.signal);
+    return () => controller.abort();
   }, [selectedRegion, selectedSport, searchTerm]);
 
   // Close modal on Escape
@@ -306,7 +331,91 @@ export default function ClubsPage() {
     }
   };
 
-  const hasFilters = Boolean(selectedRegion || selectedSport || searchTerm);
+  const resetFilters = () => {
+    locationRequest.current += 1;
+    setLocating(false);
+    setSelectedRegion("");
+    setSelectedSport("");
+    setSearchInput("");
+    setSearchTerm("");
+    setNearPosition(null);
+    setSort("latest");
+    setLocationMessage("");
+  };
+  const findNearby = () => {
+    if (nearPosition && sort === "nearby") {
+      setSort("latest");
+      setNearPosition(null);
+      setLocationMessage("");
+      return;
+    }
+    if (nearPosition) {
+      setSort("nearby");
+      return;
+    }
+    if (!navigator.geolocation) {
+      setLocationMessage(
+        language === "vi"
+          ? "Trình duyệt chưa hỗ trợ vị trí. Bạn có thể chọn khu vực để tìm câu lạc bộ."
+          : "Location is unavailable. Please choose a region instead.",
+      );
+      return;
+    }
+    setLocating(true);
+    const request = ++locationRequest.current;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (request !== locationRequest.current) return;
+        setLocating(false);
+        setSort("nearby");
+        setNearPosition({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocationMessage(
+          language === "vi"
+            ? "CLB có tọa độ được sắp xếp từ gần đến xa; CLB chưa cập nhật tọa độ hiển thị phía sau."
+            : "Clubs with coordinates are sorted by distance; those without coordinates appear afterwards.",
+        );
+      },
+      () => {
+        if (request !== locationRequest.current) return;
+        setLocating(false);
+        setLocationMessage(
+          language === "vi"
+            ? "Chưa lấy được vị trí. Vui lòng cho phép truy cập vị trí hoặc chọn khu vực để tìm câu lạc bộ."
+            : "Unable to get your location. Allow location access or choose a region instead.",
+        );
+      },
+      { timeout: 10000, maximumAge: 300000 },
+    );
+  };
+  const displayedClubs = useMemo(() => {
+    if (sort === "name")
+      return [...clubs].sort((a, b) =>
+        a.name.localeCompare(b.name, language === "vi" ? "vi" : "en"),
+      );
+    if (!nearPosition || sort !== "nearby") return clubs;
+    const radians = (value: number) => (value * Math.PI) / 180;
+    const distance = (club: Club) => {
+      if (
+        typeof club.lat !== "number" ||
+        typeof club.lng !== "number" ||
+        !Number.isFinite(club.lat) ||
+        !Number.isFinite(club.lng)
+      )
+        return Infinity;
+      const deltaLat = radians(club.lat - nearPosition.lat);
+      const deltaLng = radians(club.lng - nearPosition.lng);
+      const a =
+        Math.sin(deltaLat / 2) ** 2 +
+        Math.cos(radians(nearPosition.lat)) *
+          Math.cos(radians(club.lat)) *
+          Math.sin(deltaLng / 2) ** 2;
+      return 6371 * 2 * Math.asin(Math.sqrt(Math.min(1, a)));
+    };
+    return [...clubs].sort((a, b) => distance(a) - distance(b));
+  }, [clubs, nearPosition, sort, language]);
 
   const sportOptions = useMemo(
     () => sports.map((s) => ({ label: s.label, value: s.value })),
@@ -320,295 +429,63 @@ export default function ClubsPage() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.ambient} aria-hidden="true">
-        <span className={`${styles.blob} ${styles.blobOne}`} />
-        <span className={`${styles.blob} ${styles.blobTwo}`} />
-        <span className={`${styles.blob} ${styles.blobThree}`} />
-      </div>
-
-      {/* HERO */}
-      <section className={styles.hero}>
-        <ClubsHeroBackground language={language} />
-        <div className={`${styles.container} ${styles.heroInner}`}>
-          <div className={styles.heroText}>
-            <span className={styles.eyebrow}>
-              <span className={styles.eyebrowDot} aria-hidden="true" />
-              {tStr.eyebrow}
-            </span>
-            <h1 className={styles.heroTitle}>{tStr.heading}</h1>
-            <p className={styles.heroSubtitle}>{tStr.subheading}</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setIsModalOpen(true);
-              setSubmitStatus("idle");
-              setSportError(false);
-            }}
-            className={styles.primaryCta}
-          >
-            <PlusCircle
-              size={18}
-              strokeWidth={ICON_STROKE}
-              aria-hidden="true"
-            />
-            {tStr.btnRegisterClub}
-          </button>
-        </div>
-      </section>
-
-      {/* BODY: FILTER BAND + GRID */}
-      <div className={`${styles.container} ${styles.body}`}>
-        <section className={styles.filters} aria-label={tStr.filterHeading}>
-          <div className={styles.filtersHead}>
-            <span className={styles.filtersTitle}>
-              <Filter size={16} strokeWidth={ICON_STROKE} aria-hidden="true" />
-              {tStr.filterHeading}
-            </span>
-            {hasFilters && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedRegion("");
-                  setSelectedSport("");
-                  setSearchInput("");
-                }}
-                className={styles.clearBtn}
-              >
-                {tStr.clearFilters}
-              </button>
-            )}
-          </div>
-
-          <div className={styles.filtersRow}>
-            <div className={styles.searchField}>
-              <label className={styles.fieldLabel} htmlFor="clubSearch">
-                {tStr.searchLabel}
-              </label>
-              <div className={styles.searchWrap}>
-                <Search
-                  size={16}
-                  strokeWidth={ICON_STROKE}
-                  className={styles.searchIcon}
-                  aria-hidden="true"
-                />
-                <input
-                  type="search"
-                  id="clubSearch"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className={styles.searchInput}
-                  placeholder={tStr.searchPlaceholder}
-                  autoComplete="off"
-                />
-              </div>
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.fieldLabel} htmlFor="filterRegion">
-                {tStr.filterRegion}
-              </label>
-              <ConfigProvider
-                theme={{
-                  algorithm: isDark
-                    ? antTheme.darkAlgorithm
-                    : antTheme.defaultAlgorithm,
-                  token: {
-                    colorPrimary: isDark ? "#f7f4ed" : "#1c1c1c",
-                    colorBgElevated: isDark ? "#1b1b18" : "#fcfbf8",
-                    colorText: isDark ? "#f7f4ed" : "#1c1c1c",
-                    colorTextPlaceholder: isDark ? "#b5b2a9" : "#5f5f5d",
-                    colorBorder: isDark ? "#3b3b34" : "#eceae4",
-                    borderRadius: 10,
-                    fontFamily: "inherit",
-                  },
-                }}
-              >
-                <Select
-                  id="filterRegion"
-                  className={styles.selectWrap}
-                  value={selectedRegion || undefined}
-                  placeholder={tStr.allRegions}
-                  options={regionOptions}
-                  onChange={(value) => setSelectedRegion(value ?? "")}
-                  allowClear
-                  popupMatchSelectWidth
-                />
-              </ConfigProvider>
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.fieldLabel} htmlFor="filterSport">
-                {tStr.filterSport}
-              </label>
-              <ConfigProvider
-                theme={{
-                  algorithm: isDark
-                    ? antTheme.darkAlgorithm
-                    : antTheme.defaultAlgorithm,
-                  token: {
-                    colorPrimary: isDark ? "#f7f4ed" : "#1c1c1c",
-                    colorBgElevated: isDark ? "#1b1b18" : "#fcfbf8",
-                    colorText: isDark ? "#f7f4ed" : "#1c1c1c",
-                    colorTextPlaceholder: isDark ? "#b5b2a9" : "#5f5f5d",
-                    colorBorder: isDark ? "#3b3b34" : "#eceae4",
-                    borderRadius: 10,
-                    fontFamily: "inherit",
-                  },
-                }}
-              >
-                <Select
-                  id="filterSport"
-                  className={styles.selectWrap}
-                  value={selectedSport || undefined}
-                  placeholder={tStr.allSports}
-                  options={sportOptions}
-                  onChange={(value) => setSelectedSport(value ?? "")}
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                  popupMatchSelectWidth
-                />
-              </ConfigProvider>
-            </div>
-          </div>
-        </section>
-
-        <section aria-label="Danh sách câu lạc bộ">
-          {!loading && (
-            <div className={styles.resultMeta}>
-              <span className={styles.resultCount}>
-                <strong>{clubs.length}</strong> {tStr.resultCount}
-              </span>
-            </div>
-          )}
-
-          {loading ? (
-            <div className={styles.grid}>
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className={styles.skeleton} />
-              ))}
-            </div>
-          ) : clubs.length === 0 ? (
-            <div className={styles.empty}>
-              <span className={styles.emptyIcon}>
-                <Compass
-                  size={24}
-                  strokeWidth={ICON_STROKE}
-                  aria-hidden="true"
-                />
-              </span>
-              <p className={styles.emptyText}>{tStr.noClubsFound}</p>
-              <p className={styles.emptyText}>{tStr.noClubsHint}</p>
-            </div>
-          ) : (
-            <div className={styles.grid}>
-              {clubs.map((club) => (
-                <article key={club.id} className={styles.card}>
-                  <div className={styles.cardTop}>
-                    <h2 className={styles.cardTitle}>
-                      <Link
-                        href={"/clubs/detail/" + clubSlug(club)}
-                        className={styles.cardLink}
-                      >
-                        {club.name}
-                      </Link>
-                    </h2>
-                    {splitClubSports(club.sport).length > 0 && (
-                      <span className={styles.sportPills}>
-                        {splitClubSports(club.sport).map((clubSport) => (
-                          <span key={clubSport} className={styles.sportPill}>
-                            {clubSport}
-                          </span>
-                        ))}
-                      </span>
-                    )}
-                  </div>
-
-                  {club.description && (
-                    <p className={styles.cardDesc}>
-                      {club.description.replace(/<[^>]*>/g, " ")}
-                    </p>
-                  )}
-
-                  <ul className={styles.metaList}>
-                    {club.location && (
-                      <li className={styles.metaItem}>
-                        <MapPin
-                          size={15}
-                          strokeWidth={ICON_STROKE}
-                          className={styles.metaIcon}
-                          aria-hidden="true"
-                        />
-                        <span>
-                          <span className={styles.metaLabel}>
-                            {tStr.labelLocation}
-                          </span>{" "}
-                          {club.location}
-                        </span>
-                      </li>
-                    )}
-                    {club.schedule && (
-                      <li className={styles.metaItem}>
-                        <Calendar
-                          size={15}
-                          strokeWidth={ICON_STROKE}
-                          className={styles.metaIcon}
-                          aria-hidden="true"
-                        />
-                        <span>
-                          <span className={styles.metaLabel}>
-                            {tStr.labelSchedule}
-                          </span>{" "}
-                          {club.schedule}
-                        </span>
-                      </li>
-                    )}
-                    {club.suitableFor && (
-                      <li className={styles.metaItem}>
-                        <CheckSquare
-                          size={15}
-                          strokeWidth={ICON_STROKE}
-                          className={styles.metaIcon}
-                          aria-hidden="true"
-                        />
-                        <span>
-                          <span className={styles.metaLabel}>
-                            {tStr.labelSuitable}
-                          </span>{" "}
-                          {club.suitableFor}
-                        </span>
-                      </li>
-                    )}
-                    {club.contactInfo && (
-                      <li className={styles.metaItem}>
-                        <PhoneCall
-                          size={15}
-                          strokeWidth={ICON_STROKE}
-                          className={styles.metaIcon}
-                          aria-hidden="true"
-                        />
-                        <span>
-                          <span className={styles.metaLabel}>
-                            {tStr.labelContact}
-                          </span>{" "}
-                          {club.contactInfo}
-                        </span>
-                      </li>
-                    )}
-                  </ul>
-
-                  <span className={styles.cardFoot} aria-hidden="true">
-                    {tStr.explore}
-                    <ArrowUpRight size={14} strokeWidth={ICON_STROKE} />
-                  </span>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+      <ClubsPageHero
+        language={language}
+        dark={isDark}
+        region={selectedRegion}
+        sport={selectedSport}
+        search={searchInput}
+        regions={regionOptions}
+        sports={sportOptions}
+        near={Boolean(nearPosition) && sort === "nearby"}
+        locating={locating}
+        locationMessage={locationMessage}
+        onRegion={setSelectedRegion}
+        onSport={setSelectedSport}
+        onSearch={setSearchInput}
+        onSubmit={() => {
+          setSearchTerm(searchInput.trim());
+          document.getElementById("clubs-results")?.scrollIntoView({
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+              .matches
+              ? "instant"
+              : "smooth",
+            block: "start",
+          });
+        }}
+        onReset={resetFilters}
+        onNearby={findNearby}
+        onRegister={() => {
+          setIsModalOpen(true);
+          setSubmitStatus("idle");
+          setSportError(false);
+        }}
+      />
+      <ClubsDirectory
+        clubs={displayedClubs}
+        loading={loading}
+        error={fetchError}
+        language={language}
+        dark={isDark}
+        sort={sort}
+        locating={locating}
+        onSort={(value) => {
+          if (value === "nearby") {
+            if (sort !== "nearby") findNearby();
+          } else {
+            setSort(value);
+            setLocationMessage("");
+          }
+        }}
+        onRetry={() => {
+          fetchClubs();
+        }}
+        onRegister={() => {
+          setIsModalOpen(true);
+          setSubmitStatus("idle");
+          setSportError(false);
+        }}
+      />
 
       {/* MODAL */}
       {isModalOpen && (
