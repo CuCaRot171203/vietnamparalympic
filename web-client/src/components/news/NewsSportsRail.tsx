@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { SPORT_LOGOS } from "@/lib/sport-logos";
+import { sportIconSource } from "@/lib/sport-media";
 import styles from "./news-sports-rail.module.css";
 
 export interface NewsSport {
@@ -12,6 +11,7 @@ export interface NewsSport {
   slug: string;
   nameVi: string;
   nameEn?: string;
+  icon?: string;
 }
 
 export default function NewsSportsRail({
@@ -93,9 +93,9 @@ export default function NewsSportsRail({
               aria-current={sport.slug === activeSlug ? "page" : undefined}
             >
               <span className={styles.logo}>
-                {SPORT_LOGOS[sport.slug] && (
-                  <Image
-                    src={`/subjects/${SPORT_LOGOS[sport.slug]}`}
+                {sportIconSource(sport.icon, sport.slug) && (
+                  <img
+                    src={sportIconSource(sport.icon, sport.slug)!}
                     alt=""
                     width={42}
                     height={42}

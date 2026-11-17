@@ -14,9 +14,10 @@ interface MediaUploadProps {
   type?: "image" | "video" | "both";
   placeholder?: string;
   className?: string;
+  onUploadingChange?: (uploading: boolean) => void;
 }
 
-export function MediaUpload({ value, onChange, type = "both", placeholder = "Tải file lên hoặc dán link", className = "" }: MediaUploadProps) {
+export function MediaUpload({ value, onChange, type = "both", placeholder = "Tải file lên hoặc dán link", className = "", onUploadingChange }: MediaUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +51,7 @@ export function MediaUpload({ value, onChange, type = "both", placeholder = "T�
     }
 
     setIsUploading(true);
+    onUploadingChange?.(true);
     const formData = new FormData();
     formData.append("file", file);
 
@@ -71,6 +73,7 @@ export function MediaUpload({ value, onChange, type = "both", placeholder = "T�
       setErrorMsg("Lỗi kết nối khi tải lên");
     } finally {
       setIsUploading(false);
+      onUploadingChange?.(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }

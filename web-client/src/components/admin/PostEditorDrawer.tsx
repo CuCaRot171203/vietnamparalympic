@@ -31,6 +31,11 @@ type Props = {
   language: string;
   post: PreviewPost;
   category?: string;
+  previewIcon?: string | null;
+  previewPath?: string;
+  contentPreview?: ReactNode;
+  footerNote?: string;
+  saveLabel?: string;
   saving: boolean;
   uploading: boolean;
   error?: string;
@@ -44,6 +49,11 @@ export default function PostEditorDrawer({
   language,
   post,
   category,
+  previewIcon,
+  previewPath,
+  contentPreview,
+  footerNote,
+  saveLabel,
   saving,
   uploading,
   error,
@@ -128,13 +138,14 @@ export default function PostEditorDrawer({
         footer={
           <div className={styles.footer}>
             <span>
-              {post.status === "PUBLISHED"
-                ? vi
-                  ? "Trạng thái: Đã xuất bản"
-                  : "Status: Published"
-                : vi
-                  ? "Trạng thái: Bản nháp"
-                  : "Status: Draft"}
+              {footerNote ||
+                (post.status === "PUBLISHED"
+                  ? vi
+                    ? "Trạng thái: Đã xuất bản"
+                    : "Status: Published"
+                  : vi
+                    ? "Trạng thái: Bản nháp"
+                    : "Status: Draft")}
             </span>
             <div>
               <Button
@@ -152,7 +163,7 @@ export default function PostEditorDrawer({
                 onClick={save}
               >
                 <Check size={16} />
-                {vi ? "Lưu bài viết" : "Save post"}
+                {saveLabel || (vi ? "Lưu bài viết" : "Save post")}
               </Button>
             </div>
           </div>
@@ -229,6 +240,11 @@ export default function PostEditorDrawer({
             aria-label={vi ? "Bản xem trước bài viết" : "Article preview"}
           >
             <header className={styles.previewHero}>
+              {previewIcon && (
+                <span className={styles.previewIcon}>
+                  <img src={previewIcon} alt="" />
+                </span>
+              )}
               <span className={styles.brand}>Vietnam ParaSports</span>
               <span className={styles.category}>
                 {category ||
@@ -250,7 +266,9 @@ export default function PostEditorDrawer({
               </figure>
             )}
             <div className={styles.previewBody}>
-              {hasContent ? (
+              {contentPreview ? (
+                contentPreview
+              ) : hasContent ? (
                 <div
                   className={styles.content}
                   dangerouslySetInnerHTML={{ __html: sanitized }}
@@ -263,7 +281,7 @@ export default function PostEditorDrawer({
                 </p>
               )}
               <p className={styles.previewUrl}>
-                /{language}/news/{post.slug || "..."}
+                {previewPath || `/${language}/news/${post.slug || "..."}`}
               </p>
             </div>
           </article>

@@ -1,0 +1,111 @@
+.content {
+  font-family: var(--font-home-label), sans-serif;
+  font-size: 16px;
+  line-height: 1.95;
+  overflow-wrap: anywhere;
+}
+.content > :first-child {
+  margin-top: 0;
+}
+.content p {
+  margin: 0 0 1.35em;
+}
+.content :is(h1, h2, h3, h4) {
+  font-family: var(--font-home-neusharp), sans-serif;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 1.7em 0 0.8em;
+  text-align: left;
+  text-wrap: wrap;
+  scroll-margin-top: 100px;
+}
+.content h1,
+.content h2 {
+  font-size: 24px;
+}
+.content h3 {
+  font-size: 21px;
+}
+.content h4 {
+  font-size: 18px;
+}
+.content strong {
+  font-weight: 600;
+}
+.content a {
+  color: #d7141e;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+:global(.dark) .content a {
+  color: #ff6571;
+}
+.content :is(img, video, iframe) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 18px;
+  margin: 26px auto;
+}
+.content figure {
+  max-width: 100%;
+  margin-inline: 0;
+}
+.content figcaption {
+  font-size: 12px;
+  line-height: 1.7;
+  opacity: 0.7;
+  text-align: center;
+}
+.content :is(ul, ol) {
+  padding-left: 1.5em;
+  margin: 1.2em 0;
+}
+.content ul {
+  list-style-type: disc;
+}
+.content ol {
+  list-style-type: decimal;
+}
+.content li + li {
+  margin-top: 0.45em;
+}
+.content blockquote {
+  padding: 22px;
+  border-left: 3px solid #d7141e;
+  border-radius: 0 16px 16px 0;
+  background: #80716b0a;
+  margin: 26px 0;
+}
+.content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 13px;
+}
+.content :is(th, td) {
+  border: 1px solid #80716b40;
+  padding: 12px;
+}
+.content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 18px;
+  background: #80716b0a;
+  border-radius: 14px;
+}
+@media (max-width: 767px) {
+  .content {
+    font-size: 14px;
+    line-height: 1.9;
+  }
+  .content h1,
+  .content h2 {
+    font-size: 21px;
+  }
+  .content h3 {
+    font-size: 19px;
+  }
+}

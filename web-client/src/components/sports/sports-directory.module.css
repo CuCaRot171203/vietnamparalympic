@@ -721,3 +721,4 @@
   .filters { flex:none; width:100%; }
   .search { min-width:0; }
 }
+.image > img.cardPhoto { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }

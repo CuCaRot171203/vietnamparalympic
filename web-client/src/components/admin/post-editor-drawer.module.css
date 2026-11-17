@@ -359,3 +359,17 @@
   line-height: 1.7;
   flex-shrink: 0;
 }
+.previewIcon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  background: white;
+  border-radius: 14px;
+  margin-bottom: 18px;
+}
+.previewIcon img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}

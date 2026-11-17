@@ -378,6 +378,7 @@ model Sport {
   nameVi       String
   nameEn       String
   slug         String   @unique
+  thumbnail    String?
   icon         String
   descVi       String
   descEn       String

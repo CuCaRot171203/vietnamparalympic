@@ -21,6 +21,7 @@ export class CreateSportDto {
   @IsString()
   @IsOptional()
   bannerUrl?: string;
+  @ApiProperty({ required: false }) @IsString() @IsOptional() thumbnail?: string;
 }
 
 export class UpdateSportDto {
@@ -43,4 +44,5 @@ export class UpdateSportDto {
   @IsString()
   @IsOptional()
   bannerUrl?: string;
+  @ApiProperty({ required: false }) @IsString() @IsOptional() thumbnail?: string;
 }

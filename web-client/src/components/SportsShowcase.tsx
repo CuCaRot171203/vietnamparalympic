@@ -6,13 +6,14 @@ import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "./sports-showcase.module.css";
 import { homeNeusharp, homeBeVietnam } from "@/lib/home-fonts";
-import { SPORT_LOGOS as icons } from "@/lib/sport-logos";
+import { sportIconSource } from "@/lib/sport-media";
 
 interface Sport {
   id?: string;
   slug: string;
   nameVi: string;
   nameEn: string;
+  icon?: string;
 }
 
 // Match the repository's photos explicitly: filenames are not always the API slugs.
@@ -154,10 +155,10 @@ export default function SportsShowcase({
                   <div className={styles.shade} />
                   <div className={styles.frameContent}>
                     <div className={styles.story}>
-                      {icons[sport.slug] && (
+                      {sportIconSource(sport.icon, sport.slug) && (
                         <div className={styles.symbol} aria-hidden="true">
-                          <Image
-                            src={`/subjects/${icons[sport.slug]}`}
+                          <img
+                            src={sportIconSource(sport.icon, sport.slug)!}
                             width={80}
                             height={80}
                             alt=""

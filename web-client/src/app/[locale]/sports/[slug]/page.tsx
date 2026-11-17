@@ -15,8 +15,9 @@ import {
   Trophy,
 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
-import { SPORT_LOGOS } from "@/lib/sport-logos";
-import { SPORT_BACKGROUNDS, SPORT_STORIES } from "@/lib/sport-assets";
+import { sportIconSource, sportThumbnailSource } from "@/lib/sport-media";
+import SportRichContent from "@/components/sports/SportRichContent";
+import { SPORT_STORIES } from "@/lib/sport-assets";
 import { clubSlug } from "@/lib/organizations";
 import NewsImage from "@/components/news/NewsImage";
 import NewsSportsRail from "@/components/news/NewsSportsRail";
@@ -40,6 +41,8 @@ type Sport = {
   slug: string;
   nameVi: string;
   nameEn?: string;
+  icon?: string;
+  thumbnail?: string | null;
   descVi?: string;
   descEn?: string;
   detailDescVi?: string;
@@ -103,10 +106,12 @@ type Props = {
   params: Promise<{ locale: string; slug: string }>;
   searchParams: Promise<{ page?: string }>;
 };
-async function read<T>(path: string): Promise<Read<T>> {
+async function read<T>(path: string, fresh = false): Promise<Read<T>> {
   try {
     const response = await apiClient.request(path, {
-      next: { revalidate: 60 },
+      ...(fresh
+        ? { cache: "no-store" as const }
+        : { next: { revalidate: 60 } }),
     });
     return {
       data: response.ok ? await response.json() : null,
@@ -117,7 +122,7 @@ async function read<T>(path: string): Promise<Read<T>> {
   }
 }
 const getSport = cache((slug: string) =>
-  read<Sport>(`/sports/slug/${encodeURIComponent(slug)}`),
+  read<Sport>(`/sports/slug/${encodeURIComponent(slug)}`, true),
 );
 const plain = (value = "") =>
   value
@@ -180,11 +185,12 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
     plain((vi ? sport.descVi : sport.descEn) || sport.descVi || "") ||
     (story ? story[vi ? 1 : 3] : "");
   const detail =
-    plain(
-      (vi ? sport.detailDescVi : sport.detailDescEn) ||
-        sport.detailDescVi ||
-        "",
-    ) || summary;
+    (vi ? sport.detailDescVi : sport.detailDescEn) ||
+    sport.detailDescVi ||
+    (vi ? sport.descVi : sport.descEn) ||
+    sport.descVi ||
+    "";
+  const icon = sportIconSource(sport.icon, slug);
   const page = Math.max(
     1,
     Number.isSafeInteger(Number(query.page)) ? Number(query.page) : 1,
@@ -229,11 +235,7 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
     ? rankingData.data.slice(0, 5)
     : [];
   const tournaments = tournamentData.data?.data || [];
-  const background = SPORT_BACKGROUNDS[slug]
-    ? `/back_subjects/${SPORT_BACKGROUNDS[slug]}`
-    : slug === "ban-cung"
-      ? "/wp169/wp1.jpg"
-      : "/assets/homepage/creator-lab-launch.jpg";
+  const background = sportThumbnailSource(sport.thumbnail, slug);
   const date = (value?: string, time = false) =>
     value && !Number.isNaN(Date.parse(value))
       ? new Intl.DateTimeFormat(vi ? "vi-VN" : "en-GB", {
@@ -313,10 +315,10 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
           </nav>
           <header className={styles.hero}>
             <div className={styles.heroCopy}>
-              {SPORT_LOGOS[slug] && (
+              {icon && (
                 <span className={styles.heroLogo}>
-                  <Image
-                    src={`/subjects/${SPORT_LOGOS[slug]}`}
+                  <img
+                    src={icon}
                     alt={vi ? `Logo ${name}` : `${name} pictogram`}
                     width={56}
                     height={56}
@@ -342,14 +344,7 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
               </div>
             </div>
             <div className={styles.heroVisual}>
-              <Image
-                src={background}
-                alt={name}
-                fill
-                priority
-                sizes="(max-width: 767px) 100vw, 48vw"
-                className={styles.cover}
-              />
+              <img src={background} alt={name} className={styles.cover} />
               <div className={styles.visualCaption}>
                 <span>Vietnam ParaSports</span>
                 <span>
@@ -379,24 +374,39 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
           ))}
         </nav>
         <section
-          className={styles.introduction}
+          className={styles.articleLayout}
           id="sport-intro"
           aria-labelledby="intro-heading"
         >
-          <div>
+          <article className={styles.sportArticle}>
             <p className={styles.eyebrow}>
-              {vi
-                ? "Nhịp điệu riêng. Tinh thần chung."
-                : "A unique rhythm. A shared spirit."}
+              {vi ? "Giới thiệu bộ môn" : "About this sport"}
             </p>
             <h2 id="intro-heading">
-              {vi ? "Khám phá" : "Discover"}
-              <br />
-              {name.toLocaleLowerCase(vi ? "vi-VN" : "en-GB")}.
+              {vi ? "Tìm hiểu về " : "Discover "}
+              {name}
             </h2>
-          </div>
-          <div>
-            <p>{detail}</p>
+            <SportRichContent html={detail} />
+          </article>
+          <aside
+            className={styles.articleAside}
+            aria-label={vi ? "Kết nối cùng bộ môn" : "Connect with the sport"}
+          >
+            <span className={styles.eyebrow}>Vietnam ParaSports</span>
+            <h3>{vi ? "Cùng khám phá" : "Keep exploring"}</h3>
+            <p>
+              {vi
+                ? "Theo dõi câu chuyện, tìm nơi tập luyện và kết nối với cộng đồng của bộ môn."
+                : "Follow the stories, find a place to train and connect with the community."}
+            </p>
+            <a href="#sport-news">
+              {vi ? "Tin tức bộ môn" : "Sport news"}
+              <ArrowRight size={16} />
+            </a>
+            <a href="#sport-clubs">
+              {vi ? "Tìm câu lạc bộ" : "Find clubs"}
+              <ArrowRight size={16} />
+            </a>
             <div className={styles.numbers}>
               <span>
                 <strong>{newsData.data ? total : "—"}</strong>
@@ -415,7 +425,7 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
                 {vi ? "trận đấu cập nhật" : "listed matches"}
               </span>
             </div>
-          </div>
+          </aside>
         </section>
         <section
           id="sport-news"

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, Search } from "lucide-react";
-import { SPORT_LOGOS } from "@/lib/sport-logos";
+import { sportIconSource, sportThumbnailSource } from "@/lib/sport-media";
 import { SPORT_BACKGROUNDS } from "@/lib/sport-assets";
 import styles from "./sports-directory.module.css";
 
@@ -13,6 +13,8 @@ export type DirectorySport = {
   slug: string;
   nameVi: string;
   nameEn?: string;
+  icon?: string;
+  thumbnail?: string | null;
   descVi?: string;
   descEn?: string;
 };
@@ -196,22 +198,24 @@ export default function SportsDirectory({
                 href={`/${locale}/sports/${sport.slug}`}
                 aria-label={name(sport)}
               >
-                {SPORT_BACKGROUNDS[sport.slug] ? (
+                {sport.thumbnail || SPORT_BACKGROUNDS[sport.slug] ? (
                   <Image
-                    src={`/back_subjects/${SPORT_BACKGROUNDS[sport.slug]}`}
+                    className={styles.cardPhoto}
+                    src={sportThumbnailSource(sport.thumbnail, sport.slug)}
                     alt=""
                     fill
                     sizes="(max-width:639px) 100vw, (max-width:1023px) 50vw, 33vw"
+                    unoptimized={Boolean(sport.thumbnail)}
                   />
                 ) : (
                   <span className={styles.photoFallback}>
                     Vietnam ParaSports
                   </span>
                 )}
-                {SPORT_LOGOS[sport.slug] && (
+                {sportIconSource(sport.icon, sport.slug) && (
                   <span className={styles.logo}>
-                    <Image
-                      src={`/subjects/${SPORT_LOGOS[sport.slug]}`}
+                    <img
+                      src={sportIconSource(sport.icon, sport.slug)!}
                       alt=""
                       width={36}
                       height={36}

@@ -14,6 +14,7 @@ import {
   UserCheck
 } from "lucide-react";
 import Link from "next/link";
+import { sportIconSource } from "@/lib/sport-media";
 import SportEventsTab from "./SportEventsTab";
 import SportClassificationsTab from "./SportClassificationsTab";
 
@@ -84,10 +85,10 @@ export default function SportDetailsPage() {
           <ArrowLeft size={20} />
         </Link>
         <div className="flex items-center gap-3">
-          <span className="text-3xl" role="img">{sport.icon}</span>
+          {sportIconSource(sport.icon, sport.slug) ? <img src={sportIconSource(sport.icon, sport.slug)!} alt="" className="h-12 w-12 rounded-xl bg-white p-1 object-contain" /> : <span className="text-3xl" role="img">{sport.icon}</span>}
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {language === "vi" ? sport.nameVi : sport.nameEn}
+              {(language === "vi" ? sport.nameVi : sport.nameEn) || sport.nameVi}
             </h1>
             <p className="text-sm text-slate-500 font-mono">{sport.slug}</p>
           </div>

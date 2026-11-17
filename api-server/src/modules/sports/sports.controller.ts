@@ -53,15 +53,16 @@ export class SportsController {
   @UseInterceptors(
     FileInterceptor("icon", {
       storage: diskStorage({
-        destination: "./uploads/sports",
+        destination: "./uploads/public/sports",
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
         },
       }),
+      limits: { fileSize: 10 * 1024 * 1024 },
       fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpeg|png|jpg)$/)) {
+        if (!file.mimetype.match(/^image\/(jpeg|png|webp|gif|avif)$/)) {
           return cb(new Error("Only image files are allowed!"), false);
         }
         cb(null, true);
@@ -69,8 +70,8 @@ export class SportsController {
     })
   )
   create(@UploadedFile() iconFile: Express.Multer.File, @Body() data: CreateSportDto) {
-    const iconPath = iconFile ? `uploads/sports/${iconFile.filename}` : "";
-    return this.sportsService.create({ ...data, icon: iconPath } as any);
+    const iconPath = iconFile ? `/uploads/public/sports/${iconFile.filename}` : data.icon;
+    return this.sportsService.create({ ...data, icon: iconPath });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -79,15 +80,16 @@ export class SportsController {
   @UseInterceptors(
     FileInterceptor("icon", {
       storage: diskStorage({
-        destination: "./uploads/sports",
+        destination: "./uploads/public/sports",
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
         },
       }),
+      limits: { fileSize: 10 * 1024 * 1024 },
       fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpeg|png|jpg)$/)) {
+        if (!file.mimetype.match(/^image\/(jpeg|png|webp|gif|avif)$/)) {
           return cb(new Error("Only image files are allowed!"), false);
         }
         cb(null, true);
@@ -99,7 +101,7 @@ export class SportsController {
     @UploadedFile() iconFile: Express.Multer.File,
     @Body() data: UpdateSportDto
   ) {
-    const iconPath = iconFile ? `uploads/sports/${iconFile.filename}` : undefined;
+    const iconPath = iconFile ? `/uploads/public/sports/${iconFile.filename}` : undefined;
     const payload = iconPath ? { ...data, icon: iconPath } : data;
     return this.sportsService.update(id, payload);
   }
