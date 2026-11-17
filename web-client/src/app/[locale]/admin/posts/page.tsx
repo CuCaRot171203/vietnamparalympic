@@ -15,14 +15,13 @@ import {
   Plus, 
   Edit, 
   Trash2, 
-  Check, 
   X, 
   Loader2,
   Upload,
   MessageSquare
 } from "lucide-react";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import PostEditorDrawer from "@/components/admin/PostEditorDrawer";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
@@ -232,6 +231,7 @@ export default function AdminPostsPage() {
     const isNew = !currentPost.id;
     const url = isNew ? getApiUrl("/posts") : getApiUrl(`/posts/${currentPost.id}`);
     const method = isNew ? "POST" : "PUT";
+    setAlertInfo(previous => ({ ...previous, isOpen: false }));
     setActionLoading(currentPost.id || "new");
 
     try {
@@ -510,12 +510,22 @@ export default function AdminPostsPage() {
         )}
       />
 
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
-          <DialogHeader className="px-5 py-4 border-b border-slate-150 dark:border-slate-700 bg-white dark:bg-slate-800">
-            <DialogTitle>{currentPost.id ? tStr.editPost : tStr.newPost}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSave} className="p-5 space-y-4 overflow-y-auto flex-1">
+      <PostEditorDrawer
+        key={currentPost.id || "new"}
+        open={isEditModalOpen}
+        title={currentPost.id ? tStr.editPost : tStr.newPost}
+        language={language}
+        post={currentPost}
+        category={categories.find(category => category.id === currentPost.categoryId)?.name}
+        saving={actionLoading !== null}
+        uploading={uploading}
+        error={alertInfo.isOpen ? alertInfo.message : undefined}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setAlertInfo(previous => ({ ...previous, isOpen: false }));
+        }}
+        onSave={handleSave}
+      >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">{tStr.titleLabel}</label>
@@ -543,7 +553,7 @@ export default function AdminPostsPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="-- Choose Category --" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent style={{ zIndex: 1400 }}>
                     {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -554,7 +564,7 @@ export default function AdminPostsPage() {
                   <SelectTrigger>
                     <SelectValue placeholder={tStr.statusDraft} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent style={{ zIndex: 1400 }}>
                     <SelectItem value="DRAFT">{tStr.statusDraft}</SelectItem>
                     <SelectItem value="PUBLISHED">{tStr.statusPublished}</SelectItem>
                   </SelectContent>
@@ -605,18 +615,7 @@ export default function AdminPostsPage() {
               <TiptapEditor value={currentPost.content} onChange={(html) => setCurrentPost({...currentPost, content: html})} />
             </div>
 
-            <DialogFooter className="px-0">
-              <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
-                {tStr.btnCancel}
-              </Button>
-              <Button type="submit" disabled={actionLoading !== null} isLoading={actionLoading !== null}>
-                <Check size={18} className="mr-2" />
-                {tStr.btnSave}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      </PostEditorDrawer>
 
       {/* Modals */}
       <ConfirmModal
@@ -630,7 +629,7 @@ export default function AdminPostsPage() {
       />
 
       <ConfirmModal
-        isOpen={alertInfo.isOpen}
+        isOpen={alertInfo.isOpen && !isEditModalOpen}
         title={alertInfo.title}
         message={alertInfo.message}
         type={alertInfo.type}

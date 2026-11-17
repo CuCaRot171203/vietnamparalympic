@@ -33,16 +33,21 @@ export class SportsService {
 
   async create(data: {
     nameVi: string;
-    nameEn: string;
+    nameEn?: string;
     slug: string;
     icon: string;
     descVi: string;
-    descEn: string;
+    descEn?: string;
     detailDescVi: string;
-    detailDescEn: string;
+    detailDescEn?: string;
   }) {
     return this.prisma.sport.create({
-      data,
+      data: {
+        ...data,
+        nameEn: data.nameEn ?? "",
+        descEn: data.descEn ?? "",
+        detailDescEn: data.detailDescEn ?? "",
+      },
     });
   }
 

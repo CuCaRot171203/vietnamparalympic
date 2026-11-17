@@ -59,7 +59,8 @@ export class PostsController {
     @Query("limit") limit?: string,
     @Query("categoryId") categoryId?: string,
     @Query("categorySlug") categorySlug?: string,
-    @Query("search") search?: string
+    @Query("search") search?: string,
+    @Query("sort") sort?: string
   ) {
     const where: Prisma.PostWhereInput = { status: "PUBLISHED" };
     if (categoryId) {
@@ -75,7 +76,9 @@ export class PostsController {
       page: page ? Number(page) : 1,
       limit: limit ? Number(limit) : 12,
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: sort === "updatedAt"
+        ? [{ updatedAt: "desc" }, { createdAt: "desc" }, { id: "desc" }]
+        : [{ createdAt: "desc" }, { id: "desc" }],
     });
   }
 

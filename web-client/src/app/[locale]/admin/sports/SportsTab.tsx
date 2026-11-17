@@ -479,11 +479,13 @@ export function SportsTab() {
               {/* Name EN */}
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block">
-                  {tStr.nameEnLabel} <span className="text-red-500">*</span>
+                  {tStr.nameEnLabel}{" "}
+                  <span className="font-normal text-slate-400">
+                    ({language === "vi" ? "Không bắt buộc" : "Optional"})
+                  </span>
                 </label>
                 <Input
                   type="text"
-                  required
                   value={formData.nameEn}
                   onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
                 />
@@ -532,7 +534,10 @@ export function SportsTab() {
             {/* Desc EN */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block">
-                {tStr.descEnLabel} <span className="text-red-500">*</span>
+                {tStr.descEnLabel}{" "}
+                <span className="font-normal text-slate-400">
+                  ({language === "vi" ? "Không bắt buộc" : "Optional"})
+                </span>
               </label>
               <TiptapEditor
                 value={formData.descEn}
@@ -554,7 +559,10 @@ export function SportsTab() {
             {/* Detail Desc EN */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block">
-                {tStr.detailDescEnLabel} <span className="text-red-500">*</span>
+                {tStr.detailDescEnLabel}{" "}
+                <span className="font-normal text-slate-400">
+                  ({language === "vi" ? "Không bắt buộc" : "Optional"})
+                </span>
               </label>
               <TiptapEditor
                 value={formData.detailDescEn}

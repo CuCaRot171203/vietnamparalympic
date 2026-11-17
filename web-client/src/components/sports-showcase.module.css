@@ -5,8 +5,7 @@
   font-family: var(--font-home-label), sans-serif;
 }
 .stage {
-  position: sticky;
-  top: var(--header-height, 52px);
+  position: relative;
   padding: 48px 0 24px;
   background: #fff url("/DES/homes/SPORT_DEV.webp") left top / 100% auto
     no-repeat;

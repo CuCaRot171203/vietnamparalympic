@@ -26,7 +26,7 @@ export class PostsService {
     skip?: number;
     take?: number;
     where?: Prisma.PostWhereInput;
-    orderBy?: Prisma.PostOrderByWithRelationInput;
+    orderBy?: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[];
   }) {
     const { skip, take, where, orderBy } = params;
     return this.prisma.post.findMany({
@@ -46,7 +46,7 @@ export class PostsService {
     page?: number;
     limit?: number;
     where?: Prisma.PostWhereInput;
-    orderBy?: Prisma.PostOrderByWithRelationInput;
+    orderBy?: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[];
   }) {
     const { page = 1, limit = 12, where, orderBy } = params;
     const skip = (page - 1) * limit;

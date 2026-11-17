@@ -30,6 +30,7 @@ const LOGO = "/assets/brand/vietnam-parasports-2026-full.png";
 const DEFAULT_ORDER = [
   "news",
   "about",
+  "sports-directory",
   "matches",
   "rankings",
   "creator-lab",
@@ -38,6 +39,7 @@ const DEFAULT_ORDER = [
 ];
 const ROUTES: Record<string, string> = {
   about: "/about",
+  "sports-directory": "/sports",
   sports: "/sports",
   matches: "/matches",
   rankings: "/rankings",
@@ -75,6 +77,7 @@ export function Header() {
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
   const labels: Record<string, string> = {
     about: t("navAbout"),
+    "sports-directory": vi ? "Bộ môn & Thương tật" : "Sports & Classifications",
     sports: t("navSports"),
     matches: t("navMatches"),
     rankings: t("navRankings"),
@@ -90,6 +93,10 @@ export function Header() {
   const menu = [...new Set(configuredOrder)].filter(
     (id) => id !== "marketplace" && id !== "sports" && ROUTES[id] && settings.HEADER_MENU_VISIBILITY?.[id] !== false
   );
+  if (!menu.includes("sports-directory") && settings.HEADER_MENU_VISIBILITY?.["sports-directory"] !== false) {
+    const afterAbout = menu.indexOf("about");
+    menu.splice(afterAbout >= 0 ? afterAbout + 1 : 1, 0, "sports-directory");
+  }
   const newsIndex = menu.indexOf("news");
   if (newsIndex !== -1 && menu.includes("about")) {
     menu.splice(newsIndex, 1);

@@ -48,6 +48,7 @@ interface Organization {
   description: string;
   isApproved: boolean;
   createdAt: string;
+  updatedAt?: string;
   slug?: string;
   details?: Record<string, unknown> | null;
 }
@@ -399,6 +400,7 @@ export default function AdminOrganizationsPage() {
         } else {
           setOrganizations((prev) => [savedOrganization, ...prev]);
         }
+        setCurrentPage(1);
         toast.success(tStr.alertSaveSuccess);
         setIsModalOpen(false);
         if (!isEdit)
@@ -522,9 +524,16 @@ export default function AdminOrganizationsPage() {
     return matchSearch && matchStatus;
   });
 
-  // Sort Organizations
+  // Use the latest activity when no column sort is selected.
+  const lastActivity = (organization: Organization) =>
+    Math.max(
+      Date.parse(organization.updatedAt || "") || 0,
+      Date.parse(organization.createdAt) || 0
+    );
   const sortedOrganizations = [...filteredOrganizations].sort((a, b) => {
-    if (!sortConfig.key || !sortConfig.direction) return 0;
+    if (!sortConfig.key || !sortConfig.direction) {
+      return lastActivity(b) - lastActivity(a) || a.id.localeCompare(b.id);
+    }
     const aVal = (a as any)[sortConfig.key] || "";
     const bVal = (b as any)[sortConfig.key] || "";
     if (sortConfig.direction === "asc") {

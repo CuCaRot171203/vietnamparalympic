@@ -43,13 +43,17 @@ export default async function NewsPage({ params, searchParams }: PageProps) {
     .trim()
     .slice(0, 200);
   const category = scalar(query.category).trim();
-  const requestParams = new URLSearchParams({ page: "1", limit: "6" });
+  const requestParams = new URLSearchParams({
+    page: "1",
+    limit: "6",
+    sort: "updatedAt",
+  });
   if (search) requestParams.set("search", search);
   if (category) requestParams.set("categorySlug", category);
   const [result, heroResult] = await Promise.all([
     readPublic(`/posts/paginated?${requestParams}`),
     search || category
-      ? readPublic("/posts/paginated?limit=3")
+      ? readPublic("/posts/paginated?limit=3&sort=updatedAt")
       : Promise.resolve(null),
   ]);
   const posts = Array.isArray(result?.data) ? result.data : [];

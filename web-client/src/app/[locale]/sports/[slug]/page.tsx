@@ -1,5 +1,7 @@
 import { cache } from "react";
 import Image from "next/image";
+import localFont from "next/font/local";
+import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
@@ -19,6 +21,19 @@ import { clubSlug } from "@/lib/organizations";
 import NewsImage from "@/components/news/NewsImage";
 import NewsSportsRail from "@/components/news/NewsSportsRail";
 import styles from "./sport.module.css";
+
+const calvera = localFont({
+  src: "../../../../../public/KV/DL-Calvera-2.otf",
+  weight: "400",
+  display: "swap",
+  variable: "--font-sport-calvera",
+});
+const pageClass = [
+  styles.page,
+  calvera.variable,
+  homeBeVietnam.variable,
+  homeNeusharp.variable,
+].join(" ");
 
 type Sport = {
   id: string;
@@ -136,7 +151,7 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
   if (result.status === 404) notFound();
   if (!result.data)
     return (
-      <main className={styles.page}>
+      <main id="main-content" className={pageClass}>
         <div className={styles.container}>
           <div className={styles.empty}>
             <Trophy size={32} />
@@ -282,58 +297,70 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
     .filter((value) => value > 0 && value <= last)
     .sort((a, b) => a - b);
   return (
-    <main className={styles.page}>
-      <div className={styles.container}>
-        <nav
-          className={styles.breadcrumb}
-          aria-label={vi ? "Điều hướng trang" : "Breadcrumb"}
-        >
-          <Link href={`/${locale}`}>{vi ? "Trang chủ" : "Home"}</Link>
-          <span>/</span>
-          <span>{vi ? "Bộ môn" : "Sports"}</span>
-          <span>/</span>
-          <span aria-current="page">{name}</span>
-        </nav>
-        <header className={styles.hero}>
-          <Image
-            src={background}
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 767px) 100vw, 1300px"
-            className={styles.cover}
-          />
-          <div className={styles.heroShade} />
-          <div className={styles.heroCopy}>
-            {SPORT_LOGOS[slug] && (
-              <span className={styles.heroLogo}>
-                <Image
-                  src={`/subjects/${SPORT_LOGOS[slug]}`}
-                  alt={vi ? `Logo ${name}` : `${name} pictogram`}
-                  width={56}
-                  height={56}
-                />
-              </span>
-            )}
-            <p className={styles.heroEyebrow}>
-              Vietnam ParaSports ·{" "}
-              {vi ? "Khám phá bộ môn" : "Explore the sport"}
-            </p>
-            <h1>{name}</h1>
-            {story && <p className={styles.tagline}>{story[vi ? 0 : 2]}</p>}
-            <p className={styles.heroDescription}>{summary}</p>
-            <div className={styles.heroActions}>
-              <a href="#sport-news">
-                {vi ? "Theo nhịp bộ môn" : "Follow the sport"}
-                <ArrowRight size={16} />
-              </a>
-              <a href="#sport-clubs">
-                {vi ? "Tìm câu lạc bộ" : "Find a club"}
-                <MapPin size={15} />
-              </a>
+    <main id="main-content" className={pageClass}>
+      <section className={styles.heroSection} aria-labelledby="sport-heading">
+        <div className={styles.heroBackground} aria-hidden="true" />
+        <div className={styles.container}>
+          <nav
+            className={styles.breadcrumb}
+            aria-label={vi ? "Điều hướng trang" : "Breadcrumb"}
+          >
+            <Link href={`/${locale}`}>{vi ? "Trang chủ" : "Home"}</Link>
+            <span>/</span>
+            <span>{vi ? "Bộ môn" : "Sports"}</span>
+            <span>/</span>
+            <span aria-current="page">{name}</span>
+          </nav>
+          <header className={styles.hero}>
+            <div className={styles.heroCopy}>
+              {SPORT_LOGOS[slug] && (
+                <span className={styles.heroLogo}>
+                  <Image
+                    src={`/subjects/${SPORT_LOGOS[slug]}`}
+                    alt={vi ? `Logo ${name}` : `${name} pictogram`}
+                    width={56}
+                    height={56}
+                  />
+                </span>
+              )}
+              <p className={styles.heroEyebrow}>
+                Vietnam ParaSports ·{" "}
+                {vi ? "Khám phá bộ môn" : "Explore the sport"}
+              </p>
+              <h1 id="sport-heading">{name}</h1>
+              {story && <p className={styles.tagline}>{story[vi ? 0 : 2]}</p>}
+              <p className={styles.heroDescription}>{summary}</p>
+              <div className={styles.heroActions}>
+                <a href="#sport-news">
+                  {vi ? "Theo nhịp bộ môn" : "Follow the sport"}
+                  <ArrowRight size={16} />
+                </a>
+                <a href="#sport-clubs">
+                  {vi ? "Tìm câu lạc bộ" : "Find a club"}
+                  <MapPin size={15} />
+                </a>
+              </div>
             </div>
-          </div>
-        </header>
+            <div className={styles.heroVisual}>
+              <Image
+                src={background}
+                alt={name}
+                fill
+                priority
+                sizes="(max-width: 767px) 100vw, 48vw"
+                className={styles.cover}
+              />
+              <div className={styles.visualCaption}>
+                <span>Vietnam ParaSports</span>
+                <span>
+                  {vi ? "Tinh thần không giới hạn" : "A spirit without limits"}
+                </span>
+              </div>
+            </div>
+          </header>
+        </div>
+      </section>
+      <div className={styles.container}>
         <nav
           className={styles.sectionNav}
           aria-label={vi ? "Nội dung bộ môn" : "Sport sections"}
@@ -590,9 +617,23 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
             <div className={styles.clubGrid}>
               {clubs.slice(0, 6).map((club) => (
                 <article className={styles.club} key={club.id}>
-                  <span className={styles.clubIcon}>
-                    <MapPin size={20} strokeWidth={1.5} />
-                  </span>
+                  {club.imageUrl ? (
+                    <Link
+                      className={styles.clubImage}
+                      href={`/${locale}/clubs/detail/${clubSlug(club)}`}
+                      aria-label={club.name}
+                    >
+                      <NewsImage
+                        src={club.imageUrl}
+                        className={styles.photo}
+                        sizes="(max-width:639px) 100vw, 33vw"
+                      />
+                    </Link>
+                  ) : (
+                    <span className={styles.clubIcon}>
+                      <MapPin size={20} strokeWidth={1.5} />
+                    </span>
+                  )}
                   <h3>
                     <Link href={`/${locale}/clubs/detail/${clubSlug(club)}`}>
                       {club.name}

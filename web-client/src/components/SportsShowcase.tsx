@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "./sports-showcase.module.css";
 import { homeNeusharp, homeBeVietnam } from "@/lib/home-fonts";
-import { scrollToPosition } from "@/components/SmoothScrollProvider";
 import { SPORT_LOGOS as icons } from "@/lib/sport-logos";
 
 interface Sport {
@@ -30,15 +28,11 @@ export default function SportsShowcase({
   sports: Sport[];
   language: string;
 }) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
   const indexRef = useRef(0);
   const selectorRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [previous, setPrevious] = useState<number | null>(null);
   const [direction, setDirection] = useState("down");
-  const [stageHeight, setStageHeight] = useState(0);
-  const [stickyTop, setStickyTop] = useState(0);
   useEffect(() => {
     const rail = selectorRef.current;
     const item = rail?.children[active] as HTMLElement | undefined;
@@ -56,7 +50,6 @@ export default function SportsShowcase({
   }, [active]);
 
   const vi = language === "vi";
-  const step = 100;
 
   const select = (index: number) => {
     const next = Math.max(0, Math.min(sports.length - 1, index));
@@ -68,151 +61,19 @@ export default function SportsShowcase({
   };
 
   const goTo = (index: number) => {
-    const section = sectionRef.current;
-    if (!section || index < 0 || index >= sports.length) return;
+    if (index < 0 || index >= sports.length) return;
     select(index);
-    scrollToPosition(
-      window.scrollY +
-        section.getBoundingClientRect().top -
-        stickyTop +
-        index * step,
-      true,
-    );
   };
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    const stage = stageRef.current;
-    if (!section || !stage || !sports.length) return;
-    let frame = 0;
-    let lastTurn = -Infinity;
-    let touchY = 0;
-    let touchX = 0;
-    let touchHandled = false;
-    let touchOnSelector = false;
-    const header = document.querySelector("header");
-    let topInset = 0;
-    const measure = () => {
-      const height = stage.getBoundingClientRect().height;
-      topInset = Math.max(
-        0,
-        Math.min(
-          header?.getBoundingClientRect().height || 0,
-          window.innerHeight - height,
-        ),
-      );
-      setStickyTop(topInset);
-      setStageHeight(height);
-    };
-    const observer = new ResizeObserver(measure);
-    observer.observe(stage);
-    if (header) observer.observe(header);
-    measure();
-    const update = () => {
-      frame = 0;
-      const progress = topInset - section.getBoundingClientRect().top;
-      select(Math.round(progress / step));
-    };
-    const scroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    const pinned = () => {
-      const rect = section.getBoundingClientRect();
-      return (
-        rect.top <= topInset + 2 &&
-        rect.bottom >= topInset + stage.getBoundingClientRect().height - 2
-      );
-    };
-    const turn = (delta: number) => {
-      const next = indexRef.current + Math.sign(delta);
-      if (next < 0 || next >= sports.length) return false;
-      select(next);
-      scrollToPosition(
-        window.scrollY +
-          section.getBoundingClientRect().top -
-          topInset +
-          next * step,
-        true,
-      );
-      return true;
-    };
-    const wheel = (event: WheelEvent) => {
-      if (
-        event.ctrlKey ||
-        !event.deltaY ||
-        Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
-        !pinned()
-      )
-        return;
-      // No distance threshold: even a light wheel tick turns a frame.
-      // Briefly absorb momentum so one gesture does not skip several sports.
-      if (performance.now() - lastTurn < 620) {
-        event.preventDefault();
-        return;
-      }
-      if (turn(event.deltaY)) {
-        event.preventDefault();
-        lastTurn = performance.now();
-      }
-    };
-    const touchStart = (event: TouchEvent) => {
-      touchOnSelector =
-        selectorRef.current?.contains(event.target as Node) ?? false;
-      touchY = event.touches[0].clientY;
-      touchX = event.touches[0].clientX;
-      touchHandled = false;
-    };
-    const touchMove = (event: TouchEvent) => {
-      if (touchOnSelector || !pinned() || event.touches.length !== 1) return;
-      if (touchHandled) {
-        event.preventDefault();
-        return;
-      }
-      const vertical = touchY - event.touches[0].clientY;
-      const horizontal = touchX - event.touches[0].clientX;
-      const delta =
-        Math.abs(horizontal) > Math.abs(vertical) ? horizontal : vertical;
-      if (Math.abs(delta) >= 8 && turn(delta)) {
-        event.preventDefault();
-        touchHandled = true;
-      }
-    };
-    window.addEventListener("scroll", scroll, { passive: true });
-    stage.addEventListener("wheel", wheel, { passive: false });
-    stage.addEventListener("touchstart", touchStart, { passive: true });
-    stage.addEventListener("touchmove", touchMove, { passive: false });
-    update();
-    return () => {
-      observer.disconnect();
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", scroll);
-      stage.removeEventListener("wheel", wheel);
-      stage.removeEventListener("touchstart", touchStart);
-      stage.removeEventListener("touchmove", touchMove);
-    };
-    // The observer and scroll handlers use refs so a frame change never rebinds input.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sports.length]);
 
   if (!sports.length) return null;
   const visible = new Set([active, previous, active - 1, active + 1]);
   return (
     <div
-      ref={sectionRef}
       id="sports-frames"
       className={`${styles.runway} ${homeNeusharp.variable} ${homeBeVietnam.variable}`}
-      style={
-        {
-          height: stageHeight
-            ? stageHeight + (sports.length - 1) * step
-            : undefined,
-          "--header-height": `${stickyTop}px`,
-        } as CSSProperties
-      }
     >
       <section
         aria-labelledby="sports-heading"
-        ref={stageRef}
         className={styles.stage}
         role="region"
         aria-roledescription={vi ? "trình chiếu" : "slideshow"}
@@ -221,16 +82,7 @@ export default function SportsShowcase({
         onKeyDown={(event) => {
           if (
             event.target !== event.currentTarget ||
-            ![
-              "ArrowLeft",
-              "ArrowRight",
-              "ArrowDown",
-              "ArrowUp",
-              "PageDown",
-              "PageUp",
-              "Home",
-              "End",
-            ].includes(event.key)
+            !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)
           )
             return;
           event.preventDefault();
@@ -239,10 +91,7 @@ export default function SportsShowcase({
               ? 0
               : event.key === "End"
                 ? sports.length - 1
-                : active +
-                  (["ArrowDown", "ArrowRight", "PageDown"].includes(event.key)
-                    ? 1
-                    : -1),
+                : active + (event.key === "ArrowRight" ? 1 : -1),
           );
         }}
       >

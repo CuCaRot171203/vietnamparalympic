@@ -33,10 +33,12 @@ async function getPage(
   search: string,
   signal: AbortSignal,
 ): Promise<PageResult> {
-  // Fetch a growing prefix: the API sorts only by createdAt, so offset pages
-  // can overlap when articles share a timestamp. Merge by id to keep existing
-  // cards in place and reveal six new articles at each step.
-  const params = new URLSearchParams({ page: "1", limit: String(page * 6) });
+  // Refresh the full visible prefix to preserve server ordering after edits.
+  const params = new URLSearchParams({
+    page: "1",
+    limit: String(page * 6),
+    sort: "updatedAt",
+  });
   if (category) params.set("categorySlug", category);
   if (search) params.set("search", search);
   const response = await fetch(getApiUrl(`/posts/paginated?${params}`), {
@@ -180,13 +182,9 @@ export default function NewsFeed({
         controller.signal,
       );
       if (version.current !== current || controller.signal.aborted) return;
-      setPosts((previous) =>
-        [
-          ...new Map(
-            [...previous, ...result.data].map((post) => [post.id, post]),
-          ).values(),
-        ].slice(0, (page + 1) * 6),
-      );
+      setPosts([
+        ...new Map(result.data.map((post) => [post.id, post])).values(),
+      ]);
       setTotal(result.meta.total);
       setPage(page + 1);
       setHasMore(result.data.length > 0 && (page + 1) * 6 < result.meta.total);
