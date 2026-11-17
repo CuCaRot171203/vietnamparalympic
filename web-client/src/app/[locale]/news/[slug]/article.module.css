@@ -98,9 +98,9 @@
   background: #ffffff24;
 }
 .header h1 {
-  font-family: var(--font-article-calvera), sans-serif;
+  font-family: var(--font-home-neusharp), sans-serif;
   font-size: clamp(60px, 6vw, 84px);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.13;
   text-transform: uppercase;
   text-wrap: balance;
@@ -649,3 +649,5 @@
     transform: none;
   }
 }
+
+.breadcrumb a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 3px; }

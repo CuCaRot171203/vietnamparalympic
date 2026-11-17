@@ -104,12 +104,13 @@
   background: transparent;
   padding: 0;
   width: 124px;
-  overflow: hidden;
+  overflow: visible;
 }
 .header[data-scrolled="true"] .logo img {
   width: 124px;
-  height: 62px;
-  max-width: none;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
   flex-shrink: 0;
   mix-blend-mode: normal;
 }

@@ -75,6 +75,10 @@
 .heroCopy {
   min-width: 0;
 }
+.heroText {
+  position: relative;
+  top: 12px;
+}
 .heroLogo {
   display: grid;
   place-items: center;
@@ -96,9 +100,9 @@
   margin: 0 0 18px;
 }
 .hero h1 {
-  font-family: var(--font-sport-calvera), sans-serif;
+  font-family: var(--font-home-neusharp), sans-serif;
   font-size: 100px;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.08;
   text-transform: uppercase;
   margin: 0 0 22px;
@@ -854,4 +858,6 @@
 .articleAside .numbers strong { min-width:44px; font-size:28px; }
 .heroVisual > img.cover { position:absolute; inset:0; width:100%; height:100%; }
 @media(max-width:1023px) { .articleLayout { grid-template-columns:minmax(0,1fr) 260px; gap:28px; } .articleAside { padding:20px; } }
-@media(max-width:767px) { .articleLayout { grid-template-columns:1fr; padding:44px 0; gap:32px; } .articleAside { position:static; } .sportArticle > h2 { font-size:23px; } .articleAside .numbers { grid-template-columns:repeat(3,minmax(0,1fr)); } .articleAside .numbers span { flex-direction:column; align-items:flex-start; gap:6px; } }
+@media(max-width:767px) { .articleLayout { grid-template-columns:1fr; padding:44px 0; gap:32px; } .articleAside { position:static; } .sportArticle > h2 { font-size:23px; } .articleAside .numbers { grid-template-columns:repeat(2,minmax(0,1fr)); } .articleAside .numbers span { flex-direction:column; align-items:flex-start; gap:6px; } }
+
+.breadcrumb a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 3px; }

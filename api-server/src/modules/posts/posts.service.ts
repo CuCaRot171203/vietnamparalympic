@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import { CacheService, CACHE_TTL } from "../../common/cache/cache.service";
@@ -7,12 +7,19 @@ import { CacheService, CACHE_TTL } from "../../common/cache/cache.service";
 export class PostsService {
   constructor(
     private prisma: PrismaService,
-    private cache: CacheService
+    private cache: CacheService,
   ) {}
 
   async create(data: any) {
-    const { categoryId, tagIds, ...rest } = data;
+    const { categoryId, tagIds, authorId, ...rest } = data;
     const createData: any = { ...rest };
+    if (createData.createdAt)
+      createData.createdAt = new Date(createData.createdAt);
+    if (createData.publishedAt)
+      createData.publishedAt = new Date(createData.publishedAt);
+    if (createData.status === "PUBLISHED" && !createData.publishedAt)
+      createData.publishedAt = new Date();
+    if (authorId) createData.author = { connect: { id: authorId } };
     if (categoryId) {
       createData.category = { connect: { id: categoryId } };
     }
@@ -22,11 +29,24 @@ export class PostsService {
     return this.prisma.post.create({ data: createData });
   }
 
+  async findAuthors() {
+    return this.prisma.user.findMany({
+      where: {
+        isActive: true,
+        role: { name: { in: ["SUPER_ADMIN", "ADMIN", "EDITOR"] } },
+      },
+      select: { id: true, fullName: true },
+      orderBy: { fullName: "asc" },
+    });
+  }
+
   async findAll(params: {
     skip?: number;
     take?: number;
     where?: Prisma.PostWhereInput;
-    orderBy?: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[];
+    orderBy?:
+      | Prisma.PostOrderByWithRelationInput
+      | Prisma.PostOrderByWithRelationInput[];
   }) {
     const { skip, take, where, orderBy } = params;
     return this.prisma.post.findMany({
@@ -46,7 +66,9 @@ export class PostsService {
     page?: number;
     limit?: number;
     where?: Prisma.PostWhereInput;
-    orderBy?: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[];
+    orderBy?:
+      | Prisma.PostOrderByWithRelationInput
+      | Prisma.PostOrderByWithRelationInput[];
   }) {
     const { page = 1, limit = 12, where, orderBy } = params;
     const skip = (page - 1) * limit;
@@ -92,27 +114,35 @@ export class PostsService {
             },
           },
         }),
-      CACHE_TTL.POST_DETAIL
+      CACHE_TTL.POST_DETAIL,
     );
   }
 
   async update(id: string, data: any) {
-    const { categoryId, tagIds, ...rest } = data;
+    const { categoryId, tagIds, authorId, ...rest } = data;
     const updateData: any = { ...rest };
     if (updateData.createdAt) {
       updateData.createdAt = new Date(updateData.createdAt);
     }
 
-    // Auto-set publishedAt when status changes to PUBLISHED
-    if (updateData.status === "PUBLISHED") {
-      const existing = await this.prisma.post.findUnique({
-        where: { id },
-        select: { publishedAt: true },
-      });
-      if (!existing?.publishedAt) {
-        updateData.publishedAt = new Date();
-      }
+    const existing = await this.prisma.post.findUnique({
+      where: { id },
+      select: { slug: true, status: true, publishedAt: true },
+    });
+    if (!existing) throw new NotFoundException("Post not found");
+    if (updateData.publishedAt)
+      updateData.publishedAt = new Date(updateData.publishedAt);
+    const publicationDate =
+      updateData.publishedAt === undefined
+        ? existing.publishedAt
+        : updateData.publishedAt;
+    if (
+      (updateData.status ?? existing.status) === "PUBLISHED" &&
+      !publicationDate
+    ) {
+      updateData.publishedAt = new Date();
     }
+    if (authorId) updateData.author = { connect: { id: authorId } };
 
     if (categoryId) {
       updateData.category = { connect: { id: categoryId } };
@@ -121,8 +151,13 @@ export class PostsService {
       updateData.tags = { set: tagIds.map((tid: string) => ({ id: tid })) };
     }
 
-    const post = await this.prisma.post.update({ where: { id }, data: updateData });
+    const post = await this.prisma.post.update({
+      where: { id },
+      data: updateData,
+    });
     await this.cache.del(CacheService.keys.postBySlug(post.slug));
+    if (existing.slug !== post.slug)
+      await this.cache.del(CacheService.keys.postBySlug(existing.slug));
     return post;
   }
 
@@ -132,8 +167,8 @@ export class PostsService {
         this.prisma.post.update({
           where: { id: item.id },
           data: { createdAt: new Date(item.createdAt) },
-        })
-      )
+        }),
+      ),
     );
     return { updated: updates.length };
   }
@@ -156,7 +191,11 @@ export class PostsService {
     });
 
     // Xóa cache cho từng post
-    await Promise.all(posts.map((post) => this.cache.del(CacheService.keys.postBySlug(post.slug))));
+    await Promise.all(
+      posts.map((post) =>
+        this.cache.del(CacheService.keys.postBySlug(post.slug)),
+      ),
+    );
 
     return result;
   }

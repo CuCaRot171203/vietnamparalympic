@@ -1,13 +1,11 @@
 import { cache } from "react";
 import Image from "next/image";
-import localFont from "next/font/local";
 import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
   ArrowRight,
   ArrowUpRight,
-  BookOpen,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
@@ -23,15 +21,8 @@ import NewsImage from "@/components/news/NewsImage";
 import NewsSportsRail from "@/components/news/NewsSportsRail";
 import styles from "./sport.module.css";
 
-const calvera = localFont({
-  src: "../../../../../public/KV/DL-Calvera-2.otf",
-  weight: "400",
-  display: "swap",
-  variable: "--font-sport-calvera",
-});
 const pageClass = [
   styles.page,
-  calvera.variable,
   homeBeVietnam.variable,
   homeNeusharp.variable,
 ].join(" ");
@@ -58,14 +49,6 @@ type Post = {
   publishedAt?: string;
   category?: { name: string };
 };
-type Course = {
-  id: string;
-  slug: string;
-  title: string;
-  description?: string;
-  thumbnail?: string;
-  lessonCount?: number;
-};
 type Club = {
   id: string;
   slug?: string;
@@ -73,14 +56,6 @@ type Club = {
   location?: string;
   schedule?: string;
   imageUrl?: string;
-};
-type Match = {
-  id: string;
-  title: string;
-  startTime?: string;
-  location?: string;
-  status: string;
-  tournament?: { name: string };
 };
 type Tournament = {
   id: string;
@@ -129,12 +104,6 @@ const plain = (value = "") =>
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-const normalize = (value: string) =>
-  plain(value)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[đĐ]/g, "d")
-    .toLowerCase();
 export async function generateMetadata({ params }: Props) {
   const { locale, slug } = await params;
   const result = await getSport(slug);
@@ -196,25 +165,16 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
     Number.isSafeInteger(Number(query.page)) ? Number(query.page) : 1,
   );
   const pageSize = 6;
-  const [
-    allSports,
-    newsData,
-    courseData,
-    clubData,
-    matchData,
-    rankingData,
-    tournamentData,
-  ] = await Promise.all([
-    read<Sport[]>("/sports"),
-    read<Page<Post>>(
-      `/posts/paginated?${new URLSearchParams({ search: sport.nameVi, page: String(page), limit: String(pageSize) })}`,
-    ),
-    read<Course[]>("/courses"),
-    read<Club[]>(`/organizations?sport=${encodeURIComponent(sport.nameVi)}`),
-    read<Page<Match>>(`/matches?sportId=${sport.id}&limit=4`),
-    read<Ranking[]>(`/rankings/sport/${sport.id}`),
-    read<Page<Tournament>>(`/tournaments?sportId=${sport.id}&limit=3`),
-  ]);
+  const [allSports, newsData, clubData, rankingData, tournamentData] =
+    await Promise.all([
+      read<Sport[]>("/sports"),
+      read<Page<Post>>(
+        `/posts/paginated?${new URLSearchParams({ search: sport.nameVi, page: String(page), limit: String(pageSize) })}`,
+      ),
+      read<Club[]>(`/organizations?sport=${encodeURIComponent(sport.nameVi)}`),
+      read<Ranking[]>(`/rankings/sport/${sport.id}`),
+      read<Page<Tournament>>(`/tournaments?sportId=${sport.id}&limit=3`),
+    ]);
   const posts = newsData.data?.data || [];
   const total = newsData.data?.meta.total ?? posts.length;
   const last = Math.max(1, newsData.data?.meta.totalPages || 1);
@@ -222,15 +182,7 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
     redirect(
       `/${locale}/sports/${slug}${last > 1 ? `?page=${last}` : ""}#sport-news`,
     );
-  const courses = Array.isArray(courseData.data) ? courseData.data : [];
-  const dedicated = courses.filter((course) =>
-    normalize(`${course.title} ${course.description || ""}`).includes(
-      normalize(sport.nameVi),
-    ),
-  );
-  const learning = (dedicated.length ? dedicated : courses).slice(0, 3);
   const clubs = Array.isArray(clubData.data) ? clubData.data : [];
-  const matches = matchData.data?.data || [];
   const rankings = Array.isArray(rankingData.data)
     ? rankingData.data.slice(0, 5)
     : [];
@@ -309,7 +261,9 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
           >
             <Link href={`/${locale}`}>{vi ? "Trang chủ" : "Home"}</Link>
             <span>/</span>
-            <span>{vi ? "Bộ môn" : "Sports"}</span>
+            <Link href={`/${locale}/sports`}>
+              {vi ? "Bộ môn & Thương tật" : "Sports & Classifications"}
+            </Link>
             <span>/</span>
             <span aria-current="page">{name}</span>
           </nav>
@@ -329,9 +283,11 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
                 Vietnam ParaSports ·{" "}
                 {vi ? "Khám phá bộ môn" : "Explore the sport"}
               </p>
-              <h1 id="sport-heading">{name}</h1>
-              {story && <p className={styles.tagline}>{story[vi ? 0 : 2]}</p>}
-              <p className={styles.heroDescription}>{summary}</p>
+              <div className={styles.heroText}>
+                <h1 id="sport-heading">{name}</h1>
+                {story && <p className={styles.tagline}>{story[vi ? 0 : 2]}</p>}
+                <p className={styles.heroDescription}>{summary}</p>
+              </div>
               <div className={styles.heroActions}>
                 <a href="#sport-news">
                   {vi ? "Theo nhịp bộ môn" : "Follow the sport"}
@@ -362,10 +318,8 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
         >
           {[
             ["sport-intro", vi ? "Giới thiệu" : "Overview"],
-            ["sport-news", vi ? "Tin tức" : "News"],
-            ["sport-learning", vi ? "Học tập" : "Learning"],
             ["sport-clubs", vi ? "Câu lạc bộ" : "Clubs"],
-            ["sport-calendar", vi ? "Lịch thi đấu" : "Fixtures"],
+            ["sport-news", vi ? "Tin tức" : "News"],
             ["sport-rankings", vi ? "Xếp hạng" : "Rankings"],
           ].map(([id, label]) => (
             <a href={`#${id}`} key={id}>
@@ -416,16 +370,79 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
                 <strong>{clubData.data ? clubs.length : "—"}</strong>
                 {vi ? "câu lạc bộ kết nối" : "connected clubs"}
               </span>
-              <span>
-                <strong>
-                  {matchData.data
-                    ? (matchData.data.meta?.total ?? matches.length)
-                    : "—"}
-                </strong>
-                {vi ? "trận đấu cập nhật" : "listed matches"}
-              </span>
             </div>
           </aside>
+        </section>
+        <section
+          id="sport-clubs"
+          className={styles.section}
+          aria-labelledby="clubs-heading"
+        >
+          {heading(
+            "clubs-heading",
+            vi
+              ? "Cùng tập luyện. Cùng tiến bộ."
+              : "Train together. Grow together.",
+            vi ? "Kết nối câu lạc bộ" : "Find your community",
+            `/${locale}/clubs`,
+            vi ? "Khám phá CLB" : "Explore clubs",
+          )}
+          {!clubs.length ? (
+            empty(
+              !clubData.data,
+              vi
+                ? "Chưa có câu lạc bộ của bộ môn này được công bố. Bạn có thể khám phá thêm tại danh sách câu lạc bộ."
+                : "No clubs for this sport have been published yet. Explore the club directory for more options.",
+            )
+          ) : (
+            <div className={styles.clubGrid}>
+              {clubs.slice(0, 6).map((club) => (
+                <article className={styles.club} key={club.id}>
+                  {club.imageUrl ? (
+                    <Link
+                      className={styles.clubImage}
+                      href={`/${locale}/clubs/detail/${clubSlug(club)}`}
+                      aria-label={club.name}
+                    >
+                      <NewsImage
+                        src={club.imageUrl}
+                        className={styles.photo}
+                        sizes="(max-width:639px) 100vw, 33vw"
+                      />
+                    </Link>
+                  ) : (
+                    <span className={styles.clubIcon}>
+                      <MapPin size={20} strokeWidth={1.5} />
+                    </span>
+                  )}
+                  <h3>
+                    <Link href={`/${locale}/clubs/detail/${clubSlug(club)}`}>
+                      {club.name}
+                    </Link>
+                  </h3>
+                  <p>
+                    <MapPin size={13} />
+                    {club.location ||
+                      (vi ? "Địa điểm đang cập nhật" : "Venue to be announced")}
+                  </p>
+                  <p>
+                    <CalendarDays size={13} />
+                    {club.schedule ||
+                      (vi
+                        ? "Lịch tập đang cập nhật"
+                        : "Schedule to be announced")}
+                  </p>
+                  <Link
+                    className={styles.cardAction}
+                    href={`/${locale}/clubs/detail/${clubSlug(club)}`}
+                  >
+                    {vi ? "Khám phá câu lạc bộ" : "Explore club"}
+                    <ArrowUpRight size={16} />
+                  </Link>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
         <section
           id="sport-news"
@@ -527,198 +544,6 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
                 </nav>
               )}
             </>
-          )}
-        </section>
-        <section
-          id="sport-learning"
-          className={styles.section}
-          aria-labelledby="learning-heading"
-        >
-          {heading(
-            "learning-heading",
-            vi ? "Học hỏi & phát triển" : "Learn & develop",
-            vi ? "Khóa học & kỹ năng" : "Courses & skills",
-            `/${locale}/creator-lab`,
-            "Creator Lab",
-          )}
-          <p className={styles.sectionDescription}>
-            {dedicated.length
-              ? vi
-                ? `Học liệu liên quan đến ${name.toLocaleLowerCase("vi-VN")}.`
-                : `Learning resources related to ${name.toLowerCase()}.`
-              : vi
-                ? "Khám phá các khóa học bổ trợ về dinh dưỡng, phục hồi và kỹ năng truyền thông trong thể thao."
-                : "Explore supporting courses in nutrition, recovery and sports communication."}
-          </p>
-          {!learning.length ? (
-            empty(
-              !courseData.data,
-              vi
-                ? "Học liệu đang được cập nhật."
-                : "Learning resources are being updated.",
-            )
-          ) : (
-            <div className={styles.newsGrid}>
-              {learning.map((course) => (
-                <article key={course.id} className={styles.story}>
-                  <Link
-                    href={`/${locale}/creator-lab/courses/${course.slug}`}
-                    className={styles.storyImage}
-                    aria-label={course.title}
-                  >
-                    <NewsImage
-                      src={course.thumbnail}
-                      className={styles.photo}
-                      sizes="(max-width:639px) 100vw, 33vw"
-                    />
-                    <span className={styles.imageArrow}>
-                      <BookOpen size={18} />
-                    </span>
-                  </Link>
-                  <div className={styles.meta}>
-                    <span>
-                      {dedicated.length
-                        ? vi
-                          ? "Khóa học"
-                          : "Course"
-                        : vi
-                          ? "Kỹ năng bổ trợ"
-                          : "Supporting skills"}
-                    </span>
-                    <span>
-                      {course.lessonCount ?? 0} {vi ? "bài học" : "lessons"}
-                    </span>
-                  </div>
-                  <h3>
-                    <Link
-                      href={`/${locale}/creator-lab/courses/${course.slug}`}
-                    >
-                      {course.title}
-                    </Link>
-                  </h3>
-                  <p>{plain(course.description)}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-        <section
-          id="sport-clubs"
-          className={styles.section}
-          aria-labelledby="clubs-heading"
-        >
-          {heading(
-            "clubs-heading",
-            vi
-              ? "Cùng tập luyện. Cùng tiến bộ."
-              : "Train together. Grow together.",
-            vi ? "Kết nối câu lạc bộ" : "Find your community",
-            `/${locale}/clubs`,
-            vi ? "Khám phá CLB" : "Explore clubs",
-          )}
-          {!clubs.length ? (
-            empty(
-              !clubData.data,
-              vi
-                ? "Chưa có câu lạc bộ của bộ môn này được công bố. Bạn có thể khám phá thêm tại danh sách câu lạc bộ."
-                : "No clubs for this sport have been published yet. Explore the club directory for more options.",
-            )
-          ) : (
-            <div className={styles.clubGrid}>
-              {clubs.slice(0, 6).map((club) => (
-                <article className={styles.club} key={club.id}>
-                  {club.imageUrl ? (
-                    <Link
-                      className={styles.clubImage}
-                      href={`/${locale}/clubs/detail/${clubSlug(club)}`}
-                      aria-label={club.name}
-                    >
-                      <NewsImage
-                        src={club.imageUrl}
-                        className={styles.photo}
-                        sizes="(max-width:639px) 100vw, 33vw"
-                      />
-                    </Link>
-                  ) : (
-                    <span className={styles.clubIcon}>
-                      <MapPin size={20} strokeWidth={1.5} />
-                    </span>
-                  )}
-                  <h3>
-                    <Link href={`/${locale}/clubs/detail/${clubSlug(club)}`}>
-                      {club.name}
-                    </Link>
-                  </h3>
-                  <p>
-                    <MapPin size={13} />
-                    {club.location ||
-                      (vi ? "Địa điểm đang cập nhật" : "Venue to be announced")}
-                  </p>
-                  <p>
-                    <CalendarDays size={13} />
-                    {club.schedule ||
-                      (vi
-                        ? "Lịch tập đang cập nhật"
-                        : "Schedule to be announced")}
-                  </p>
-                  <Link
-                    className={styles.cardAction}
-                    href={`/${locale}/clubs/detail/${clubSlug(club)}`}
-                  >
-                    {vi ? "Khám phá câu lạc bộ" : "Explore club"}
-                    <ArrowUpRight size={16} />
-                  </Link>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-        <section
-          id="sport-calendar"
-          className={styles.section}
-          aria-labelledby="calendar-heading"
-        >
-          {heading(
-            "calendar-heading",
-            vi ? "Theo nhịp những cuộc đấu" : "Follow the competition",
-            vi ? "Lịch thi đấu" : "Fixtures",
-            `/${locale}/matches`,
-            vi ? "Xem lịch thi đấu" : "All fixtures",
-          )}
-          {!matches.length ? (
-            empty(
-              !matchData.data,
-              vi
-                ? "Lịch thi đấu của bộ môn đang được cập nhật."
-                : "Fixtures for this sport will appear here.",
-            )
-          ) : (
-            <div className={styles.matchGrid}>
-              {matches.map((match) => (
-                <Link
-                  key={match.id}
-                  href={`/${locale}/matches/${match.id}`}
-                  className={styles.match}
-                >
-                  <div className={styles.matchTop}>
-                    <span className={styles.status} data-status={match.status}>
-                      {status(match.status)}
-                    </span>
-                    <ArrowUpRight size={17} />
-                  </div>
-                  <h3>{match.title}</h3>
-                  <p>
-                    <CalendarDays size={13} />
-                    {date(match.startTime, true)} · GMT+7
-                  </p>
-                  <p>
-                    <MapPin size={13} />
-                    {match.location ||
-                      (vi ? "Địa điểm đang cập nhật" : "Venue to be announced")}
-                  </p>
-                </Link>
-              ))}
-            </div>
           )}
         </section>
         <div className={styles.competitionGrid}>

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import localFont from "next/font/local";
 import DOMPurify from "isomorphic-dompurify";
 import { ConfigProvider, Modal, theme } from "antd";
 import { useTheme } from "next-themes";
@@ -32,12 +31,6 @@ import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import { ClubSummaryCard } from "./ClubsDirectory";
 import styles from "./club-detail.module.css";
 
-const calvera = localFont({
-  src: "../../../public/KV/DL-Calvera-2.otf",
-  weight: "400",
-  display: "swap",
-  variable: "--font-club-calvera",
-});
 function Badge({ children }: { children: React.ReactNode }) {
   return (
     <span className={styles.badge}>
@@ -211,7 +204,6 @@ export function ClubDetailView({
       <div
         className={[
           styles.page,
-          calvera.variable,
           homeBeVietnam.variable,
           homeNeusharp.variable,
           preview ? styles.preview : "",

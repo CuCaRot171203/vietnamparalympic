@@ -1,5 +1,4 @@
 import { cache } from "react";
-import localFont from "next/font/local";
 import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import { apiClient } from "@/lib/api-client";
 import Link from "next/link";
@@ -12,13 +11,6 @@ import ShareButton from "@/components/ShareButton";
 import NewsImage from "@/components/news/NewsImage";
 import DOMPurify from "isomorphic-dompurify";
 import styles from "./article.module.css";
-
-const calvera = localFont({
-  src: "../../../../../public/KV/DL-Calvera-2.otf",
-  weight: "400",
-  display: "swap",
-  variable: "--font-article-calvera",
-});
 
 interface Post {
   id: string;
@@ -119,7 +111,6 @@ export default async function NewsDetailPage({ params }: PageProps) {
       id="main-content"
       className={[
         styles.page,
-        calvera.variable,
         homeBeVietnam.variable,
         homeNeusharp.variable,
       ].join(" ")}
@@ -141,9 +132,13 @@ export default async function NewsDetailPage({ params }: PageProps) {
             <ChevronRight size={12} aria-hidden="true" />
             <Link href={`/${locale}/news`}>{vi ? "Tin tức" : "News"}</Link>
             <ChevronRight size={12} aria-hidden="true" />
-            <span aria-current="page">
-              {post.category?.name || (vi ? "Bài viết" : "Article")}
-            </span>
+            {post.category && (
+              <>
+                <Link href={categoryHref}>{post.category.name}</Link>
+                <ChevronRight size={12} aria-hidden="true" />
+              </>
+            )}
+            <span aria-current="page">{post.title}</span>
           </nav>
           <header className={styles.header}>
             <div className={styles.eyebrow}>

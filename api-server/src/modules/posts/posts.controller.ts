@@ -18,7 +18,11 @@ import { Prisma } from "@prisma/client";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { RolesGuard } from "../auth/roles.guard";
 import { Roles } from "../../common/decorators/roles.decorator";
-import { BulkUpdatePostDatesDto, CreatePostDto, UpdatePostDto } from "./dto/post.dto";
+import {
+  BulkUpdatePostDatesDto,
+  CreatePostDto,
+  UpdatePostDto,
+} from "./dto/post.dto";
 
 @Controller("posts")
 @UsePipes(
@@ -26,7 +30,7 @@ import { BulkUpdatePostDatesDto, CreatePostDto, UpdatePostDto } from "./dto/post
     whitelist: true,
     forbidNonWhitelisted: true,
     transform: true,
-  })
+  }),
 )
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -36,7 +40,7 @@ export class PostsController {
     @Query("skip") skip?: string,
     @Query("take") take?: string,
     @Query("categoryId") categoryId?: string,
-    @Query("search") search?: string
+    @Query("search") search?: string,
   ) {
     const where: Prisma.PostWhereInput = { status: "PUBLISHED" };
     if (categoryId) {
@@ -60,7 +64,7 @@ export class PostsController {
     @Query("categoryId") categoryId?: string,
     @Query("categorySlug") categorySlug?: string,
     @Query("search") search?: string,
-    @Query("sort") sort?: string
+    @Query("sort") sort?: string,
   ) {
     const where: Prisma.PostWhereInput = { status: "PUBLISHED" };
     if (categoryId) {
@@ -76,9 +80,10 @@ export class PostsController {
       page: page ? Number(page) : 1,
       limit: limit ? Number(limit) : 12,
       where,
-      orderBy: sort === "updatedAt"
-        ? [{ updatedAt: "desc" }, { createdAt: "desc" }, { id: "desc" }]
-        : [{ createdAt: "desc" }, { id: "desc" }],
+      orderBy:
+        sort === "updatedAt"
+          ? [{ updatedAt: "desc" }, { createdAt: "desc" }, { id: "desc" }]
+          : [{ createdAt: "desc" }, { id: "desc" }],
     });
   }
 
@@ -89,6 +94,13 @@ export class PostsController {
     return this.postsService.findAll({
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("SUPER_ADMIN", "ADMIN", "EDITOR")
+  @Get("authors")
+  findAuthors() {
+    return this.postsService.findAuthors();
   }
 
   @Get(":slug")

@@ -24,6 +24,9 @@ type PreviewPost = {
   content?: string;
   thumbnail?: string;
   status: string;
+  authorName?: string;
+  createdAt?: string;
+  publishedAt?: string | null;
 };
 type Props = {
   open: boolean;
@@ -85,6 +88,10 @@ export default function PostEditorDrawer({
           resolvedTheme === "dark"
             ? antTheme.darkAlgorithm
             : antTheme.defaultAlgorithm,
+        components: {
+          Select: { zIndexPopup: 1400 },
+          DatePicker: { zIndexPopup: 1400 },
+        },
         token: {
           colorPrimary: "#d7141e",
           borderRadius: 14,
@@ -143,9 +150,13 @@ export default function PostEditorDrawer({
                   ? vi
                     ? "Trạng thái: Đã xuất bản"
                     : "Status: Published"
-                  : vi
-                    ? "Trạng thái: Bản nháp"
-                    : "Status: Draft")}
+                  : post.status === "PENDING"
+                    ? vi
+                      ? "Trạng thái: Chờ duyệt"
+                      : "Status: Pending review"
+                    : vi
+                      ? "Trạng thái: Bản nháp"
+                      : "Status: Draft")}
             </span>
             <div>
               <Button
@@ -255,6 +266,29 @@ export default function PostEditorDrawer({
                   (vi ? "Tiêu đề bài viết của bạn" : "Your article title")}
               </h1>
               {post.excerpt && <p>{post.excerpt}</p>}
+              {(post.authorName || post.createdAt || post.publishedAt) && (
+                <div className={styles.previewMeta}>
+                  {post.authorName && <span>{post.authorName}</span>}
+                  {(
+                    [
+                      [post.createdAt, vi ? "Đăng" : "Created"],
+                      [post.publishedAt, vi ? "Xuất bản" : "Published"],
+                    ] as const
+                  ).map(([date, label]) =>
+                    date && !Number.isNaN(Date.parse(date)) ? (
+                      <time key={label} dateTime={date}>
+                        {label}:{" "}
+                        {new Intl.DateTimeFormat(vi ? "vi-VN" : "en-GB", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                          timeZone: "Asia/Ho_Chi_Minh",
+                        }).format(new Date(date))}{" "}
+                        (UTC+7)
+                      </time>
+                    ) : null,
+                  )}
+                </div>
+              )}
             </header>
             {post.thumbnail && (
               <figure className={styles.cover}>

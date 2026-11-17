@@ -112,9 +112,9 @@
 .hero h1 {
   max-width: 850px;
   margin: 0;
-  font-family: var(--font-club-calvera), sans-serif;
+  font-family: var(--font-home-neusharp), sans-serif;
   font-size: clamp(70px, 7.6vw, 100px);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.1;
   text-transform: uppercase;
   overflow-wrap: anywhere;
@@ -898,3 +898,7 @@
     transform: none;
   }
 }
+
+.breadcrumb a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 3px; }
+
+@media (max-width: 767px) { .keepTogether { white-space: normal; } }
