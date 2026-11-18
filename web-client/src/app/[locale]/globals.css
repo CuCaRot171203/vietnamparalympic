@@ -3,37 +3,6 @@
 @variant dark (&:where(.dark, .dark *));
 @plugin "@tailwindcss/typography";
 
-/* -- Smooth scroll (Lenis) -- */
-
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-
-/* Hide the native scrollbar on public pages (Lenis adds the `lenis` class to <html>).
-   The admin panel keeps the native scrollbar because it uses inner scroll containers. */
-html.lenis {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-html.lenis::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-.lenis [data-lenis-prevent],
-.lenis [data-lenis-prevent-wheel],
-.lenis [data-lenis-prevent-touch],
-.lenis [data-lenis-prevent-vertical],
-.lenis [data-lenis-prevent-horizontal] {
-  overscroll-behavior: contain;
-}
-
-.lenis.lenis-smooth iframe {
-  pointer-events: none;
-}
-
 /* -- shadcn/ui animation keyframes (replaces tailwindcss-animate which uses legacy v3 plugin API) -- */
 
 @keyframes enter {

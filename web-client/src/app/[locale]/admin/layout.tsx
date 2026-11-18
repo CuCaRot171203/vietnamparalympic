@@ -291,7 +291,6 @@ export default function AdminLayout({
       <AdminUiContext.Provider value={true}>
         <div
           className={`admin-workspace ${collapsed ? "sidebar-collapsed" : ""}`}
-          data-lenis-prevent
         >
           <aside
             className="admin-sidebar"

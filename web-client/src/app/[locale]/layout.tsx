@@ -10,18 +10,22 @@ import { Toaster } from "@/components/ui/sonner";
 import { GlobalModal } from "@/components/ui/GlobalModal";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/components/SettingsProvider";
-import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import { AccessibilityProvider } from "@/components/AccessibilityProvider";
 import AiAssistant from "@/components/AiAssistant";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 
-const inter = Inter({ subsets: ["latin"], display: 'swap' });
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 async function fetchSettings() {
   try {
-    const baseUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001/api/v1";
-    const res = await fetch(`${baseUrl.replace(/\/+$/, '')}/settings`, { next: { revalidate: 60 } });
+    const baseUrl =
+      process.env.INTERNAL_API_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "http://127.0.0.1:3001/api/v1";
+    const res = await fetch(`${baseUrl.replace(/\/+$/, "")}/settings`, {
+      next: { revalidate: 60 },
+    });
     if (res.ok) {
       const data = await res.json();
       return data?.data || data;
@@ -35,13 +39,14 @@ async function fetchSettings() {
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await fetchSettings();
   const siteTitle = settings?.siteTitle || "Việt Nam Paralympic Sport";
-  
+
   return {
     title: {
       default: siteTitle,
       template: `%s | ${siteTitle}`,
     },
-    description: "Cộng đồng thể thao người khuyết tật Việt Nam — Kết nối vận động viên, câu lạc bộ, giải đấu và người hâm mộ Paralympic.",
+    description:
+      "Cộng đồng thể thao người khuyết tật Việt Nam — Kết nối vận động viên, câu lạc bộ, giải đấu và người hâm mộ Paralympic.",
     icons: {
       icon: [
         {
@@ -72,11 +77,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
 };
 
@@ -92,16 +97,18 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-white`}>
+      <body
+        className={`${inter.className} min-h-screen flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-white`}
+      >
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Organization',
-              name: 'Vietnam ParaSports',
-              url: 'https://vietnamparasports.com',
-              description: 'Cộng đồng thể thao người khuyết tật Việt Nam',
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Vietnam ParaSports",
+              url: "https://vietnamparasports.com",
+              description: "Cộng đồng thể thao người khuyết tật Việt Nam",
               sameAs: [],
             }),
           }}
@@ -118,17 +125,15 @@ export default async function RootLayout({
               <SettingsProvider>
                 <AccessibilityProvider>
                   <TooltipProvider>
-                    <SmoothScrollProvider>
-                      <Header />
-                      <div className="flex-1" id="main-content" tabIndex={-1}>
-                        {children}
-                      </div>
-                      <Footer />
-                      <BackToTop />
-                      <AiAssistant />
-                      <Toaster />
-                      <GlobalModal />
-                    </SmoothScrollProvider>
+                    <Header />
+                    <div className="flex-1" id="main-content" tabIndex={-1}>
+                      {children}
+                    </div>
+                    <Footer />
+                    <BackToTop />
+                    <AiAssistant />
+                    <Toaster />
+                    <GlobalModal />
                   </TooltipProvider>
                 </AccessibilityProvider>
               </SettingsProvider>
