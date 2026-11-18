@@ -1,11 +1,13 @@
 "use client";
 
+import listStyles from "@/components/rich-text-lists.module.css";
+
 import { useMemo, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { ConfigProvider, Drawer, theme as antTheme } from "antd";
 import { useTheme } from "next-themes";
 import { Check, Eye, FilePenLine } from "lucide-react";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeRichText } from "@/lib/rich-text";
 import localFont from "next/font/local";
 import { Button } from "@/components/ui/Button";
 import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
@@ -70,7 +72,7 @@ export default function PostEditorDrawer({
   const formRef = useRef<HTMLFormElement>(null);
   const locked = saving || uploading;
   const sanitized = useMemo(
-    () => DOMPurify.sanitize(post.content || ""),
+    () => sanitizeRichText(post.content || ""),
     [post.content],
   );
   const hasContent =
@@ -304,7 +306,7 @@ export default function PostEditorDrawer({
                 contentPreview
               ) : hasContent ? (
                 <div
-                  className={styles.content}
+                  className={`${styles.content} ${listStyles.lists}`}
                   dangerouslySetInnerHTML={{ __html: sanitized }}
                 />
               ) : (

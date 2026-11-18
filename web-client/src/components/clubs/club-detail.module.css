@@ -899,6 +899,60 @@
   }
 }
 
-.breadcrumb a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 3px; }
+.breadcrumb a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 3px;
+}
 
-@media (max-width: 767px) { .keepTogether { white-space: normal; } }
+@media (max-width: 767px) {
+  .keepTogether {
+    white-space: normal;
+  }
+}
+
+.coordinators {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+.coordinatorHeading {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.coordinatorPerson + .coordinatorPerson {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+.coordinatorPerson .coordinator {
+  border: 0;
+  margin: 0 0 12px;
+  padding: 0;
+}
+.coordinatorPerson h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+.personPhone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--ink);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.personPhone:hover {
+  background: var(--soft);
+}
+.personPhone > svg {
+  flex-shrink: 0;
+}
+.personPhone > svg:last-child {
+  margin-inline-start: auto;
+}

@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import {
   ArrayMaxSize,
   IsArray,
@@ -7,12 +8,35 @@ import {
   Matches,
   MaxLength,
   ValidateIf,
+  ValidateNested,
+  IsNotEmpty,
+  IsIn,
 } from "class-validator";
 
 // Public media can be an uploaded relative path or an HTTP(S) URL.
 const mediaPath = /^(?:$|\/(?!\/)[^\s]*|https?:\/\/[^\s]+)$/;
 
+export class ClubContactDto {
+  @IsString() @IsNotEmpty() @Matches(/\S/) @MaxLength(160) name!: string;
+  @IsOptional() @IsString() @MaxLength(160) role?: string;
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(40)
+  @Matches(/^[+\d\s().-]+$/)
+  phone!: string;
+}
+
 export class OrganizationDetailsDto {
+  @IsOptional()
+  @IsIn(["Miền Bắc", "Miền Trung", "Miền Nam"])
+  region?: string;
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => ClubContactDto)
+  contacts?: ClubContactDto[];
+
   @IsOptional()
   @IsString()
   @MaxLength(240)

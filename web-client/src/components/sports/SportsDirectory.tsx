@@ -45,17 +45,23 @@ export default function SportsDirectory({
   classifications,
   sportsError,
   classesError,
+  initialTab = "sports",
+  initialSportId = "",
+  initialQuery = "",
 }: {
   locale: string;
   sports: DirectorySport[];
   classifications: SportClass[];
   sportsError: boolean;
   classesError: boolean;
+  initialTab?: "sports" | "classes";
+  initialSportId?: string;
+  initialQuery?: string;
 }) {
   const vi = locale === "vi";
-  const [tab, setTab] = useState<"sports" | "classes">("sports");
-  const [query, setQuery] = useState("");
-  const [sportId, setSportId] = useState("");
+  const [tab, setTab] = useState<"sports" | "classes">(initialTab);
+  const [query, setQuery] = useState(initialQuery);
+  const [sportId, setSportId] = useState(initialSportId);
   const [limit, setLimit] = useState(9);
   const name = (sport: DirectorySport) =>
     (vi ? sport.nameVi : sport.nameEn) || sport.nameVi;

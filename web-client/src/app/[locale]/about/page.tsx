@@ -56,9 +56,9 @@ const translations: Record<string, AboutCopy> = {
   vi: {
     eyebrow: "Giới thiệu",
     heading: "Về Chúng Tôi",
-    subheading: "Thể thao không rào cản",
+    subheading: "Di sản vinh quang",
     heroLead:
-      "Vietnam ParaSports là nền tảng truyền thông và kết nối cộng đồng thể thao người khuyết tật tại Việt Nam — nơi năng lực được tôn vinh, câu chuyện được kể đúng cách, và mọi người tìm thấy nhau trong cùng một sân chơi.",
+      "Vietnam ParaSports là dự án truyền thông và kết nối cộng đồng thể thao người khuyết tật tại Việt Nam, hướng đến việc giúp mỗi người tìm hiểu các bộ môn phù hợp, tiếp cận thông tin tập luyện và kết nối với câu lạc bộ, huấn luyện viên cùng những người có chung đam mê.\nVới tinh thần “Khơi lửa đam mê”, chúng tôi mong muốn mỗi người đều có cơ hội bắt đầu hành trình thể thao của riêng mình.",
     ctaPrimary: "Khám phá thể thao",
     ctaSecondary: "Gặp gỡ cộng đồng",
     heroCardTitle: "Một nơi để bắt đầu",
@@ -74,17 +74,17 @@ const translations: Record<string, AboutCopy> = {
     ],
     whatIsTitle: "Vietnam ParaSports là gì?",
     whatIsDesc1:
-      "Vietnam ParaSports là nền tảng truyền thông và kết nối cộng đồng thể thao người khuyết tật tại Việt Nam. Website được xây dựng nhằm lan tỏa tinh thần “Thể thao không rào cản”, giúp ParaSports đến gần hơn với công chúng, đồng thời tạo thêm không gian để người khuyết tật, vận động viên, huấn luyện viên, câu lạc bộ và cộng đồng có thể kết nối với nhau.",
+      "Vietnam ParaSports là nền tảng truyền thông và kết nối cộng đồng thể thao người khuyết tật tại Việt Nam. Website được xây dựng nhằm lan tỏa tinh thần “Thể thao kết nối – Cộng đồng lan tỏa”, cung cấp thông tin về các bộ môn thể thao, hoạt động tập luyện và câu lạc bộ, đồng thời tạo không gian để người khuyết tật, vận động viên, huấn luyện viên và cộng đồng giao lưu, chia sẻ, kết nối và cùng phát triển đam mê thể thao.",
     whatIsDesc2:
       "Vietnam ParaSports không chỉ đưa tin về thể thao người khuyết tật, mà còn hướng tới việc xây dựng một hệ sinh thái thông tin dễ tiếp cận: nơi mọi người có thể đọc tin tức, tìm hiểu các CLB, tham gia hoạt động cộng đồng, học cách xây kênh cá nhân và kết nối với các nguồn lực đồng hành.",
     missionTitle: "Sứ mệnh của chúng tôi",
     missionDesc:
       "Vietnam ParaSports hướng tới việc lan tỏa hình ảnh ParaSports theo hướng tôn trọng, chân thật và không thương hại hóa. Dự án mong muốn người khuyết tật được nhìn nhận như những cá nhân có năng lực, có câu chuyện, có quyền tham gia thể thao và có thể hiện diện chủ động trong cộng đồng.",
     missionPoints: [
-      "Tôn trọng người khuyết tật như chủ thể có năng lực và có tiếng nói riêng.",
-      "Kết nối vận động viên với câu lạc bộ, huấn luyện viên và nhà tài trợ.",
-      "Truyền thông chân thật, dễ tiếp cận, tránh giật gân và thương hại hóa.",
-      "Hỗ trợ vận động viên làm chủ kỹ năng số và kể câu chuyện của riêng mình.",
+      "Mở rộng cơ hội tiếp cận thể thao: Cung cấp kiến thức cơ bản về bộ môn, cách bắt đầu tập luyện và những lưu ý an toàn.",
+      "Kết nối cộng đồng: Giúp người khuyết tật tiếp cận câu lạc bộ, huấn luyện viên, vận động viên và những người đồng hành phù hợp.",
+      "Lan tỏa giá trị thể thao người khuyết tật: Truyền tải những câu chuyện, hoạt động và thành tích bằng góc nhìn tôn trọng, chân thực.",
+      "Xây dựng nguồn thông tin hữu ích, lâu dài: Phát triển hệ thống nội dung và kết nối có thể tiếp tục được khai thác, cập nhật qua các thế hệ dự án.",
     ],
     coreValuesTitle: "Giá trị cốt lõi",
     coreDesc:

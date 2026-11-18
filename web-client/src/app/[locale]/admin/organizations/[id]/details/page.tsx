@@ -24,20 +24,27 @@ import { ClubDetailView } from "@/components/clubs/ClubDetailView";
 import { MediaUpload } from "@/components/MediaUpload";
 import {
   ClubDetails,
+  clubContacts,
+  clubRegion,
+  CLUB_REGIONS,
+  type ClubRegion,
   clubSlug,
   emptyClubDetails,
   normalizeClubDetails,
   Organization,
   splitClubSports,
 } from "@/lib/organizations";
+import ClubContactsEditor from "@/components/clubs/ClubContactsEditor";
 import editorStyles from "@/components/clubs/club-editor.module.css";
 
 const TiptapEditor = dynamic(
   () => import("@/components/TiptapEditor").then((m) => m.TiptapEditor),
   {
     ssr: false,
-    loading: () => <div className="h-40 animate-pulse rounded-xl bg-[var(--club-border)]" />,
-  }
+    loading: () => (
+      <div className="h-40 animate-pulse rounded-xl bg-[var(--club-border)]" />
+    ),
+  },
 );
 const inputClass =
   "mt-2 min-h-11 w-full rounded-md border border-[var(--club-border)] bg-[var(--club-surface)] px-3 py-2 text-base text-[var(--club-text)] outline-none placeholder:text-[var(--club-muted)] focus:border-[var(--club-text)]/40 focus:ring-2 focus:ring-[var(--focus-ring)]";
@@ -68,7 +75,8 @@ export default function ClubDetailsEditor() {
 
   useEffect(() => {
     if (status === "unauthenticated") router.replace(`/${language}/login`);
-    if (status === "authenticated" && !authorized) router.replace(`/${language}`);
+    if (status === "authenticated" && !authorized)
+      router.replace(`/${language}`);
   }, [status, authorized, router, language]);
 
   useEffect(() => {
@@ -83,11 +91,15 @@ export default function ClubDetailsEditor() {
           throw new Error(
             res.status === 404
               ? text("Không tìm thấy câu lạc bộ.", "Club not found.")
-              : text("Không thể tải dữ liệu.", "Unable to load club.")
+              : text("Không thể tải dữ liệu.", "Unable to load club."),
           );
         const data: Organization = await res.json();
         if (!active) return;
-        const initial = normalizeClubDetails(data.details);
+        const initial = {
+          ...normalizeClubDetails(data.details),
+          contacts: clubContacts(data),
+          region: clubRegion(data),
+        };
         setClub(data);
         setDetails(initial);
         setSaved(JSON.stringify(initial));
@@ -123,24 +135,37 @@ export default function ClubDetailsEditor() {
         gallery: details.gallery.filter(Boolean),
         facilities: details.facilities.map((s) => s.trim()).filter(Boolean),
       };
-      const res = await apiClient.put(`/organizations/${encodeURIComponent(id)}/details`, payload);
+      const res = await apiClient.put(
+        `/organizations/${encodeURIComponent(id)}/details`,
+        payload,
+      );
       if (!res.ok) {
         const body = await res.json();
         throw new Error(
           Array.isArray(body?.message)
             ? body.message.join(" · ")
             : body?.message ||
-                text("Không thể lưu. Vui lòng thử lại.", "Unable to save. Please try again.")
+                text(
+                  "Không thể lưu. Vui lòng thử lại.",
+                  "Unable to save. Please try again.",
+                ),
         );
       }
       const data: Organization = await res.json();
-      const latest = normalizeClubDetails(data.details);
+      const latest = {
+        ...normalizeClubDetails(data.details),
+        contacts: clubContacts(data),
+      };
       setClub(data);
       setDetails(latest);
       setSaved(JSON.stringify(latest));
       toast.success(text("Đã lưu chi tiết câu lạc bộ.", "Club details saved."));
     } catch (err) {
-      setError(err instanceof Error ? err.message : text("Lỗi kết nối.", "Connection error."));
+      setError(
+        err instanceof Error
+          ? err.message
+          : text("Lỗi kết nối.", "Connection error."),
+      );
     } finally {
       setSaving(false);
     }
@@ -193,8 +218,8 @@ export default function ClubDetailsEditor() {
               window.confirm(
                 text(
                   "Bạn có thay đổi chưa lưu. Rời khỏi trang?",
-                  "You have unsaved changes. Leave this page?"
-                )
+                  "You have unsaved changes. Leave this page?",
+                ),
               )
             )
               router.push(`/${language}/admin/organizations`);
@@ -207,7 +232,10 @@ export default function ClubDetailsEditor() {
         <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="mb-3 text-sm text-[var(--club-muted)]">
-              {text("Không gian biên tập / Câu lạc bộ", "Editorial space / Clubs")}
+              {text(
+                "Không gian biên tập / Câu lạc bộ",
+                "Editorial space / Clubs",
+              )}
             </p>
             <h1 className="text-3xl font-semibold tracking-[-1.2px] sm:text-4xl">
               {text("Kể câu chuyện của câu lạc bộ.", "Tell your club’s story.")}
@@ -215,16 +243,25 @@ export default function ClubDetailsEditor() {
             <p className="mt-3 text-[var(--club-muted)]">{club.name}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <span aria-live="polite" className="text-sm text-[var(--club-muted)]">
+            <span
+              aria-live="polite"
+              className="text-sm text-[var(--club-muted)]"
+            >
               {saving
                 ? text("Đang lưu…", "Saving…")
                 : dirty
                   ? text("Có thay đổi chưa lưu", "Unsaved changes")
                   : text("Đã đồng bộ", "Up to date")}
             </span>
-            <button type="button" onClick={() => setPreview((p) => !p)} className={buttonClass}>
+            <button
+              type="button"
+              onClick={() => setPreview((p) => !p)}
+              className={buttonClass}
+            >
               {preview ? <FileText size={16} /> : <Eye size={16} />}
-              {preview ? text("Biên tập", "Edit") : text("Xem trước", "Preview")}
+              {preview
+                ? text("Biên tập", "Edit")
+                : text("Xem trước", "Preview")}
             </button>
             <button
               type="submit"
@@ -232,7 +269,11 @@ export default function ClubDetailsEditor() {
               disabled={saving || !dirty}
               className={`${buttonClass} !border-[var(--club-text)] !bg-[var(--club-contrast)] text-[var(--club-on-contrast)] shadow-[inset_0_0.5px_0_rgba(255,255,255,0.2)]`}
             >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              {saving ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Save size={16} />
+              )}
               {text("Lưu chi tiết", "Save details")}
             </button>
           </div>
@@ -241,7 +282,7 @@ export default function ClubDetailsEditor() {
           <p className="mb-6 rounded-xl border border-[var(--club-border)] px-5 py-4 text-sm text-[var(--club-muted)]">
             {text(
               "CLB đang chờ duyệt. Nội dung có thể được lưu và xem trước; trang công khai xuất hiện sau khi CLB được phê duyệt.",
-              "This club is pending approval. Save and preview its content here; the public page becomes available after approval."
+              "This club is pending approval. Save and preview its content here; the public page becomes available after approval.",
             )}
           </p>
         )}
@@ -259,10 +300,15 @@ export default function ClubDetailsEditor() {
           onSubmit={save}
           onInvalidCapture={() => setPreview(false)}
           className={
-            preview ? "hidden" : "grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_300px]"
+            preview
+              ? "hidden"
+              : "grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_300px]"
           }
         >
-          <fieldset disabled={saving} className="min-w-0 space-y-6 disabled:opacity-70">
+          <fieldset
+            disabled={saving}
+            className="min-w-0 space-y-6 disabled:opacity-70"
+          >
             <section className="rounded-2xl border border-[var(--club-border)] p-5 sm:p-8">
               <div className="mb-6 flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--club-border)] text-sm">
@@ -275,11 +321,27 @@ export default function ClubDetailsEditor() {
                   <p className="mt-1 text-sm text-[var(--club-muted)]">
                     {text(
                       "Một lời giới thiệu ngắn và hình ảnh mang dấu ấn riêng.",
-                      "An introduction and a cover that feel like your club."
+                      "An introduction and a cover that feel like your club.",
                     )}
                   </p>
                 </div>
               </div>
+              <label className="mb-6 block text-sm">
+                {text("Khu vực", "Region")}
+                <select
+                  className={inputClass}
+                  value={details.region}
+                  onChange={(event) =>
+                    update("region", event.target.value as ClubRegion)
+                  }
+                >
+                  {CLUB_REGIONS.map((region) => (
+                    <option value={region} key={region}>
+                      {region}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label className="block text-sm">
                 {text("Thông điệp câu lạc bộ", "Club tagline")}
                 <input
@@ -288,7 +350,7 @@ export default function ClubDetailsEditor() {
                   onChange={(e) => update("tagline", e.target.value)}
                   placeholder={text(
                     "VD: Cùng nhau vượt giới hạn, mỗi ngày.",
-                    "e.g. Moving beyond limits, together."
+                    "e.g. Moving beyond limits, together.",
                   )}
                   className={inputClass}
                 />
@@ -303,7 +365,7 @@ export default function ClubDetailsEditor() {
                 <p className="mt-2 text-xs text-[var(--club-muted)]">
                   {text(
                     "Nên dùng ảnh ngang. Khi để trống, trang sử dụng ảnh CLB hiện có.",
-                    "A landscape image works best. Leave empty to use the existing club image."
+                    "A landscape image works best. Leave empty to use the existing club image.",
                   )}
                 </p>
               </div>
@@ -320,7 +382,7 @@ export default function ClubDetailsEditor() {
               <p className="mb-4 text-sm text-[var(--club-muted)]">
                 {text(
                   "Bổ sung hành trình, đội ngũ, chương trình tập luyện hoặc thành tích. Nội dung này hiển thị bên dưới giới thiệu cơ bản của CLB.",
-                  "Share your journey, team, training or achievements. This appears below the club’s basic introduction."
+                  "Share your journey, team, training or achievements. This appears below the club’s basic introduction.",
                 )}
               </p>
               <TiptapEditor
@@ -352,15 +414,17 @@ export default function ClubDetailsEditor() {
               <label className="block text-sm">
                 {text(
                   "Tiện ích & hỗ trợ — mỗi dòng một mục (tối đa 20)",
-                  "Facilities & support — one per line (up to 20)"
+                  "Facilities & support — one per line (up to 20)",
                 )}
                 <textarea
                   rows={5}
                   value={details.facilities.join("\n")}
-                  onChange={(e) => update("facilities", e.target.value.split("\n"))}
+                  onChange={(e) =>
+                    update("facilities", e.target.value.split("\n"))
+                  }
                   placeholder={text(
                     "Lối đi dành cho xe lăn\nHuấn luyện viên chuyên môn\nDụng cụ tập luyện phù hợp",
-                    "Wheelchair access\nQualified coaches\nAdapted equipment"
+                    "Wheelchair access\nQualified coaches\nAdapted equipment",
                   )}
                   className={inputClass}
                 />
@@ -371,10 +435,12 @@ export default function ClubDetailsEditor() {
                   rows={5}
                   maxLength={5000}
                   value={details.joiningInstructions}
-                  onChange={(e) => update("joiningInstructions", e.target.value)}
+                  onChange={(e) =>
+                    update("joiningInstructions", e.target.value)
+                  }
                   placeholder={text(
                     "Cách đăng ký, chi phí, vật dụng cần chuẩn bị và những điều cần lưu ý…",
-                    "Registration, fees, what to bring and anything else to know…"
+                    "Registration, fees, what to bring and anything else to know…",
                   )}
                   className={inputClass}
                 />
@@ -393,12 +459,15 @@ export default function ClubDetailsEditor() {
               <p className="mb-6 text-sm text-[var(--club-muted)]">
                 {text(
                   "Giới thiệu không gian tập luyện và hoạt động thực tế.",
-                  "Show the training space and everyday club life."
+                  "Show the training space and everyday club life.",
                 )}
               </p>
               <div className="grid gap-5 sm:grid-cols-2">
                 {details.gallery.map((url, index) => (
-                  <div key={index} className="rounded-xl border border-[var(--club-border)] p-3">
+                  <div
+                    key={index}
+                    className="rounded-xl border border-[var(--club-border)] p-3"
+                  >
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-sm">
                         {text("Ảnh", "Image")} {index + 1}
@@ -409,7 +478,7 @@ export default function ClubDetailsEditor() {
                         onClick={() =>
                           update(
                             "gallery",
-                            details.gallery.filter((_, i) => i !== index)
+                            details.gallery.filter((_, i) => i !== index),
                           )
                         }
                         className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-[var(--club-border)]"
@@ -423,7 +492,9 @@ export default function ClubDetailsEditor() {
                       onChange={(value) =>
                         update(
                           "gallery",
-                          details.gallery.map((item, i) => (i === index ? value : item))
+                          details.gallery.map((item, i) =>
+                            i === index ? value : item,
+                          ),
                         )
                       }
                     />
@@ -447,7 +518,7 @@ export default function ClubDetailsEditor() {
               <p className="mb-5 text-sm text-[var(--club-muted)]">
                 {text(
                   "Bổ sung các nút liên hệ trực tiếp bên cạnh thông tin cơ bản hiện có.",
-                  "Add direct contact buttons alongside existing contact information."
+                  "Add direct contact buttons alongside existing contact information.",
                 )}
               </p>
               <div className="grid gap-5 sm:grid-cols-2">
@@ -485,6 +556,11 @@ export default function ClubDetailsEditor() {
                   className={inputClass}
                 />
               </label>
+              <ClubContactsEditor
+                value={details.contacts}
+                onChange={(contacts) => update("contacts", contacts)}
+                language={language}
+              />
             </section>
           </fieldset>
           <aside className="space-y-5 lg:sticky lg:top-8">
@@ -525,11 +601,17 @@ export default function ClubDetailsEditor() {
               </p>
               <p className="my-4 text-4xl font-semibold tracking-[-1.2px]">
                 {completed}
-                <span className="text-xl text-[var(--club-on-contrast)]/50"> / 6</span>
+                <span className="text-xl text-[var(--club-on-contrast)]/50">
+                  {" "}
+                  / 6
+                </span>
               </p>
               <div
                 role="progressbar"
-                aria-label={text("Mức độ hoàn thiện nội dung", "Content completeness")}
+                aria-label={text(
+                  "Mức độ hoàn thiện nội dung",
+                  "Content completeness",
+                )}
                 aria-valuenow={completed}
                 aria-valuemin={0}
                 aria-valuemax={6}
@@ -543,7 +625,7 @@ export default function ClubDetailsEditor() {
               <p className="mt-4 text-sm leading-relaxed text-[var(--club-on-contrast)]/70">
                 {text(
                   "Thông điệp, ảnh bìa, câu chuyện, hướng dẫn, tiện ích và hình ảnh giúp mọi người hiểu hơn về CLB.",
-                  "A tagline, cover, story, joining guide, facilities and photos help people get to know your club."
+                  "A tagline, cover, story, joining guide, facilities and photos help people get to know your club.",
                 )}
               </p>
             </div>
@@ -551,7 +633,7 @@ export default function ClubDetailsEditor() {
               <Check size={15} className="shrink-0" />
               {text(
                 "Nội dung được hiển thị trên trang công khai sau khi lưu, với CLB đã được duyệt.",
-                "Saved content appears on the public page for approved clubs."
+                "Saved content appears on the public page for approved clubs.",
               )}
             </p>
           </aside>
@@ -562,9 +644,12 @@ export default function ClubDetailsEditor() {
               {dirty
                 ? text(
                     "Xem trước nội dung hiện tại · Chưa lưu thay đổi",
-                    "Preview of the current content · Save to publish changes"
+                    "Preview of the current content · Save to publish changes",
                   )
-                : text("Xem trước · Nội dung đã lưu", "Preview · Saved content")}
+                : text(
+                    "Xem trước · Nội dung đã lưu",
+                    "Preview · Saved content",
+                  )}
             </div>
             <ClubDetailView club={{ ...club, details }} preview />
           </div>

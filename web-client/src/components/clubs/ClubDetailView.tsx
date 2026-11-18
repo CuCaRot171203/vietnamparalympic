@@ -1,8 +1,10 @@
 "use client";
 
+import listStyles from "@/components/rich-text-lists.module.css";
+
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeRichText } from "@/lib/rich-text";
 import { ConfigProvider, Modal, theme } from "antd";
 import { useTheme } from "next-themes";
 import {
@@ -22,6 +24,7 @@ import { Link } from "@/i18n/routing";
 import { useLanguage } from "@/hooks/useTranslation";
 import {
   normalizeClubDetails,
+  clubContacts,
   type Organization,
   safeMediaUrl,
   splitClubSports,
@@ -98,6 +101,7 @@ export function ClubDetailView({
           ),
         ),
       ];
+  const coordinators = clubContacts(club);
   const phoneSource =
     d.phone || club.contactInfo?.match(/(?:\+84|0)[\d ().-]{8,20}/)?.[0] || "";
   const phone = /^[+\d\s().-]+$/.test(phoneSource)
@@ -164,13 +168,16 @@ export function ClubDetailView({
   };
   const ContactLinks = () => (
     <div className={styles.contactLinks}>
-      {phone && (
-        <a href={"tel:" + phone}>
-          <Phone size={17} aria-hidden="true" />
-          <span>{phoneSource}</span>
-          <ArrowRight size={16} aria-hidden="true" />
-        </a>
-      )}
+      {phone &&
+        !coordinators.some(
+          (person) => person.phone.replace(/[^+\d]/g, "") === phone,
+        ) && (
+          <a href={"tel:" + phone}>
+            <Phone size={17} aria-hidden="true" />
+            <span>{phoneSource}</span>
+            <ArrowRight size={16} aria-hidden="true" />
+          </a>
+        )}
       {email && (
         <a href={"mailto:" + email}>
           <Mail size={17} aria-hidden="true" />
@@ -307,17 +314,17 @@ export function ClubDetailView({
                 <h2>{vi ? "CÂU CHUYỆN CỦA CHÚNG TÔI" : "OUR STORY"}</h2>
                 {club.description && (
                   <div
-                    className={styles.description}
+                    className={`${styles.description} ${listStyles.lists}`}
                     dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(club.description),
+                      __html: sanitizeRichText(club.description),
                     }}
                   />
                 )}
                 {d.content && (
                   <div
-                    className={styles.richText}
+                    className={`${styles.richText} ${listStyles.lists}`}
                     dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(d.content),
+                      __html: sanitizeRichText(d.content),
                     }}
                   />
                 )}
@@ -502,20 +509,52 @@ export function ClubDetailView({
                     </span>
                   </button>
                 )}
-                <div className={styles.coordinator}>
-                  <span className={styles.avatar}>
-                    <Users size={19} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <h3>{vi ? "Người phụ trách CLB" : "Club coordinator"}</h3>
+                <section
+                  aria-label={vi ? "Người phụ trách CLB" : "Club coordinators"}
+                  className={styles.coordinators}
+                >
+                  <h3 className={styles.coordinatorHeading}>
+                    {vi ? "Người phụ trách CLB" : "Club coordinators"}
+                  </h3>
+                  {coordinators.length ? (
+                    coordinators.map((person, index) => (
+                      <div className={styles.coordinatorPerson} key={index}>
+                        <div className={styles.coordinator}>
+                          <span className={styles.avatar}>
+                            <Users size={19} aria-hidden="true" />
+                          </span>
+                          <div>
+                            <h4>{person.name}</h4>
+                            {person.role && <p>{person.role}</p>}
+                          </div>
+                        </div>
+                        {/^[+\d\s().-]+$/.test(person.phone) && (
+                          <a
+                            className={styles.personPhone}
+                            href={"tel:" + person.phone.replace(/[^+\d]/g, "")}
+                            aria-label={
+                              (vi ? "Gọi " : "Call ") +
+                              person.name +
+                              ": " +
+                              person.phone
+                            }
+                          >
+                            <Phone size={17} aria-hidden="true" />
+                            <span>{person.phone}</span>
+                            <ArrowRight size={16} aria-hidden="true" />
+                          </a>
+                        )}
+                      </div>
+                    ))
+                  ) : (
                     <p>
                       {club.contactInfo ||
                         (vi
                           ? "Thông tin đang được cập nhật"
                           : "Contact details coming soon")}
                     </p>
-                  </div>
-                </div>
+                  )}
+                </section>
                 <ContactLinks />
               </section>
               <section
@@ -590,7 +629,24 @@ export function ClubDetailView({
                 ? "Liên hệ người phụ trách để được tư vấn và xác nhận đăng ký tham gia."
                 : "Contact the coordinator for guidance and to confirm your registration."}
             </p>
-            {club.contactInfo && <p>{club.contactInfo}</p>}
+            {club.contactInfo && !coordinators.length && (
+              <p>{club.contactInfo}</p>
+            )}
+            {coordinators.map((person, index) => (
+              <div className={styles.coordinatorPerson} key={index}>
+                <strong>{person.name}</strong>
+                {person.role && <p>{person.role}</p>}
+                {/^[+\d\s().-]+$/.test(person.phone) && (
+                  <a
+                    className={styles.personPhone}
+                    href={"tel:" + person.phone.replace(/[^+\d]/g, "")}
+                  >
+                    <Phone size={17} aria-hidden="true" />
+                    {person.phone}
+                  </a>
+                )}
+              </div>
+            ))}
             {d.joiningInstructions && (
               <p className={styles.instructions}>{d.joiningInstructions}</p>
             )}

@@ -7,7 +7,16 @@ import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/hooks/useTranslation";
-import { Loader2, Plus, Edit2, Trash2, CheckCircle2, X, Upload, Globe } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Edit2,
+  Trash2,
+  CheckCircle2,
+  X,
+  Upload,
+  Globe,
+} from "lucide-react";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 import { MediaUpload } from "@/components/MediaUpload";
 import dynamic from "next/dynamic";
@@ -18,13 +27,29 @@ const TiptapEditor = dynamic(
     loading: () => (
       <div className="h-40 bg-gray-100 animate-pulse rounded-md border border-gray-200"></div>
     ),
-  }
+  },
 );
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { ConfigProvider, Drawer, Select as AntSelect, theme as antTheme } from "antd";
+import {
+  ConfigProvider,
+  Drawer,
+  Select as AntSelect,
+  theme as antTheme,
+} from "antd";
 import { useTheme } from "next-themes";
 import { Link } from "@/i18n/routing";
-import { clubSlug, joinClubSports, splitClubSports } from "@/lib/organizations";
+import {
+  clubContacts,
+  clubRegion,
+  CLUB_REGIONS,
+  type ClubRegion,
+  normalizeClubDetails,
+  type ClubContact,
+  clubSlug,
+  joinClubSports,
+  splitClubSports,
+} from "@/lib/organizations";
+import ClubContactsEditor from "@/components/clubs/ClubContactsEditor";
 import editorStyles from "@/components/clubs/club-editor.module.css";
 import { Input } from "@/components/ui/Input";
 import {
@@ -161,14 +186,18 @@ export default function AdminOrganizationsPage() {
     message: string;
     type: "danger" | "warning" | "info";
   }>({ isOpen: false, title: "", message: "", type: "danger" });
-  const [deleteOrganization, setDeleteOrganization] = useState<{ id: string; name: string } | null>(
-    null
-  );
-  const [approveOrganizationId, setApproveOrganizationId] = useState<string | null>(null);
+  const [deleteOrganization, setDeleteOrganization] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [approveOrganizationId, setApproveOrganizationId] = useState<
+    string | null
+  >(null);
 
   // Modal form states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingOrganization, setEditingOrganization] = useState<Organization | null>(null);
+  const [editingOrganization, setEditingOrganization] =
+    useState<Organization | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     sports: [] as string[],
@@ -176,6 +205,8 @@ export default function AdminOrganizationsPage() {
     schedule: "",
     suitableFor: "",
     contactInfo: "",
+    contacts: [] as ClubContact[],
+    region: "Miền Bắc" as ClubRegion,
     imageUrl: "",
     description: "",
   });
@@ -196,7 +227,10 @@ export default function AdminOrganizationsPage() {
   const [showColumnDropdown, setShowColumnDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" | null }>({
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: "asc" | "desc" | null;
+  }>({
     key: "",
     direction: null,
   });
@@ -246,7 +280,10 @@ export default function AdminOrganizationsPage() {
   // Click outside for column visibility dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowColumnDropdown(false);
       }
     }
@@ -298,6 +335,8 @@ export default function AdminOrganizationsPage() {
       schedule: "",
       suitableFor: "",
       contactInfo: "",
+      contacts: [] as ClubContact[],
+      region: "Miền Bắc" as ClubRegion,
       imageUrl: "",
       description: "",
     });
@@ -313,6 +352,8 @@ export default function AdminOrganizationsPage() {
       schedule: Organization.schedule || "",
       suitableFor: Organization.suitableFor || "",
       contactInfo: Organization.contactInfo || "",
+      contacts: clubContacts(Organization as any),
+      region: clubRegion(Organization as any),
       imageUrl: Organization.imageUrl || "",
       description: Organization.description || "",
     });
@@ -337,14 +378,19 @@ export default function AdminOrganizationsPage() {
         setFormData((prev) => ({ ...prev, imageUrl: data.url }));
       } else {
         const errData = await res.json().catch(() => ({}));
-        const defaultMsg = language === "vi" ? "Tải ảnh lên thất bại." : "Failed to upload image.";
+        const defaultMsg =
+          language === "vi"
+            ? "Tải ảnh lên thất bại."
+            : "Failed to upload image.";
         const msg = errData.message || defaultMsg;
         toast.error(typeof msg === "object" ? msg[0] : msg);
       }
     } catch (err) {
       console.error("Upload error:", err);
       toast.error(
-        language === "vi" ? "Lỗi kết nối khi tải ảnh." : "Connection error when uploading image."
+        language === "vi"
+          ? "Lỗi kết nối khi tải ảnh."
+          : "Connection error when uploading image.",
       );
     } finally {
       setUploading(false);
@@ -357,7 +403,7 @@ export default function AdminOrganizationsPage() {
       toast.error(
         language === "vi"
           ? "Vui lòng chọn ít nhất một môn thể thao."
-          : "Please select at least one sport."
+          : "Please select at least one sport.",
       );
       return;
     }
@@ -385,6 +431,11 @@ export default function AdminOrganizationsPage() {
           schedule: formData.schedule,
           suitableFor: formData.suitableFor,
           contactInfo: formData.contactInfo,
+          details: {
+            ...normalizeClubDetails(editingOrganization?.details as any),
+            contacts: formData.contacts,
+            region: formData.region,
+          },
           imageUrl: formData.imageUrl,
           description: formData.description,
         }),
@@ -395,7 +446,9 @@ export default function AdminOrganizationsPage() {
         const savedOrganization = raw?.data ?? raw;
         if (isEdit) {
           setOrganizations((prev) =>
-            prev.map((c) => (c.id === savedOrganization.id ? savedOrganization : c))
+            prev.map((c) =>
+              c.id === savedOrganization.id ? savedOrganization : c,
+            ),
           );
         } else {
           setOrganizations((prev) => [savedOrganization, ...prev]);
@@ -413,17 +466,21 @@ export default function AdminOrganizationsPage() {
                 label: language === "vi" ? "Thêm chi tiết" : "Add details",
                 onClick: () =>
                   router.push(
-                    "/" + language + "/admin/organizations/" + savedOrganization.id + "/details"
+                    "/" +
+                      language +
+                      "/admin/organizations/" +
+                      savedOrganization.id +
+                      "/details",
                   ),
               },
-            }
+            },
           );
       } else {
         const errData = await res.json().catch(() => ({}));
         toast.error(
           Array.isArray(errData.message)
             ? errData.message.join(" · ")
-            : errData.message || tStr.alertError
+            : errData.message || tStr.alertError,
         );
       }
     } catch (err) {
@@ -438,17 +495,27 @@ export default function AdminOrganizationsPage() {
     if (!approveOrganizationId) return;
     setActionLoading(approveOrganizationId);
     try {
-      const res = await apiClient.request(`/organizations/${approveOrganizationId}/approve`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${(session as any)?.accessToken}` },
-      });
+      const res = await apiClient.request(
+        `/organizations/${approveOrganizationId}/approve`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${(session as any)?.accessToken}` },
+        },
+      );
       if (res.ok) {
         toast.success(tStr.alertApproveSuccess);
         setOrganizations((prev) =>
-          prev.map((c) => (c.id === approveOrganizationId ? { ...c, isApproved: true } : c))
+          prev.map((c) =>
+            c.id === approveOrganizationId ? { ...c, isApproved: true } : c,
+          ),
         );
       } else {
-        setAlertInfo({ isOpen: true, title: "Lỗi", message: tStr.alertError, type: "danger" });
+        setAlertInfo({
+          isOpen: true,
+          title: "Lỗi",
+          message: tStr.alertError,
+          type: "danger",
+        });
       }
     } catch (err) {
       console.error(err);
@@ -469,15 +536,25 @@ export default function AdminOrganizationsPage() {
     setActionLoading(deleteOrganization.id);
 
     try {
-      const res = await apiClient.request(`/organizations/${deleteOrganization.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${(session as any)?.accessToken}` },
-      });
+      const res = await apiClient.request(
+        `/organizations/${deleteOrganization.id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${(session as any)?.accessToken}` },
+        },
+      );
       if (res.ok) {
         toast.success(tStr.alertDeleteSuccess);
-        setOrganizations((prev) => prev.filter((c) => c.id !== deleteOrganization.id));
+        setOrganizations((prev) =>
+          prev.filter((c) => c.id !== deleteOrganization.id),
+        );
       } else {
-        setAlertInfo({ isOpen: true, title: "Lỗi", message: tStr.alertError, type: "danger" });
+        setAlertInfo({
+          isOpen: true,
+          title: "Lỗi",
+          message: tStr.alertError,
+          type: "danger",
+        });
       }
     } catch (err) {
       console.error(err);
@@ -528,7 +605,7 @@ export default function AdminOrganizationsPage() {
   const lastActivity = (organization: Organization) =>
     Math.max(
       Date.parse(organization.updatedAt || "") || 0,
-      Date.parse(organization.createdAt) || 0
+      Date.parse(organization.createdAt) || 0,
     );
   const sortedOrganizations = [...filteredOrganizations].sort((a, b) => {
     if (!sortConfig.key || !sortConfig.direction) {
@@ -548,7 +625,10 @@ export default function AdminOrganizationsPage() {
   const totalPages = Math.ceil(totalItems / pageSize) || 1;
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalItems);
-  const paginatedOrganizations = sortedOrganizations.slice(startIndex, endIndex);
+  const paginatedOrganizations = sortedOrganizations.slice(
+    startIndex,
+    endIndex,
+  );
 
   const columnsList = [
     { key: "sport", label: tStr.thSport },
@@ -566,7 +646,8 @@ export default function AdminOrganizationsPage() {
       sortable: true,
       render: (Organization) => {
         const clubSports = splitClubSports(Organization.sport);
-        if (clubSports.length === 0) return <span className="text-xs text-slate-400">—</span>;
+        if (clubSports.length === 0)
+          return <span className="text-xs text-slate-400">—</span>;
         return (
           <span className="flex flex-wrap gap-1.5">
             {clubSports.map((clubSport) => (
@@ -593,7 +674,12 @@ export default function AdminOrganizationsPage() {
     },
     { key: "location", title: tStr.thLocation, sortable: true },
     { key: "schedule", title: tStr.thSchedule, sortable: false },
-    { key: "contact", title: tStr.thContact, sortable: false, render: (c) => c.contactInfo },
+    {
+      key: "contact",
+      title: tStr.thContact,
+      sortable: false,
+      render: (c) => c.contactInfo,
+    },
     {
       key: "status",
       title: tStr.thStatus,
@@ -615,7 +701,10 @@ export default function AdminOrganizationsPage() {
       key: "actions",
       title: tStr.thActions,
       render: (Organization) => (
-        <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="flex justify-end gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
           {!Organization.isApproved && (
             <button
               onClick={() => setApproveOrganizationId(Organization.id)}
@@ -647,7 +736,9 @@ export default function AdminOrganizationsPage() {
               href={"/clubs/detail/" + clubSlug(Organization)}
               target="_blank"
               className="inline-flex min-h-9 items-center px-2 text-slate-500 hover:text-slate-900"
-              aria-label={language === "vi" ? "Xem trang câu lạc bộ" : "View club page"}
+              aria-label={
+                language === "vi" ? "Xem trang câu lạc bộ" : "View club page"
+              }
             >
               <Globe size={16} />
             </Link>
@@ -660,7 +751,12 @@ export default function AdminOrganizationsPage() {
             <Edit2 size={16} />
           </button>
           <button
-            onClick={() => setDeleteOrganization({ id: Organization.id, name: Organization.name })}
+            onClick={() =>
+              setDeleteOrganization({
+                id: Organization.id,
+                name: Organization.name,
+              })
+            }
             disabled={actionLoading === Organization.id}
             className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/30 text-slate-400 hover:text-rose-600 rounded-lg transition disabled:opacity-55 border-none bg-transparent cursor-pointer"
             title={Organization.isApproved ? "Xóa" : tStr.btnReject}
@@ -677,7 +773,10 @@ export default function AdminOrganizationsPage() {
   ];
 
   const filterNodes = (
-    <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value)}>
+    <Select
+      value={statusFilter}
+      onValueChange={(value: string) => setStatusFilter(value)}
+    >
       <SelectTrigger className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 focus:ring-2 focus:ring-[color:var(--focus-ring)] outline-none text-sm transition cursor-pointer text-slate-700 dark:text-slate-300 font-medium">
         <SelectValue placeholder={tStr.statusFilterAll} />
       </SelectTrigger>
@@ -714,7 +813,9 @@ export default function AdminOrganizationsPage() {
       {/* Right-side editor, scoped to the club design palette. */}
       <ConfigProvider
         theme={{
-          algorithm: isDark ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
+          algorithm: isDark
+            ? antTheme.darkAlgorithm
+            : antTheme.defaultAlgorithm,
           token: {
             colorPrimary: isDark ? "#f7f4ed" : "#1c1c1c",
             colorBgElevated: isDark ? "#1b1b18" : "#f7f4ed",
@@ -727,7 +828,9 @@ export default function AdminOrganizationsPage() {
       >
         <Drawer
           className={editorStyles.surface}
-          title={editingOrganization ? tStr.editOrganization : tStr.newOrganization}
+          title={
+            editingOrganization ? tStr.editOrganization : tStr.newOrganization
+          }
           placement="right"
           size="min(100vw, 680px)"
           open={isModalOpen}
@@ -738,7 +841,9 @@ export default function AdminOrganizationsPage() {
           keyboard={!formLoading}
           styles={{
             body: { padding: 0 },
-            header: { borderBottom: `1px solid ${isDark ? "#3b3b34" : "#eceae4"}` },
+            header: {
+              borderBottom: `1px solid ${isDark ? "#3b3b34" : "#eceae4"}`,
+            },
           }}
           footer={
             <div className="flex justify-end gap-3">
@@ -761,26 +866,50 @@ export default function AdminOrganizationsPage() {
             </div>
           }
         >
-          <form id="organization-basic-form" onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form
+            id="organization-basic-form"
+            onSubmit={handleSubmit}
+            className="p-6 space-y-6"
+          >
             <p className="text-sm leading-relaxed text-[var(--club-muted)]">
               {language === "vi"
                 ? "Thông tin cơ bản giúp mọi người tìm thấy và kết nối với câu lạc bộ. Sau khi lưu, chọn Thêm chi tiết để xây dựng trang giới thiệu riêng."
                 : "Basic information helps people discover your club. After saving, select Add details to build its introduction page."}
             </p>
+            <div className="space-y-1">
+              <label
+                htmlFor="club-region"
+                className="block text-xs font-bold text-slate-600 dark:text-slate-300"
+              >
+                {language === "vi" ? "Khu vực" : "Region"}
+              </label>
+              <AntSelect
+                id="club-region"
+                style={{ width: "100%" }}
+                value={formData.region}
+                options={CLUB_REGIONS.map((value) => ({ value, label: value }))}
+                onChange={(region: ClubRegion) =>
+                  setFormData((previous) => ({ ...previous, region }))
+                }
+              />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label
                   htmlFor="cName"
                   className="text-xs font-bold text-slate-600 dark:text-slate-300 block"
                 >
-                  {tStr.OrganizationNameLabel} <span className="text-red-500">*</span>
+                  {tStr.OrganizationNameLabel}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="text"
                   id="cName"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                 />
               </div>
 
@@ -795,13 +924,21 @@ export default function AdminOrganizationsPage() {
                   id="cSport"
                   mode="multiple"
                   value={formData.sports}
-                  onChange={(value) => setFormData({ ...formData, sports: value })}
-                  placeholder={language === "vi" ? "-- Chọn bộ môn --" : "-- Select Sport --"}
+                  onChange={(value) =>
+                    setFormData({ ...formData, sports: value })
+                  }
+                  placeholder={
+                    language === "vi"
+                      ? "-- Chọn bộ môn --"
+                      : "-- Select Sport --"
+                  }
                   options={sportOptions}
                   maxTagCount="responsive"
                   style={{ width: "100%" }}
                 />
-                <p className="text-xs text-[var(--club-muted)]">{tStr.sportHint}</p>
+                <p className="text-xs text-[var(--club-muted)]">
+                  {tStr.sportHint}
+                </p>
               </div>
             </div>
 
@@ -818,7 +955,9 @@ export default function AdminOrganizationsPage() {
                   id="cLocation"
                   required
                   value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
                 />
               </div>
 
@@ -834,7 +973,9 @@ export default function AdminOrganizationsPage() {
                   id="cSchedule"
                   required
                   value={formData.schedule}
-                  onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, schedule: e.target.value })
+                  }
                   placeholder="VD: T2-T4-T6, 17:00 - 19:00"
                 />
               </div>
@@ -846,14 +987,17 @@ export default function AdminOrganizationsPage() {
                   htmlFor="cSuitableFor"
                   className="text-xs font-bold text-slate-600 dark:text-slate-300 block"
                 >
-                  {tStr.suitableForLabel} <span className="text-red-500">*</span>
+                  {tStr.suitableForLabel}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="text"
                   id="cSuitableFor"
                   required
                   value={formData.suitableFor}
-                  onChange={(e) => setFormData({ ...formData, suitableFor: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, suitableFor: e.target.value })
+                  }
                   placeholder="VD: Người khuyết tật vận động..."
                 />
               </div>
@@ -863,18 +1007,29 @@ export default function AdminOrganizationsPage() {
                   htmlFor="cContact"
                   className="text-xs font-bold text-slate-600 dark:text-slate-300 block"
                 >
-                  {tStr.contactInfoLabel} <span className="text-red-500">*</span>
+                  {tStr.contactInfoLabel}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="text"
                   id="cContact"
-                  required
+                  required={!formData.contacts.length}
                   value={formData.contactInfo}
-                  onChange={(e) => setFormData({ ...formData, contactInfo: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, contactInfo: e.target.value })
+                  }
                   placeholder="SĐT hoặc Email liên hệ"
                 />
               </div>
             </div>
+
+            <ClubContactsEditor
+              value={formData.contacts}
+              onChange={(contacts) =>
+                setFormData((previous) => ({ ...previous, contacts }))
+              }
+              language={language}
+            />
 
             {/* Organization Image File Upload */}
             <div className="space-y-1">
@@ -886,7 +1041,9 @@ export default function AdminOrganizationsPage() {
                 onChange={(url) => setFormData({ ...formData, imageUrl: url })}
                 type="image"
                 placeholder={
-                  language === "vi" ? "Tải lên hình ảnh câu lạc bộ" : "Upload Organization image"
+                  language === "vi"
+                    ? "Tải lên hình ảnh câu lạc bộ"
+                    : "Upload Organization image"
                 }
               />
             </div>
@@ -900,7 +1057,9 @@ export default function AdminOrganizationsPage() {
               </label>
               <TiptapEditor
                 value={formData.description}
-                onChange={(val) => setFormData({ ...formData, description: val })}
+                onChange={(val) =>
+                  setFormData({ ...formData, description: val })
+                }
               />
             </div>
           </form>

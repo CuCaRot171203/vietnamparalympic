@@ -66,15 +66,6 @@ type Tournament = {
   endDate?: string;
   bannerUrl?: string;
 };
-type Ranking = {
-  id: string;
-  rank: number;
-  points: number;
-  athlete?: { userId?: string; user?: { id: string; fullName?: string } };
-  team?: { name: string };
-  event?: { name: string };
-  tournament?: { name: string };
-};
 type Page<T> = { data: T[]; meta: { total: number; totalPages: number } };
 type Read<T> = { data: T | null; status: number };
 type Props = {
@@ -165,16 +156,25 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
     Number.isSafeInteger(Number(query.page)) ? Number(query.page) : 1,
   );
   const pageSize = 6;
-  const [allSports, newsData, clubData, rankingData, tournamentData] =
-    await Promise.all([
-      read<Sport[]>("/sports"),
-      read<Page<Post>>(
-        `/posts/paginated?${new URLSearchParams({ search: sport.nameVi, page: String(page), limit: String(pageSize) })}`,
-      ),
-      read<Club[]>(`/organizations?sport=${encodeURIComponent(sport.nameVi)}`),
-      read<Ranking[]>(`/rankings/sport/${sport.id}`),
-      read<Page<Tournament>>(`/tournaments?sportId=${sport.id}&limit=3`),
-    ]);
+  const now = new Date();
+  const [allSports, newsData, clubData, tournamentData] = await Promise.all([
+    read<Sport[]>("/sports"),
+    read<Page<Post>>(
+      `/posts/paginated?${new URLSearchParams({ search: sport.nameVi, page: String(page), limit: String(pageSize) })}`,
+    ),
+    read<Club[]>(`/organizations?sport=${encodeURIComponent(sport.nameVi)}`),
+    read<Page<Tournament> | Tournament[]>(
+      "/tournaments?" +
+        new URLSearchParams({
+          sportId: sport.id,
+          status: "UPCOMING",
+          startDate: now.toISOString(),
+          page: "1",
+          limit: "3",
+        }).toString(),
+      true,
+    ),
+  ]);
   const posts = newsData.data?.data || [];
   const total = newsData.data?.meta.total ?? posts.length;
   const last = Math.max(1, newsData.data?.meta.totalPages || 1);
@@ -183,10 +183,18 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
       `/${locale}/sports/${slug}${last > 1 ? `?page=${last}` : ""}#sport-news`,
     );
   const clubs = Array.isArray(clubData.data) ? clubData.data : [];
-  const rankings = Array.isArray(rankingData.data)
-    ? rankingData.data.slice(0, 5)
-    : [];
-  const tournaments = tournamentData.data?.data || [];
+  const tournamentItems = Array.isArray(tournamentData.data)
+    ? tournamentData.data
+    : tournamentData.data?.data || [];
+  const tournaments = tournamentItems
+    .filter(
+      (item) =>
+        item.status === "UPCOMING" &&
+        item.startDate &&
+        Date.parse(item.startDate) >= now.getTime(),
+    )
+    .sort((a, b) => Date.parse(a.startDate!) - Date.parse(b.startDate!))
+    .slice(0, 3);
   const background = sportThumbnailSource(sport.thumbnail, slug);
   const date = (value?: string, time = false) =>
     value && !Number.isNaN(Date.parse(value))
@@ -318,13 +326,18 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
         >
           {[
             ["sport-intro", vi ? "Giới thiệu" : "Overview"],
+            [
+              "sport-classifications",
+              vi ? "Hạng thương tật" : "Classifications",
+              `/${locale}/sports?${new URLSearchParams({ tab: "classes", sportId: sport.id })}#sports-directory`,
+            ],
             ["sport-clubs", vi ? "Câu lạc bộ" : "Clubs"],
             ["sport-news", vi ? "Tin tức" : "News"],
-            ["sport-rankings", vi ? "Xếp hạng" : "Rankings"],
-          ].map(([id, label]) => (
-            <a href={`#${id}`} key={id}>
+            ["sport-events", vi ? "Sự kiện sắp tới" : "Upcoming events"],
+          ].map(([id, label, href]) => (
+            <Link href={href || `#${id}`} key={id}>
               {label}
-            </a>
+            </Link>
           ))}
         </nav>
         <section
@@ -546,131 +559,49 @@ export default async function SportDetailPage({ params, searchParams }: Props) {
             </>
           )}
         </section>
-        <div className={styles.competitionGrid}>
-          <section
-            id="sport-rankings"
-            className={styles.section}
-            aria-labelledby="rankings-heading"
-          >
-            {heading(
-              "rankings-heading",
-              vi ? "Dấu ấn thành tích" : "Performance highlights",
-              vi ? "Bảng xếp hạng" : "Rankings",
-              `/${locale}/rankings`,
-              vi ? "Xem tất cả" : "View all",
-            )}
-            <p className={styles.sectionDescription}>
-              {vi
-                ? "Thứ hạng theo từng nội dung và giải đấu."
-                : "Standings within each event and tournament."}
-            </p>
-            {!rankings.length ? (
-              empty(
-                !rankingData.data,
-                vi
-                  ? "Chưa có dữ liệu xếp hạng cho bộ môn này."
-                  : "Rankings are not available for this sport yet.",
-              )
-            ) : (
-              <div className={styles.rankingTable}>
-                <table>
-                  <caption className={styles.srOnly}>
-                    {vi ? `Bảng xếp hạng ${name}` : `${name} standings`}
-                  </caption>
-                  <thead>
-                    <tr>
-                      <th>{vi ? "Hạng" : "Rank"}</th>
-                      <th>{vi ? "Vận động viên / Đội" : "Athlete / Team"}</th>
-                      <th>{vi ? "Điểm" : "Points"}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rankings.map((row) => {
-                      const userId =
-                        row.athlete?.userId || row.athlete?.user?.id;
-                      const athlete =
-                        row.athlete?.user?.fullName || row.team?.name || "—";
-                      return (
-                        <tr key={row.id}>
-                          <td>
-                            <span className={styles.rank} data-rank={row.rank}>
-                              {row.rank}
-                            </span>
-                          </td>
-                          <td>
-                            {userId ? (
-                              <Link href={`/${locale}/users/${userId}`}>
-                                {athlete}
-                              </Link>
-                            ) : (
-                              athlete
-                            )}
-                            <small>
-                              {[row.event?.name, row.tournament?.name]
-                                .filter(Boolean)
-                                .join(" · ")}
-                            </small>
-                          </td>
-                          <td>
-                            {Number.isFinite(row.points)
-                              ? row.points.toLocaleString(
-                                  vi ? "vi-VN" : "en-GB",
-                                )
-                              : "—"}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-          <section
-            className={styles.section}
-            aria-labelledby="tournaments-heading"
-          >
-            {heading(
-              "tournaments-heading",
-              vi ? "Sân chơi & cơ hội" : "Places to compete",
-              vi ? "Giải đấu" : "Tournaments",
-              `/${locale}/matches`,
-              vi ? "Khám phá thêm" : "Explore more",
-            )}
-            {!tournaments.length ? (
-              empty(
-                !tournamentData.data,
-                vi
-                  ? "Các giải đấu liên quan đang được cập nhật."
-                  : "Related tournaments will appear here.",
-              )
-            ) : (
-              <div className={styles.tournaments}>
-                {tournaments.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={`/${locale}/tournaments/${item.id}`}
-                  >
-                    <span className={styles.tournamentIcon}>
-                      <Trophy size={20} strokeWidth={1.5} />
+        <section
+          id="sport-events"
+          className={styles.section}
+          aria-labelledby="events-heading"
+        >
+          {heading(
+            "events-heading",
+            vi ? "Hẹn gặp tại sự kiện" : "Meet at the next event",
+            vi ? "Sự kiện sắp tới" : "Upcoming events",
+            `/${locale}/tournaments`,
+            vi ? "Khám phá thêm" : "Explore more",
+          )}
+          {!tournaments.length ? (
+            empty(
+              !tournamentData.data,
+              vi
+                ? "Các sự kiện sắp tới của bộ môn đang được cập nhật."
+                : "Upcoming events for this sport will appear here.",
+            )
+          ) : (
+            <div className={styles.tournaments}>
+              {tournaments.map((item) => (
+                <Link key={item.id} href={`/${locale}/tournaments/${item.id}`}>
+                  <span className={styles.tournamentIcon}>
+                    <CalendarDays size={20} strokeWidth={1.5} />
+                  </span>
+                  <div>
+                    <span className={styles.status} data-status={item.status}>
+                      {status(item.status)}
                     </span>
-                    <div>
-                      <span className={styles.status} data-status={item.status}>
-                        {status(item.status)}
-                      </span>
-                      <h3>{item.name}</h3>
-                      <p>
-                        {date(item.startDate)} — {date(item.endDate)}
-                      </p>
-                      {item.location && <p>{item.location}</p>}
-                    </div>
-                    <ArrowUpRight size={16} />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
+                    <h3>{item.name}</h3>
+                    <p>
+                      {date(item.startDate)}
+                      {item.endDate ? ` — ${date(item.endDate)}` : ""}
+                    </p>
+                    {item.location && <p>{item.location}</p>}
+                  </div>
+                  <ArrowUpRight size={16} />
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
         {!!allSports.data?.length && (
           <div className={styles.otherSports}>
             <NewsSportsRail

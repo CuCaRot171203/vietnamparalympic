@@ -16,7 +16,10 @@ const calvera = localFont({
   display: "swap",
   variable: "--font-directory-calvera",
 });
-type Props = { params: Promise<{ locale: string }> };
+type Props = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ tab?: string; sportId?: string; q?: string }>;
+};
 export async function generateMetadata({ params }: Props) {
   const { locale } = await params;
   return {
@@ -33,8 +36,8 @@ async function read<T>(path: string): Promise<T[] | null> {
     return null;
   }
 }
-export default async function SportsPage({ params }: Props) {
-  const { locale } = await params;
+export default async function SportsPage({ params, searchParams }: Props) {
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
   const vi = locale === "vi";
   const [sports, classifications] = await Promise.all([
     read<DirectorySport>("/sports"),
@@ -95,11 +98,12 @@ export default async function SportsPage({ params }: Props) {
             <div className={styles.heroCollage}>
               <figure className={styles.mainPhoto}>
                 <Image
-                  src="/back_subjects/bong_ro.webp"
+                  src="/back_subjects/dien_kinh.jpg"
+                  style={{ objectPosition: "62% center" }}
                   alt={
                     vi
-                      ? "Vận động viên bóng rổ xe lăn thi đấu"
-                      : "Wheelchair basketball athletes in competition"
+                      ? "Vận động viên Việt Nam và người đồng hành tại sân điền kinh"
+                      : "Vietnamese athletes and a companion at the athletics track"
                   }
                   fill
                   priority
@@ -113,11 +117,11 @@ export default async function SportsPage({ params }: Props) {
               </figure>
               <figure className={styles.smallPhoto}>
                 <Image
-                  src="/back_subjects/dien_kinh.jpg"
+                  src="/CLUB/CLUB_01.jpg"
                   alt={
                     vi
-                      ? "Vận động viên điền kinh trên đường đua"
-                      : "Athletes on the track"
+                      ? "Cộng đồng câu lạc bộ thể thao người khuyết tật Việt Nam"
+                      : "Vietnam’s community of sports clubs for people with disabilities"
                   }
                   fill
                   sizes="(max-width:767px) 40vw, 20vw"
@@ -142,6 +146,14 @@ export default async function SportsPage({ params }: Props) {
         </div>
       </section>
       <SportsDirectory
+        key={[query.tab, query.sportId, query.q].join(":")}
+        initialTab={query.tab === "classes" ? "classes" : "sports"}
+        initialSportId={
+          (sports || []).some((s) => s.id === query.sportId)
+            ? query.sportId
+            : ""
+        }
+        initialQuery={query.q?.slice(0, 1500) || ""}
         locale={locale}
         sports={sports ?? []}
         classifications={(classifications ?? []).map(

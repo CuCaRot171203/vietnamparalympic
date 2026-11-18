@@ -60,7 +60,7 @@
   text-underline-offset: 4px;
 }
 .header {
-  max-width: 1060px;
+  max-width: none;
   margin: 44px auto 36px;
 }
 .eyebrow {
@@ -99,9 +99,9 @@
 }
 .header h1 {
   font-family: var(--font-home-neusharp), sans-serif;
-  font-size: clamp(60px, 6vw, 84px);
+  font-size: 36px;
   font-weight: 700;
-  line-height: 1.13;
+  line-height: 1.35;
   text-transform: uppercase;
   text-wrap: balance;
   overflow-wrap: anywhere;
@@ -558,8 +558,8 @@
     margin: 30px 0 26px;
   }
   .header h1 {
-    font-size: clamp(44px, 8vw, 60px);
-    line-height: 1.18;
+    font-size: 36px;
+    line-height: 1.35;
     margin: 20px 0;
   }
   .excerpt {
@@ -625,7 +625,7 @@
       100% 100%;
   }
   .header h1 {
-    font-size: 44px;
+    font-size: 36px;
   }
   .related {
     grid-template-columns: 88px minmax(0, 1fr);

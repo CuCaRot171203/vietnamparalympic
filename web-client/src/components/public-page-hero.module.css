@@ -90,6 +90,7 @@
   text-wrap: balance;
 }
 .description {
+  white-space: pre-line;
   max-width: 580px;
   color: #e4d0c8;
   font-size: 14px;

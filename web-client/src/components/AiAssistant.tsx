@@ -8,6 +8,7 @@ import {
   type AssistantResponse,
 } from "@/lib/assistant-content";
 import Image from "next/image";
+import { apiClient } from "@/lib/api-client";
 import styles from "./ai-assistant.module.css";
 import floating from "./floating-controls.module.css";
 import { useLanguage } from "@/hooks/useTranslation";
@@ -23,12 +24,12 @@ interface Message {
 const translations: Record<string, Record<string, string>> = {
   vi: {
     tabChatbot: "Trợ lý AI",
-    tabChatbotDesc: "Vietnam ParaSports · Hướng dẫn tự động",
+    tabChatbotDesc: "Vietnam ParaSports · Tra cứu dữ liệu web",
     quickPromptHeading: "Bắt đầu với gợi ý",
     chatbotInputPlaceholder: "Nhập câu hỏi của bạn tại đây...",
     chatbotSendBtn: "Gửi tin nhắn",
     botGreeting:
-      "Xin chào! Tôi là trợ lý hướng dẫn của Vietnam ParaSports. Bạn có thể hỏi về bộ môn, câu lạc bộ, tin tức hoặc học liệu Creator Lab. Tôi cũng có các mẫu caption và kịch bản để bạn kể câu chuyện thể thao của mình.",
+      "Xin chào! Tôi giúp bạn tra cứu bộ môn theo nhu cầu vận động, hạng thương tật tham khảo, câu lạc bộ theo địa điểm và các sự kiện từ dữ liệu đang công bố trên Vietnam ParaSports. Bạn muốn tìm hiểu điều gì?",
     botGreetingTime: "Vừa xong",
     botResponseTime: "Vừa xong",
     botTyping: "Trợ lý AI đang soạn câu trả lời...",
@@ -36,12 +37,12 @@ const translations: Record<string, Record<string, string>> = {
   },
   en: {
     tabChatbot: "AI Assistant",
-    tabChatbotDesc: "Vietnam ParaSports · Automated guidance",
+    tabChatbotDesc: "Vietnam ParaSports · Website data lookup",
     quickPromptHeading: "Start with a suggestion",
     chatbotInputPlaceholder: "Type your question here...",
     chatbotSendBtn: "Send Message",
     botGreeting:
-      "Hello! I’m your Vietnam ParaSports guide. Explore sports, clubs, news and Creator Lab resources, or start with a caption draft or video outline for your sporting story.",
+      "Hello! I can look up sports, reference classifications, clubs by location and published events using Vietnam ParaSports website data. What would you like to explore?",
     botGreetingTime: "Just now",
     botResponseTime: "Just now",
     botTyping: "AI Assistant is typing...",
@@ -56,8 +57,8 @@ function getPersonalizedGreeting(
 ): string {
   if (!session?.user?.name) return defaultGreeting;
   return language === "vi"
-    ? `Xin chào ${session.user.name}! Tôi là trợ lý hướng dẫn của Vietnam ParaSports. Tôi giúp bạn khám phá bộ môn, câu lạc bộ, tin tức và Creator Lab, đồng thời gợi ý caption và kịch bản kể chuyện thể thao. Bạn muốn bắt đầu từ đâu?`
-    : `Hello ${session.user.name}! I’m your Vietnam ParaSports guide. I can help you explore sports, clubs, news and Creator Lab, and suggest captions and sporting story outlines. Where would you like to start?`;
+    ? `Xin chào ${session.user.name}! Tôi là trợ lý hướng dẫn của Vietnam ParaSports. Tôi giúp bạn tra cứu bộ môn, hạng thương tật tham khảo, câu lạc bộ theo địa điểm và sự kiện từ dữ liệu đang công bố trên web. Bạn muốn bắt đầu từ đâu?`
+    : `Hello ${session.user.name}! I’m your Vietnam ParaSports guide. I can look up sports, reference classifications, clubs by location and published events. Where would you like to start?`;
 }
 
 const ASSISTANT_MARK = "/assets/brand/vietnam-parasports-2026-mark.png";
@@ -75,31 +76,30 @@ export default function AiAssistant() {
   const inputRef = useRef<HTMLInputElement>(null);
   const chatBodyRef = useRef<HTMLDivElement>(null);
   const lastMessageRef = useRef<HTMLDivElement>(null);
-  const responseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestRef = useRef<AbortController | null>(null);
   const sessionName = session?.user?.name;
   const sessionEmail = session?.user?.email;
   const sessionRole = (session?.user as any)?.role;
 
   const quickPrompts = vi
     ? [
-        "Viết caption giới thiệu vận động viên.",
-        "Tìm câu lạc bộ để tập luyện.",
-        "Tìm hiểu bộ môn và hạng thương tật.",
-        "Khám phá khóa học Creator Lab.",
-        "Gợi ý kịch bản video tập luyện.",
-        "Xem tin tức và sự kiện ParaSports.",
+        "Tôi khiếm thị, có thể tìm hiểu môn nào?",
+        "Tìm CLB Boccia ở Đà Nẵng",
+        "Hạng T11 là gì?",
+        "Tôi bị hạn chế vận động hai chân, tìm hiểu hạng nào?",
+        "Có sự kiện thể thao nào sắp diễn ra?",
       ]
     : [
-        "Write an athlete introduction caption.",
-        "Find a club to train with.",
-        "Explore sports and classifications.",
-        "Explore Creator Lab courses.",
-        "Suggest a training video script.",
-        "Find ParaSports news and events.",
+        "Which sports can someone with a visual impairment explore?",
+        "Find a Boccia club in Da Nang",
+        "What is class T11?",
+        "Which classifications relate to limited leg movement?",
+        "What sports events are coming up?",
       ];
 
   useEffect(() => {
-    if (responseTimer.current) clearTimeout(responseTimer.current);
+    requestRef.current?.abort();
+    requestRef.current = null;
     setBotLoading(false);
     setMessages([
       {
@@ -109,7 +109,8 @@ export default function AiAssistant() {
       },
     ]);
     return () => {
-      if (responseTimer.current) clearTimeout(responseTimer.current);
+      requestRef.current?.abort();
+      requestRef.current = null;
     };
     // Reset on an actual language/account change, rather than every session refresh.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,7 +156,7 @@ export default function AiAssistant() {
     setIsOpen(false);
     launcherRef.current?.focus({ preventScroll: true });
   };
-  const handleSendMessage = (textToSend: string) => {
+  const handleSendMessage = async (textToSend: string) => {
     const text = textToSend.trim();
     if (!text || botLoading) return;
     const time = () =>
@@ -169,20 +170,74 @@ export default function AiAssistant() {
     ]);
     setUserInput("");
     setBotLoading(true);
-    responseTimer.current = setTimeout(() => {
+    const controller = new AbortController();
+    requestRef.current = controller;
+    const previousQuestion = messages
+      .filter((m) => m.sender === "user")
+      .at(-1)?.text;
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      // Keep Creator Lab writing tools; factual lookups always use current public data.
+      const writing =
+        /caption|kịch bản|kich ban|capcut|creator lab|video script|self-intro/i.test(
+          text,
+        );
+      let response: AssistantResponse;
+      if (writing) response = getAssistantResponse(text, language);
+      else {
+        const result = await apiClient.request("/assistant/ask", {
+          method: "POST",
+          signal: controller.signal,
+          body: JSON.stringify({
+            question: text,
+            language: vi ? "vi" : "en",
+            previousQuestion,
+          }),
+        });
+        if (!result.ok) throw new Error("Lookup unavailable");
+        response = await result.json();
+        if (!response || typeof response.title !== "string")
+          throw new Error("Invalid answer");
+      }
+      if (requestRef.current !== controller) return;
+      setMessages((previous) => [
+        ...previous,
+        { sender: "bot", text: "", response, time: time() },
+      ]);
+    } catch {
+      if (requestRef.current !== controller) return;
       setMessages((previous) => [
         ...previous,
         {
           sender: "bot",
           text: "",
-          response: getAssistantResponse(text, language),
           time: time(),
+          response: {
+            title: vi ? "Chưa thể tra cứu dữ liệu" : "Lookup is unavailable",
+            intro: vi
+              ? "Kết nối tới dữ liệu web đang gặp lỗi. Hãy thử gửi lại câu hỏi hoặc mở các danh mục dưới đây; mình chưa có kết quả để xác nhận."
+              : "The data connection failed. Please retry or open the directories below; I cannot confirm results right now.",
+            links: [
+              {
+                label: vi ? "Bộ môn & Thương tật" : "Sports & Classifications",
+                href: "/" + language + "/sports",
+              },
+              {
+                label: vi ? "Câu lạc bộ" : "Clubs",
+                href: "/" + language + "/clubs",
+              },
+            ],
+          },
         },
       ]);
-      setBotLoading(false);
-      responseTimer.current = null;
-      inputRef.current?.focus({ preventScroll: true });
-    }, 800);
+    } finally {
+      clearTimeout(timer);
+      if (requestRef.current === controller) {
+        requestRef.current = null;
+        setBotLoading(false);
+        inputRef.current?.focus({ preventScroll: true });
+      }
+    }
   };
 
   return (
@@ -286,6 +341,11 @@ export default function AiAssistant() {
                             {message.response.note}
                           </p>
                         )}
+                        {message.response.source && (
+                          <p className={styles.answerNote}>
+                            {message.response.source}
+                          </p>
+                        )}
                         {message.response.links && (
                           <div className={styles.answerLinks}>
                             {message.response.links.map((link) => (
@@ -349,6 +409,7 @@ export default function AiAssistant() {
               }}
               placeholder={tStr.chatbotInputPlaceholder}
               aria-label={tStr.chatbotInputPlaceholder}
+              maxLength={1500}
               autoComplete="off"
             />
             <button

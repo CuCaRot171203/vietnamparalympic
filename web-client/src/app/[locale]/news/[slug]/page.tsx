@@ -1,3 +1,4 @@
+import listStyles from "@/components/rich-text-lists.module.css";
 import { cache } from "react";
 import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
 import { apiClient } from "@/lib/api-client";
@@ -10,6 +11,7 @@ import BookmarkButton from "@/components/BookmarkButton";
 import ShareButton from "@/components/ShareButton";
 import NewsImage from "@/components/news/NewsImage";
 import DOMPurify from "isomorphic-dompurify";
+import { sanitizeRichText } from "@/lib/rich-text";
 import styles from "./article.module.css";
 
 interface Post {
@@ -56,7 +58,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
   if (!post) notFound();
   const vi = locale === "vi";
   const categoryHref = `/${locale}/news${post.category ? `?category=${encodeURIComponent(post.category.slug)}#news-feed` : ""}`;
-  const cleanContent = DOMPurify.sanitize(post.content || "");
+  const cleanContent = sanitizeRichText(post.content || "");
   const plainText = DOMPurify.sanitize(post.content || "", {
     ALLOWED_TAGS: [],
     ALLOWED_ATTR: [],
@@ -201,7 +203,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
               </div>
             </div>
             <div
-              className={styles.content}
+              className={`${styles.content} ${listStyles.lists}`}
               dangerouslySetInnerHTML={{ __html: cleanContent }}
             />
             {!!post.tags?.length && (

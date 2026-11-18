@@ -37,7 +37,7 @@ export const SPORT_STORIES: Record<string, [string, string, string, string]> = {
     "Focus and technique come together in a single lift. Every weight marks a new personal milestone.",
   ],
   "bong-ban": [
-    "Nhanh một nhịp, đổi cuộc chơi",
+    "Bản lĩnh trong từng đường bóng",
     "Những đường bóng nhỏ tạo nên cuộc đấu lớn, nơi phản xạ, chiến thuật và độ chính xác lên tiếng.",
     "One moment changes the game",
     "A small ball opens up a world of fast reactions, clever tactics and remarkable precision.",

@@ -23,7 +23,7 @@ import { OrganizationDetailsDto } from "./organization-details.dto";
     whitelist: true,
     forbidNonWhitelisted: true,
     transform: true,
-  })
+  }),
 )
 export class OrganizationsController {
   constructor(private readonly OrganizationsService: OrganizationsService) {}
@@ -33,8 +33,14 @@ export class OrganizationsController {
     @Query("sport") sport?: string,
     @Query("location") location?: string,
     @Query("search") search?: string,
+    @Query("region") region?: string,
   ) {
-    return this.OrganizationsService.findAll({ sport, location, search });
+    return this.OrganizationsService.findAll({
+      sport,
+      location,
+      search,
+      region,
+    });
   }
 
   @Get("map/bounded")
@@ -42,13 +48,13 @@ export class OrganizationsController {
     @Query("minLat") minLat: string,
     @Query("maxLat") maxLat: string,
     @Query("minLng") minLng: string,
-    @Query("maxLng") maxLng: string
+    @Query("maxLng") maxLng: string,
   ) {
     return this.OrganizationsService.findBounded(
       parseFloat(minLat),
       parseFloat(maxLat),
       parseFloat(minLng),
-      parseFloat(maxLng)
+      parseFloat(maxLng),
     );
   }
 
@@ -67,7 +73,10 @@ export class OrganizationsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("SUPER_ADMIN", "ADMIN")
   @Put(":id/details")
-  updateDetails(@Param("id") id: string, @Body() details: OrganizationDetailsDto) {
+  updateDetails(
+    @Param("id") id: string,
+    @Body() details: OrganizationDetailsDto,
+  ) {
     return this.OrganizationsService.updateDetails(id, details);
   }
 
@@ -84,7 +93,7 @@ export class OrganizationsController {
       contactInfo: string;
       imageUrl?: string;
       description: string;
-    }
+    },
   ) {
     return this.OrganizationsService.create(data);
   }
@@ -103,7 +112,7 @@ export class OrganizationsController {
       contactInfo: string;
       imageUrl?: string;
       description: string;
-    }
+    },
   ) {
     return this.OrganizationsService.createAdmin(data);
   }
@@ -145,7 +154,7 @@ export class OrganizationsController {
       imageUrl?: string;
       description?: string;
       isApproved?: boolean;
-    }
+    },
   ) {
     return this.OrganizationsService.update(id, data);
   }

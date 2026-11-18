@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { AssistantModule } from "./modules/assistant/assistant.module";
 import { LoggerModule } from "nestjs-pino";
 import { ConfigModule } from "@nestjs/config";
 import * as Joi from "joi";
@@ -118,6 +119,7 @@ import { OrdersModule } from "./modules/orders/orders.module";
       }),
     }),
     PrismaModule,
+    AssistantModule,
     GlobalCacheModule,
     UsersModule,
     AuthModule,

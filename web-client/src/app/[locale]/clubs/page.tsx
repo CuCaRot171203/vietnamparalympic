@@ -1,6 +1,10 @@
 "use client";
 
-import { joinClubSports, splitClubSports } from "@/lib/organizations";
+import {
+  clubRegion,
+  joinClubSports,
+  splitClubSports,
+} from "@/lib/organizations";
 import { apiClient } from "@/lib/api-client";
 import { getApiUrl } from "@/utils/api";
 
@@ -221,7 +225,7 @@ export default function ClubsPage() {
       const params = new URLSearchParams();
 
       if (selectedSport) params.append("sport", selectedSport);
-      if (selectedRegion) params.append("location", selectedRegion);
+      if (selectedRegion) params.append("region", selectedRegion);
       if (searchTerm) params.append("search", searchTerm);
 
       if (params.toString()) {
@@ -232,7 +236,14 @@ export default function ClubsPage() {
       if (!res.ok) throw new Error("Failed to load clubs");
       if (!signal?.aborted) {
         const envelope = await res.json();
-        setClubs(Array.isArray(envelope?.data) ? envelope.data : []);
+        setClubs(
+          Array.isArray(envelope?.data)
+            ? envelope.data.filter(
+                (club: Club) =>
+                  !selectedRegion || clubRegion(club) === selectedRegion,
+              )
+            : [],
+        );
       }
     } catch (error) {
       if (!signal?.aborted) {

@@ -1,5 +1,6 @@
 export type AssistantResponse = {
   title: string;
+  source?: string;
   intro?: string;
   steps?: { title: string; text: string }[];
   sample?: string;

@@ -101,7 +101,7 @@
 }
 .hero h1 {
   font-family: var(--font-home-neusharp), sans-serif;
-  font-size: 100px;
+  font-size: 64px;
   font-weight: 700;
   line-height: 1.08;
   text-transform: uppercase;
@@ -696,12 +696,12 @@
     gap: 36px;
   }
   .hero h1 {
-    font-size: 86px;
+    font-size: 64px;
   }
 }
 @media (max-width: 1023px) {
   .hero h1 {
-    font-size: 76px;
+    font-size: 64px;
   }
   .hero {
     gap: 28px;
@@ -737,7 +737,7 @@
     margin-top: 28px;
   }
   .hero h1 {
-    font-size: 72px;
+    font-size: 64px;
     max-width: 600px;
   }
   .heroVisual {
@@ -802,7 +802,7 @@
       100% 100%;
   }
   .hero h1 {
-    font-size: 60px;
+    font-size: 64px;
   }
   .heroDescription {
     font-size: 13px;
