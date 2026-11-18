@@ -24,9 +24,10 @@ COPY api-server/prisma.config.ts ./api-server/
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Install dependencies using legacy-peer-deps to prevent workspace conflicts
+# Previous command (disabled): npm install --legacy-peer-deps
+# Install the complete locked dependency tree with normal peer checks.
 RUN --mount=type=cache,target=/root/.npm/_cacache \
-    npm install --legacy-peer-deps
+    npm ci --ignore-scripts
 
 # Copy the rest of the application code
 COPY . .
@@ -79,8 +80,9 @@ RUN rm -f ../package-lock.json
 
 # Remove shared workspace dependency so npm installs it as a regular dep
 RUN node -e "const p=require('./package.json'); delete p.dependencies['@vietnam-parasports/shared']; require('fs').writeFileSync('package.json',JSON.stringify(p,null,2))"
+# Previous command (disabled): npm install --legacy-peer-deps --ignore-scripts
 RUN --mount=type=cache,target=/root/.npm/_cacache \
-    npm install --legacy-peer-deps --ignore-scripts
+    npm install --ignore-scripts
 
 # Generate Prisma client for production
 RUN npx prisma generate
@@ -96,7 +98,7 @@ RUN mkdir -p uploads/public uploads/settings
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nestjs && \
-    chown -R nestjs:nodejs /usr/src/app
+    chown -R nestjs:nodejs /usr/src/app/api-server/uploads
 
 USER nestjs
 

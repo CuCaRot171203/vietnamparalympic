@@ -16,15 +16,16 @@ COPY api-server/package*.json ./api-server/
 COPY web-client/package*.json ./web-client/
 COPY shared/package*.json ./shared/
 COPY api-server/prisma ./api-server/prisma/
+COPY api-server/prisma.config.ts ./api-server/
 
 # Skip Puppeteer Chrome download during npm install to prevent extraction errors
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Install all dependencies using legacy-peer-deps
-RUN npm pkg delete scripts.prepare || true
+# Previous command (disabled): npm install --legacy-peer-deps --ignore-scripts
+# Lifecycle hooks are disabled; compile/generation steps run explicitly below.
 RUN --mount=type=cache,target=/root/.npm/_cacache \
-    npm install --legacy-peer-deps --ignore-scripts
+    npm ci --ignore-scripts
 
 FROM dependencies AS development
 

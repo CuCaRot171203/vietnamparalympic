@@ -1,5 +1,6 @@
 # Dependencies
 node_modules
+**/node_modules
 .git
 .github
 .husky
@@ -7,14 +8,21 @@ coverage
 
 # Build outputs
 dist
+**/dist
 .next
+**/.next
 build
+**/build
 *.tsbuildinfo
+**/*.tsbuildinfo
 
 # Environment
 .env
 .env.*
+**/.env
+**/.env.*
 !.env.example
+!**/.env.example
 
 # IDE
 .vscode
