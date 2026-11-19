@@ -29,21 +29,10 @@
   margin-bottom: 32px;
 }
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  border: 1px solid var(--news-line);
-  border-radius: 999px;
-  padding: 6px 11px;
-  font-size: 10px;
+  composes: tag from "./home-section-tag.module.css";
   margin-bottom: 24px;
 }
-.badge span {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #e31624;
-}
+
 .heading h2 {
   font-family: var(--font-home-neusharp), sans-serif;
   font-size: 44px;
@@ -406,4 +395,6 @@
   }
 }
 
-:global(.dark) .meta > span { color:#ff9fa6; }
+:global(.dark) .meta > span {
+  color: #ff9fa6;
+}

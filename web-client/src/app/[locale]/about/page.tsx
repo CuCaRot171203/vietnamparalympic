@@ -2,21 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import {
-  ArrowRight,
-  Handshake,
-  Heart,
-  Megaphone,
-  ShieldCheck,
-  Sparkles,
-  Trophy,
-  Users,
-  Video,
-} from "lucide-react";
+import { ArrowRight, Heart, Sparkles, Users } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useLanguage } from "@/hooks/useTranslation";
 import PublicPageHero from "@/components/PublicPageHero";
 import { homeBeVietnam, homeNeusharp } from "@/lib/home-fonts";
+import Journey from "./Journey";
 import styles from "./about.module.css";
 
 interface AboutCopy {
@@ -26,25 +17,12 @@ interface AboutCopy {
   heroLead: string;
   ctaPrimary: string;
   ctaSecondary: string;
-  heroCardTitle: string;
-  heroCardText: string;
-  pills: string[];
   whatIsTitle: string;
   whatIsDesc1: string;
   whatIsDesc2: string;
   missionTitle: string;
   missionDesc: string;
   missionPoints: string[];
-  coreValuesTitle: string;
-  coreDesc: string;
-  core1Title: string;
-  core1Desc: string;
-  core2Title: string;
-  core2Desc: string;
-  core3Title: string;
-  core3Desc: string;
-  core4Title: string;
-  core4Desc: string;
   spiritTitle: string;
   spiritDesc: string;
   closingTitle: string;
@@ -54,56 +32,30 @@ interface AboutCopy {
 
 const translations: Record<string, AboutCopy> = {
   vi: {
-    eyebrow: "Giới thiệu",
-    heading: "Về Chúng Tôi",
-    subheading: "Di sản vinh quang",
+    eyebrow: "VỀ CHÚNG TÔI",
+    heading: "Vietnam ParaSports",
+    subheading: "Trang thông tin về thể thao người khuyết tật Việt Nam",
     heroLead:
-      "Vietnam ParaSports là dự án truyền thông và kết nối cộng đồng thể thao người khuyết tật tại Việt Nam, hướng đến việc giúp mỗi người tìm hiểu các bộ môn phù hợp, tiếp cận thông tin tập luyện và kết nối với câu lạc bộ, huấn luyện viên cùng những người có chung đam mê.\nVới tinh thần “Khơi lửa đam mê”, chúng tôi mong muốn mỗi người đều có cơ hội bắt đầu hành trình thể thao của riêng mình.",
-    ctaPrimary: "Khám phá thể thao",
-    ctaSecondary: "Gặp gỡ cộng đồng",
-    heroCardTitle: "Một nơi để bắt đầu",
-    heroCardText:
-      "Đọc tin tức, tìm câu lạc bộ, theo dõi giải đấu và kết nối với những người đồng hành — tất cả trong một hệ sinh thái dễ tiếp cận.",
-    pills: [
-      "Tin tức",
-      "Câu lạc bộ",
-      "Giải đấu",
-      "Bảng xếp hạng",
-      "Khóa học",
-      "Đối tác",
-    ],
+      "Vietnam ParaSports là trang thông tin chính thức của Ủy ban Paralympic Việt Nam về thể thao người khuyết tật tại Việt Nam.\n\nĐược phát triển và tiếp nối qua nhiều thế hệ từ năm 2024, Vietnam ParaSports cập nhật tin tức, sự kiện, thành tích thể thao; lan tỏa câu chuyện vận động viên và cung cấp kiến thức về các môn ParaSport.\n\nBên cạnh hoạt động truyền thông, dự án còn phát triển tài nguyên học tập, giới thiệu câu lạc bộ và kết nối các hoạt động cộng đồng, góp phần mở rộng cơ hội tìm hiểu, trải nghiệm và tham gia thể thao cho người khuyết tật.",
+    ctaPrimary: "Khám phá hành trình",
+    ctaSecondary: "Tìm câu lạc bộ",
     whatIsTitle: "Vietnam ParaSports là gì?",
     whatIsDesc1:
-      "Vietnam ParaSports là nền tảng truyền thông và kết nối cộng đồng thể thao người khuyết tật tại Việt Nam. Website được xây dựng nhằm lan tỏa tinh thần “Thể thao kết nối – Cộng đồng lan tỏa”, cung cấp thông tin về các bộ môn thể thao, hoạt động tập luyện và câu lạc bộ, đồng thời tạo không gian để người khuyết tật, vận động viên, huấn luyện viên và cộng đồng giao lưu, chia sẻ, kết nối và cùng phát triển đam mê thể thao.",
+      "Nơi những câu chuyện thể thao được lan tỏa và những cơ hội tập luyện được kết nối.\n\nVietnam ParaSports đưa thể thao người khuyết tật Việt Nam đến gần hơn với cộng đồng thông qua tin tức, kiến thức, câu chuyện vận động viên và các hoạt động thể thao thực tế.",
     whatIsDesc2:
-      "Vietnam ParaSports không chỉ đưa tin về thể thao người khuyết tật, mà còn hướng tới việc xây dựng một hệ sinh thái thông tin dễ tiếp cận: nơi mọi người có thể đọc tin tức, tìm hiểu các CLB, tham gia hoạt động cộng đồng, học cách xây kênh cá nhân và kết nối với các nguồn lực đồng hành.",
-    missionTitle: "Sứ mệnh của chúng tôi",
+      "Không chỉ ghi nhận những thành tích trên đấu trường quốc tế, Vietnam ParaSports còn hướng sự quan tâm đến đời sống tập luyện thường ngày, các câu lạc bộ và những người đang bắt đầu hành trình thể thao của riêng mình.\n\nThông qua việc phát triển nội dung, chia sẻ học liệu và kết nối cộng đồng, Vietnam ParaSports mong muốn giúp nhiều người hơn hiểu về ParaSport, tìm thấy thông tin hữu ích và tiếp cận những cơ hội tham gia thể thao phù hợp.",
+    missionTitle: "Tầm nhìn & Sứ mệnh",
     missionDesc:
-      "Vietnam ParaSports hướng tới việc lan tỏa hình ảnh ParaSports theo hướng tôn trọng, chân thật và không thương hại hóa. Dự án mong muốn người khuyết tật được nhìn nhận như những cá nhân có năng lực, có câu chuyện, có quyền tham gia thể thao và có thể hiện diện chủ động trong cộng đồng.",
+      "Hướng tới một cộng đồng nơi người khuyết tật có nhiều cơ hội hơn để tiếp cận thông tin thể thao, lựa chọn hình thức tập luyện phù hợp và duy trì việc tham gia thể thao như một phần trong cuộc sống.",
     missionPoints: [
-      "Mở rộng cơ hội tiếp cận thể thao: Cung cấp kiến thức cơ bản về bộ môn, cách bắt đầu tập luyện và những lưu ý an toàn.",
-      "Kết nối cộng đồng: Giúp người khuyết tật tiếp cận câu lạc bộ, huấn luyện viên, vận động viên và những người đồng hành phù hợp.",
-      "Lan tỏa giá trị thể thao người khuyết tật: Truyền tải những câu chuyện, hoạt động và thành tích bằng góc nhìn tôn trọng, chân thực.",
-      "Xây dựng nguồn thông tin hữu ích, lâu dài: Phát triển hệ thống nội dung và kết nối có thể tiếp tục được khai thác, cập nhật qua các thế hệ dự án.",
+      "Lan tỏa: Đưa tin tức, kiến thức, thành tích và những câu chuyện chân thực của ParaSport Việt Nam đến với công chúng.",
+      "Trao quyền: Tạo điều kiện để vận động viên và người khuyết tật chủ động chia sẻ trải nghiệm, thể hiện năng lực, cá tính và tiếng nói của chính mình.",
+      "Kết nối: Giúp người quan tâm tìm hiểu môn thể thao, tiếp cận thông tin câu lạc bộ và liên hệ với cộng đồng tập luyện.",
+      "Tiếp nối: Kế thừa nguồn lực và những giá trị được xây dựng qua từng thế hệ dự án.",
     ],
-    coreValuesTitle: "Giá trị cốt lõi",
-    coreDesc:
-      "Bốn nguyên tắc định hướng mọi bài viết, sự kiện và cách chúng tôi đồng hành cùng cộng đồng.",
-    core1Title: "Tôn trọng & Chủ thể",
-    core1Desc:
-      "Tôn trọng người khuyết tật như những chủ thể có năng lực, có tiếng nói và câu chuyện riêng biệt thay vì nhìn nhận họ như những đối tượng đáng thương hại.",
-    core2Title: "Kết nối hệ sinh thái",
-    core2Desc:
-      "Tạo nhịp cầu kết nối người khuyết tật với thể thao, câu lạc bộ, huấn luyện viên, nhà tài trợ và toàn thể cộng đồng xã hội.",
-    core3Title: "Truyền thông tích cực",
-    core3Desc:
-      "Lan tỏa tinh thần ParaSports qua các thông tin chân thật, đầy đủ, dễ tiếp cận và tránh lối truyền thông giật gân, thương hại hay phi thường hóa.",
-    core4Title: "Hỗ trợ VĐV Số hóa",
-    core4Desc:
-      "Hỗ trợ đắc lực cho các vận động viên người khuyết tật trong việc học tập kỹ năng, xây dựng hình ảnh cá nhân và làm chủ nội dung số.",
-    spiritTitle: "Tinh thần chung",
+    spiritTitle: "Mỗi khởi đầu mới là một di sản được viết",
     spiritDesc:
-      "Vietnam ParaSports tin rằng thể thao không chỉ là thi đấu giành thành tích, mà còn là cơ hội tuyệt vời để mọi người rèn luyện sức khỏe, kết nối cộng đồng, nâng cao sự tự tin và kể câu chuyện của cuộc đời mình theo một cách chủ động nhất.",
+      "Từ những bước đầu lan tỏa nhận thức đến hành trình kết nối và phát triển cộng đồng, Vietnam ParaSports được tạo nên bởi sự tiếp nối của nhiều thế hệ, những con người và những giá trị chung.\n\nVới Gen 4, di sản không chỉ là những gì được kế thừa, mà còn là những cơ hội mới được mở ra: một người bắt đầu tập luyện, một kết nối được hình thành, một niềm đam mê được nuôi dưỡng.",
     closingTitle: "Cùng viết nên câu chuyện ParaSports",
     closingText:
       "Bất kỳ ai cũng có thể là một phần của hành trình này — với vai trò vận động viên, huấn luyện viên, nhà tài trợ, người đồng hành hay khán giả.",
@@ -117,10 +69,6 @@ const translations: Record<string, AboutCopy> = {
       "Vietnam ParaSports is a media and community platform for disabled sports in Vietnam — where capability is celebrated, stories are told with care, and everyone finds each other on the same field.",
     ctaPrimary: "Explore the sports",
     ctaSecondary: "Meet the community",
-    heroCardTitle: "A place to begin",
-    heroCardText:
-      "Read the news, find a club, follow the tournaments and connect with people who walk alongside you — all inside one accessible ecosystem.",
-    pills: ["News", "Clubs", "Tournaments", "Rankings", "Courses", "Partners"],
     whatIsTitle: "What is Vietnam ParaSports?",
     whatIsDesc1:
       'Vietnam ParaSports is a communication and community connection platform for disabled sports in Vietnam. The website was built to spread the spirit of "Sports Without Barriers", bringing ParaSports closer to the public, while creating a space where disabled people, athletes, coaches, clubs, and the community can connect with each other.',
@@ -135,21 +83,6 @@ const translations: Record<string, AboutCopy> = {
       "Communicate authentically and accessibly, without sensationalism or pity.",
       "Help athletes own digital skills and tell their own stories.",
     ],
-    coreValuesTitle: "Core Values",
-    coreDesc:
-      "Four principles behind every story, event and the way we stand alongside the community.",
-    core1Title: "Respect & Autonomy",
-    core1Desc:
-      "Respecting disabled people as capable subjects with their own voices and stories instead of viewing them as objects of pity.",
-    core2Title: "Connecting the Ecosystem",
-    core2Desc:
-      "Creating a bridge connecting disabled people with sports, clubs, coaches, sponsors, and the entire society.",
-    core3Title: "Positive Media",
-    core3Desc:
-      "Spreading the ParaSports spirit through authentic, complete, accessible information and avoiding sensationalist, pity-driven, or over-glorified media.",
-    core4Title: "Digital Athlete Support",
-    core4Desc:
-      "Supporting disabled athletes in learning digital skills, building personal branding, and mastering digital content.",
     spiritTitle: "Shared Spirit",
     spiritDesc:
       "Vietnam ParaSports believes that sports is not only about competing for achievements, but also a great opportunity for everyone to exercise, connect with the community, build confidence, and tell their own stories in the most proactive way.",
@@ -226,13 +159,6 @@ export default function AboutPage() {
   const revealStyle = (delayMs = 0) =>
     ({ "--reveal-delay": `${delayMs}ms` }) as CSSProperties;
 
-  const coreValues = [
-    { icon: ShieldCheck, title: tStr.core1Title, text: tStr.core1Desc },
-    { icon: Handshake, title: tStr.core2Title, text: tStr.core2Desc },
-    { icon: Megaphone, title: tStr.core3Title, text: tStr.core3Desc },
-    { icon: Video, title: tStr.core4Title, text: tStr.core4Desc },
-  ];
-
   return (
     <div
       ref={rootRef}
@@ -244,6 +170,9 @@ export default function AboutPage() {
     >
       <PublicPageHero
         locale={language}
+        className={styles.aboutHero}
+        eyebrow={tStr.eyebrow}
+        breadcrumbTitle={language === "vi" ? "Về chúng tôi" : "About us"}
         title={tStr.heading}
         tagline={tStr.subheading}
         description={tStr.heroLead}
@@ -253,44 +182,15 @@ export default function AboutPage() {
             ? "Cộng đồng vận động viên thể thao người khuyết tật Việt Nam"
             : "Vietnam’s para sports community"
         }
-        primary={{ label: tStr.ctaPrimary, href: "/" + language + "/sports" }}
+        primary={{
+          label: tStr.ctaPrimary,
+          href: "/" + language + "/about#journey",
+        }}
         secondary={{
           label: tStr.ctaSecondary,
           href: "/" + language + "/clubs",
         }}
       />
-
-      {/* ---------- THẺ "MỘT NƠI ĐỂ BẮT ĐẦU" (tràn ngang, 2 bên) ---------- */}
-      <section className={styles.startBand}>
-        <div className={styles.startInner}>
-          <div
-            className={`${styles.glass} ${styles.startCard} ${revealClass("hero-card")}`}
-            data-reveal-id="hero-card"
-            style={revealStyle(90)}
-          >
-            <div className={styles.startSide}>
-              <span className={styles.heroCardIcon}>
-                <Trophy size={24} strokeWidth={1.6} aria-hidden="true" />
-              </span>
-              <h2 className={styles.heroCardTitle}>{tStr.heroCardTitle}</h2>
-              <p className={styles.heroCardText}>{tStr.heroCardText}</p>
-            </div>
-            <div className={styles.startDivider} aria-hidden="true" />
-            <div className={styles.startSide}>
-              <div className={styles.pillList}>
-                {tStr.pills.map((pill) => (
-                  <span key={pill} className={styles.pill}>
-                    {pill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- DIVIDER ---------- */}
-      <div className={styles.divider} aria-hidden="true" />
 
       {/* ---------- GIỚI THIỆU CHUNG: 2 nửa tràn màn hình 50/50 ---------- */}
       <section className={styles.storyBand}>
@@ -315,7 +215,13 @@ export default function AboutPage() {
             data-reveal-id="story"
           >
             <h2 className={styles.storyTitle}>{tStr.whatIsTitle}</h2>
-            <p className={styles.storyLead}>{tStr.whatIsDesc1}</p>
+            <p className={styles.storyLead}>
+              <strong className={styles.storyEmphasis}>
+                {tStr.whatIsDesc1.split("\n\n")[0]}
+              </strong>
+              {tStr.whatIsDesc1.includes("\n\n") &&
+                "\n\n" + tStr.whatIsDesc1.split("\n\n").slice(1).join("\n\n")}
+            </p>
             <p className={styles.storyText}>{tStr.whatIsDesc2}</p>
           </div>
         </div>
@@ -328,7 +234,7 @@ export default function AboutPage() {
       <section className={styles.missionBand}>
         <div className={styles.missionInner}>
           <div
-            className={`${styles.glass} ${styles.mission} ${revealClass("mission")}`}
+            className={`${styles.mission} ${revealClass("mission")}`}
             data-reveal-id="mission"
           >
             <div className={styles.missionSide}>
@@ -338,79 +244,46 @@ export default function AboutPage() {
                 </span>
                 <h2 className={styles.missionTitle}>{tStr.missionTitle}</h2>
               </div>
+              <h3 className={styles.visionTitle}>
+                {language === "vi" ? "Tầm nhìn" : "Vision"}
+              </h3>
               <p className={styles.missionText}>{tStr.missionDesc}</p>
             </div>
             <div className={styles.missionDivider} aria-hidden="true" />
-            <ul className={styles.missionAside}>
-              {tStr.missionPoints.map((point, index) => (
-                <li key={point} className={styles.missionItem}>
-                  <span className={styles.missionItemIndex}>0{index + 1}</span>
-                  <Users
-                    size={18}
-                    strokeWidth={1.8}
-                    className={styles.missionItemIcon}
-                    aria-hidden="true"
-                  />
-                  <span className={styles.missionItemText}>{point}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- DIVIDER ---------- */}
-      <div className={styles.divider} aria-hidden="true" />
-
-      {/* ---------- GIÁ TRỊ CỐT LÕI (nền tràn ngang) ---------- */}
-      <section className={styles.coreBand}>
-        <div
-          className={styles.coreMedia}
-          style={{ backgroundImage: "url(/assets/aboutus/AU_03.jpg)" }}
-          aria-hidden="true"
-        />
-        <div className={styles.coreScrim} aria-hidden="true" />
-        <div className={styles.container}>
-          <div
-            className={`${styles.sectionHead} ${styles.sectionHeadLight} ${revealClass("core-head")}`}
-            data-reveal-id="core-head"
-          >
-            <span className={styles.eyebrow}>
-              <span className={styles.eyebrowDot} aria-hidden="true" />
-              {tStr.eyebrow}
-            </span>
-            <h2 className={styles.sectionTitle}>{tStr.coreValuesTitle}</h2>
-            <p className={styles.sectionDesc}>{tStr.coreDesc}</p>
-          </div>
-
-          <div className={styles.valueGrid}>
-            {coreValues.map((value, index) => {
-              const Icon = value.icon;
-              const id = `core-${index}`;
-              return (
-                <article
-                  key={value.title}
-                  className={`${styles.glass} ${styles.glassCard} ${styles.valueCard} ${revealClass(id)}`}
-                  data-reveal-id={id}
-                  style={revealStyle(index * 70)}
-                >
-                  <div className={styles.valueTop}>
-                    <span className={styles.valueIcon}>
-                      <Icon size={20} strokeWidth={1.7} aria-hidden="true" />
+            <div>
+              <h3 className={styles.visionTitle}>
+                {language === "vi" ? "Sứ mệnh" : "Mission"}
+              </h3>
+              <p className={styles.missionMotto}>
+                {language === "vi"
+                  ? "Lan tỏa – Trao quyền – Kết nối – Tiếp nối."
+                  : "Share – Empower – Connect – Carry forward."}
+              </p>
+              <ul className={styles.missionAside}>
+                {tStr.missionPoints.map((point, index) => (
+                  <li key={point} className={styles.missionItem}>
+                    <span className={styles.missionItemIndex}>
+                      0{index + 1}
                     </span>
-                    <span className={styles.valueIndex}>0{index + 1}</span>
-                  </div>
-                  <h3 className={styles.valueTitle}>{value.title}</h3>
-                  <p className={styles.valueText}>{value.text}</p>
-                </article>
-              );
-            })}
+                    <Users
+                      size={18}
+                      strokeWidth={1.8}
+                      className={styles.missionItemIcon}
+                      aria-hidden="true"
+                    />
+                    <span className={styles.missionItemText}>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ---------- DIVIDER ---------- */}
       <div className={styles.divider} aria-hidden="true" />
+
+      <Journey />
 
       {/* ---------- TINH THẦN CHUNG + CTA: 2 thẻ, chia đôi 50/50 ---------- */}
       <section className={styles.spiritBand}>
@@ -425,6 +298,13 @@ export default function AboutPage() {
               </span>
               <h2 className={styles.spiritTitle}>{tStr.spiritTitle}</h2>
               <p className={styles.spiritText}>{tStr.spiritDesc}</p>
+              <p className={styles.signature}>
+                <strong>Vietnam ParaSports 2026</strong>
+                <br />
+                {language === "vi"
+                  ? "Di sản vinh quang – Khơi lửa đam mê"
+                  : "A glorious legacy – Igniting passion"}
+              </p>
             </div>
 
             <div className={styles.duoDivider} aria-hidden="true" />

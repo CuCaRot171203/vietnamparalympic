@@ -39,23 +39,10 @@
   margin-bottom: 52px;
 }
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: #fffdf8;
-  color: #231916;
-  font-size: 11px;
-  line-height: 1.3;
-  padding: 6px 10px;
-  border-radius: 999px;
+  composes: tag from "./home-section-tag.module.css";
   margin-bottom: 20px;
 }
-.badge > span {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #e7091c;
-}
+
 .heading h2 {
   font-family: var(--font-home-neusharp), sans-serif;
   font-size: 44px;

@@ -28,13 +28,13 @@ import styles from "./header.module.css";
 
 const LOGO = "/assets/brand/vietnam-parasports-2026-full.png";
 const DEFAULT_ORDER = [
-  "news",
   "about",
   "sports-directory",
   "matches",
   "rankings",
-  "creator-lab",
   "clubs",
+  "creator-lab",
+  "news",
   "companion",
 ];
 const ROUTES: Record<string, string> = {
@@ -91,16 +91,33 @@ export function Header() {
     : DEFAULT_ORDER;
   // Keep hidden items out of older saved menu configurations as well.
   const menu = [...new Set(configuredOrder)].filter(
-    (id) => id !== "marketplace" && id !== "sports" && ROUTES[id] && settings.HEADER_MENU_VISIBILITY?.[id] !== false
+    (id) =>
+      id !== "marketplace" &&
+      id !== "sports" &&
+      ROUTES[id] &&
+      settings.HEADER_MENU_VISIBILITY?.[id] !== false,
   );
-  if (!menu.includes("sports-directory") && settings.HEADER_MENU_VISIBILITY?.["sports-directory"] !== false) {
+  if (
+    !menu.includes("sports-directory") &&
+    settings.HEADER_MENU_VISIBILITY?.["sports-directory"] !== false
+  ) {
     const afterAbout = menu.indexOf("about");
     menu.splice(afterAbout >= 0 ? afterAbout + 1 : 1, 0, "sports-directory");
   }
   const newsIndex = menu.indexOf("news");
-  if (newsIndex !== -1 && menu.includes("about")) {
+  if (newsIndex !== -1) {
     menu.splice(newsIndex, 1);
-    menu.splice(menu.indexOf("about"), 0, "news");
+    const creatorLabIndex = menu.indexOf("creator-lab");
+    const companionIndex = menu.indexOf("companion");
+    menu.splice(
+      creatorLabIndex !== -1
+        ? creatorLabIndex + 1
+        : companionIndex !== -1
+          ? companionIndex
+          : menu.length,
+      0,
+      "news",
+    );
   }
   const sports = [
     ["cu-ta", "Cử tạ", "Powerlifting"],
@@ -162,12 +179,13 @@ export function Header() {
   };
   const voiceSearch = () => {
     const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       toast.error(
         vi
           ? "Trình duyệt chưa hỗ trợ tìm kiếm bằng giọng nói."
-          : "Voice search is not supported by this browser."
+          : "Voice search is not supported by this browser.",
       );
       return;
     }
@@ -191,7 +209,10 @@ export function Header() {
     recognition.start();
   };
 
-  if (pathname && (pathname.startsWith("/admin") || /^\/[a-z]{2}\/admin/.test(pathname)))
+  if (
+    pathname &&
+    (pathname.startsWith("/admin") || /^\/[a-z]{2}\/admin/.test(pathname))
+  )
     return null;
 
   return (
@@ -199,7 +220,11 @@ export function Header() {
       ref={rootRef}
       className={styles.header}
       data-scrolled={scrolled}
-      data-home={pathname === "/" || pathname === `/${language}` || pathname === `/${language}/`}
+      data-home={
+        pathname === "/" ||
+        pathname === `/${language}` ||
+        pathname === `/${language}/`
+      }
       onKeyDown={(event) => {
         if (event.key !== "Escape") return;
         setPanel(null);
@@ -214,7 +239,10 @@ export function Header() {
         button.current?.focus();
       }}
       onBlur={(event) => {
-        if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node))
+        if (
+          event.relatedTarget &&
+          !event.currentTarget.contains(event.relatedTarget as Node)
+        )
           setPanel(null);
       }}
     >
@@ -222,7 +250,9 @@ export function Header() {
         <Link
           href="/"
           className={styles.logo}
-          aria-label={vi ? "Trang chủ Vietnam ParaSports" : "Vietnam ParaSports home"}
+          aria-label={
+            vi ? "Trang chủ Vietnam ParaSports" : "Vietnam ParaSports home"
+          }
           onClick={() => setPanel(null)}
         >
           <img
@@ -232,7 +262,10 @@ export function Header() {
             height={scrolled ? 62 : 64}
           />
         </Link>
-        <nav className={styles.desktopNav} aria-label={vi ? "Menu chính" : "Main navigation"}>
+        <nav
+          className={styles.desktopNav}
+          aria-label={vi ? "Menu chính" : "Main navigation"}
+        >
           {menu.map((id) =>
             id === "sports" ? (
               <div key={id} className={styles.sportsAnchor}>
@@ -245,13 +278,23 @@ export function Header() {
                   onClick={() => toggle("sports")}
                 >
                   {labels[id]}
-                  <ChevronDown size={13} className={panel === "sports" ? styles.rotated : ""} />
+                  <ChevronDown
+                    size={13}
+                    className={panel === "sports" ? styles.rotated : ""}
+                  />
                 </button>
                 {panel === "sports" && (
-                  <div id="header-sports" className={`${styles.popover} ${styles.sportsPanel}`}>
+                  <div
+                    id="header-sports"
+                    className={`${styles.popover} ${styles.sportsPanel}`}
+                  >
                     <div className={styles.panelIntro}>
                       <span className={styles.eyebrow}>PARASPORTS</span>
-                      <p>{vi ? "Tìm bộ môn dành cho bạn." : "Find your way to move."}</p>
+                      <p>
+                        {vi
+                          ? "Tìm bộ môn dành cho bạn."
+                          : "Find your way to move."}
+                      </p>
                     </div>
                     <nav
                       aria-label={vi ? "Các môn thể thao" : "Sports"}
@@ -291,7 +334,7 @@ export function Header() {
               >
                 {labels[id]}
               </Link>
-            )
+            ),
           )}
         </nav>
         <div className={styles.actions}>
@@ -345,7 +388,10 @@ export function Header() {
                 <ChevronDown size={13} />
               </button>
               {panel === "account" && (
-                <div id="header-account" className={`${styles.popover} ${styles.accountPanel}`}>
+                <div
+                  id="header-account"
+                  className={`${styles.popover} ${styles.accountPanel}`}
+                >
                   <div className={styles.userInfo}>
                     <p>{user.name}</p>
                     <span>{user.email}</span>
@@ -396,7 +442,13 @@ export function Header() {
             className={`${styles.iconButton} ${styles.mobileToggle}`}
             onClick={() => toggle("mobile")}
             aria-label={
-              panel === "mobile" ? (vi ? "Đóng menu" : "Close menu") : vi ? "Mở menu" : "Open menu"
+              panel === "mobile"
+                ? vi
+                  ? "Đóng menu"
+                  : "Close menu"
+                : vi
+                  ? "Mở menu"
+                  : "Open menu"
             }
             aria-expanded={panel === "mobile"}
             aria-controls="header-mobile"
@@ -406,7 +458,10 @@ export function Header() {
         </div>
       </div>
       {panel === "search" && (
-        <div id="header-search" className={`${styles.popover} ${styles.searchPanel}`}>
+        <div
+          id="header-search"
+          className={`${styles.popover} ${styles.searchPanel}`}
+        >
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -464,7 +519,9 @@ export function Header() {
         >
           <div className={styles.panelIntro}>
             <span className={styles.eyebrow}>VIETNAM PARASPORTS</span>
-            <p>{vi ? "Cùng nhau, vượt giới hạn." : "Beyond limits, together."}</p>
+            <p>
+              {vi ? "Cùng nhau, vượt giới hạn." : "Beyond limits, together."}
+            </p>
           </div>
           <div className={styles.mobileLinks}>
             {menu.map((id) =>
@@ -476,7 +533,11 @@ export function Header() {
                   </summary>
                   <div>
                     {sports.map(([slug, vn, en]) => (
-                      <Link key={slug} href={`/sports/${slug}`} onClick={() => setPanel(null)}>
+                      <Link
+                        key={slug}
+                        href={`/sports/${slug}`}
+                        onClick={() => setPanel(null)}
+                      >
                         {vi ? vn : en}
                       </Link>
                     ))}
@@ -496,12 +557,14 @@ export function Header() {
                   {labels[id]}
                   <ArrowRight size={15} aria-hidden="true" />
                 </Link>
-              )
+              ),
             )}
           </div>
           <div className={styles.mobileFooter}>
             <span>
-              {vi ? "Một cộng đồng. Nhiều khả năng." : "One community. Many possibilities."}
+              {vi
+                ? "Một cộng đồng. Nhiều khả năng."
+                : "One community. Many possibilities."}
             </span>
             <button
               type="button"

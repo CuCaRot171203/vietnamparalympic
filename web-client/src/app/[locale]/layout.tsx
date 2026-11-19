@@ -15,7 +15,11 @@ import AiAssistant from "@/components/AiAssistant";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 
-const inter = Inter({ subsets: ["latin"], display: "swap" });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-system-body",
+});
 
 async function fetchSettings() {
   try {
@@ -98,7 +102,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${inter.className} min-h-screen flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-white`}
+        className={`${inter.className} ${inter.variable} min-h-screen flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-white`}
       >
         <script
           type="application/ld+json"

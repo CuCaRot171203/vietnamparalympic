@@ -23,6 +23,9 @@ export default function PublicPageHero({
   imageAlt,
   primary,
   secondary,
+  eyebrow,
+  breadcrumbTitle,
+  className,
 }: {
   locale: string;
   title: string;
@@ -32,6 +35,9 @@ export default function PublicPageHero({
   imageAlt: string;
   primary?: Action;
   secondary?: Action;
+  eyebrow?: string;
+  breadcrumbTitle?: string;
+  className?: string;
 }) {
   return (
     <section
@@ -40,6 +46,7 @@ export default function PublicPageHero({
         calvera.variable,
         homeBeVietnam.variable,
         homeNeusharp.variable,
+        className,
       ].join(" ")}
       aria-labelledby="public-page-heading"
     >
@@ -53,13 +60,13 @@ export default function PublicPageHero({
             {locale === "vi" ? "Trang chủ" : "Home"}
           </Link>
           <ChevronRight size={13} aria-hidden="true" />
-          <span aria-current="page">{title}</span>
+          <span aria-current="page">{breadcrumbTitle ?? title}</span>
         </nav>
         <div className={styles.grid}>
           <div className={styles.copy}>
             <span className={styles.badge}>
               <i aria-hidden="true" />
-              Vietnam ParaSports
+              {eyebrow ?? "Vietnam ParaSports"}
             </span>
             <h1 id="public-page-heading">{title}</h1>
             <p className={styles.tagline}>{tagline}</p>

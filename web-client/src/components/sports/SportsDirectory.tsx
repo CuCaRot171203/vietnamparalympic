@@ -1,11 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { ConfigProvider, Select, theme } from "antd";
+import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, Search } from "lucide-react";
 import { sportIconSource, sportThumbnailSource } from "@/lib/sport-media";
 import { SPORT_BACKGROUNDS } from "@/lib/sport-assets";
+import {
+  sortClassifications,
+  type ClassificationOrder,
+} from "@/lib/classification-sort";
 import styles from "./sports-directory.module.css";
 
 export type DirectorySport = {
@@ -26,6 +32,7 @@ export type SportClass = {
   medicalDesc?: string;
   disabilityCriteria?: string;
   requiresAssistant: boolean;
+  createdAt?: string;
 };
 const plain = (value = "") =>
   value
@@ -59,10 +66,12 @@ export default function SportsDirectory({
   initialQuery?: string;
 }) {
   const vi = locale === "vi";
+  const { resolvedTheme } = useTheme();
   const [tab, setTab] = useState<"sports" | "classes">(initialTab);
   const [query, setQuery] = useState(initialQuery);
   const [sportId, setSportId] = useState(initialSportId);
   const [limit, setLimit] = useState(9);
+  const [classOrder, setClassOrder] = useState<ClassificationOrder>("az");
   const name = (sport: DirectorySport) =>
     (vi ? sport.nameVi : sport.nameEn) || sport.nameVi;
   const term = normalize(query);
@@ -72,262 +81,319 @@ export default function SportsDirectory({
       `${sport.nameVi} ${sport.nameEn || ""} ${sport.descVi || ""} ${sport.descEn || ""}`,
     ).includes(term),
   );
-  const filteredClasses = classifications.filter(
-    (item) =>
-      (!sportId || item.sportId === sportId) &&
-      normalize(
-        `${item.code} ${item.description || ""} ${item.medicalDesc || ""} ${item.disabilityCriteria || ""} ${sportById.get(item.sportId)?.nameVi || ""} ${sportById.get(item.sportId)?.nameEn || ""}`,
-      ).includes(term),
+  const sportNames = new Map(sports.map((sport) => [sport.id, name(sport)]));
+  const filteredClasses = sortClassifications(
+    classifications.filter(
+      (item) =>
+        (!sportId || item.sportId === sportId) &&
+        normalize(
+          `${item.code} ${item.description || ""} ${item.medicalDesc || ""} ${item.disabilityCriteria || ""} ${sportById.get(item.sportId)?.nameVi || ""} ${sportById.get(item.sportId)?.nameEn || ""}`,
+        ).includes(term),
+    ),
+    classOrder,
+    locale,
+    sportNames,
   );
   const items = tab === "sports" ? filteredSports : filteredClasses;
   const failed = tab === "sports" ? sportsError : classesError;
   return (
-    <section
-      id="sports-directory"
-      className={`${styles.container} ${styles.directory}`}
-      aria-labelledby="directory-heading"
+    <ConfigProvider
+      theme={{
+        algorithm:
+          resolvedTheme === "dark"
+            ? theme.darkAlgorithm
+            : theme.defaultAlgorithm,
+        token: {
+          colorPrimary: "#df1022",
+          borderRadius: 22,
+          controlHeight: 44,
+          fontSize: 13,
+          fontFamily: "var(--font-home-label), sans-serif",
+          colorBgContainer: "var(--surface)",
+          colorBgElevated: "var(--surface)",
+          colorText: "var(--ink)",
+          colorBorder: "var(--line)",
+        },
+      }}
     >
-      <span className={styles.badge}>
-        {vi ? "Khám phá & tìm hiểu" : "Explore & understand"}
-      </span>
-      <h2 id="directory-heading">
-        {tab === "sports"
-          ? vi
-            ? "Tìm bộ môn của bạn"
-            : "Find your sport"
-          : vi
-            ? "Tìm hiểu hạng thương tật"
-            : "Understand sport classifications"}
-      </h2>
-      <div className={styles.toolbar}>
-        <div
-          className={styles.tabs}
-          role="group"
-          aria-label={vi ? "Chọn nội dung" : "Choose content"}
-        >
-          <button
-            type="button"
-            aria-pressed={tab === "sports"}
-            onClick={() => {
-              setTab("sports");
-              setLimit(9);
-            }}
+      <section
+        id="sports-directory"
+        className={`${styles.container} ${styles.directory}`}
+        aria-labelledby="directory-heading"
+      >
+        <span className={styles.badge}>
+          {vi ? "Khám phá & tìm hiểu" : "Explore & understand"}
+        </span>
+        <h2 id="directory-heading">
+          {tab === "sports"
+            ? vi
+              ? "Tìm bộ môn của bạn"
+              : "Find your sport"
+            : vi
+              ? "Tìm hiểu hạng thương tật"
+              : "Understand sport classifications"}
+        </h2>
+        <div className={styles.toolbar}>
+          <div
+            className={styles.tabs}
+            role="group"
+            aria-label={vi ? "Chọn nội dung" : "Choose content"}
           >
-            {vi ? "Bộ môn" : "Sports"}
-            <span>{sports.length}</span>
-          </button>
-          <button
-            type="button"
-            aria-pressed={tab === "classes"}
-            onClick={() => {
-              setTab("classes");
-              setLimit(9);
-            }}
-          >
-            {vi ? "Thương tật" : "Classifications"}
-            <span>{classifications.length}</span>
-          </button>
-        </div>
-        <div className={styles.filters}>
-          {tab === "classes" && (
-            <select
-              aria-label={vi ? "Lọc theo bộ môn" : "Filter by sport"}
-              value={sportId}
-              onChange={(event) => {
-                setSportId(event.target.value);
+            <button
+              type="button"
+              aria-pressed={tab === "sports"}
+              onClick={() => {
+                setTab("sports");
                 setLimit(9);
               }}
             >
-              <option value="">{vi ? "Tất cả bộ môn" : "All sports"}</option>
-              {sports.map((sport) => (
-                <option key={sport.id} value={sport.id}>
-                  {name(sport)}
-                </option>
-              ))}
-            </select>
-          )}
-          <label className={styles.search}>
-            <Search size={16} aria-hidden="true" />
-            <input
-              aria-label={
-                vi
-                  ? "Tìm kiếm bộ môn hoặc hạng thương tật"
-                  : "Search sports or classifications"
-              }
-              placeholder={
-                tab === "sports"
-                  ? vi
-                    ? "Tìm kiếm bộ môn..."
-                    : "Search sports..."
-                  : vi
-                    ? "Tìm mã hạng, mô tả..."
-                    : "Search class codes, descriptions..."
-              }
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value);
+              {vi ? "Bộ môn" : "Sports"}
+              <span>{sports.length}</span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={tab === "classes"}
+              onClick={() => {
+                setTab("classes");
                 setLimit(9);
               }}
-            />
-          </label>
+            >
+              {vi ? "Thương tật" : "Classifications"}
+              <span>{classifications.length}</span>
+            </button>
+          </div>
+          <div className={styles.filters}>
+            {tab === "classes" && (
+              <>
+                <Select
+                  className={styles.filterSelect}
+                  aria-label={vi ? "Lọc theo bộ môn" : "Filter by sport"}
+                  value={sportId}
+                  showSearch
+                  optionFilterProp="label"
+                  getPopupContainer={(trigger) => trigger.parentElement!}
+                  onChange={(value) => {
+                    setSportId(value);
+                    setLimit(9);
+                  }}
+                  options={[
+                    { value: "", label: vi ? "Tất cả bộ môn" : "All sports" },
+                    ...[...sports]
+                      .sort((a, b) => name(a).localeCompare(name(b), locale))
+                      .map((sport) => ({
+                        value: sport.id,
+                        label: name(sport),
+                      })),
+                  ]}
+                />
+                <Select<ClassificationOrder>
+                  className={styles.sortSelect}
+                  aria-label={
+                    vi ? "Sắp xếp hạng thương tật" : "Sort classifications"
+                  }
+                  value={classOrder}
+                  getPopupContainer={(trigger) => trigger.parentElement!}
+                  onChange={(value) => {
+                    setClassOrder(value);
+                    setLimit(9);
+                  }}
+                  options={[
+                    { value: "az", label: vi ? "Tên: A–Z" : "Name: A–Z" },
+                    { value: "za", label: vi ? "Tên: Z–A" : "Name: Z–A" },
+                    { value: "sport", label: vi ? "Theo bộ môn" : "By sport" },
+                    { value: "newest", label: vi ? "Mới nhất" : "Newest" },
+                    { value: "oldest", label: vi ? "Cũ nhất" : "Oldest" },
+                  ]}
+                />
+              </>
+            )}
+            <label className={styles.search}>
+              <Search size={16} aria-hidden="true" />
+              <input
+                aria-label={
+                  vi
+                    ? "Tìm kiếm bộ môn hoặc hạng thương tật"
+                    : "Search sports or classifications"
+                }
+                placeholder={
+                  tab === "sports"
+                    ? vi
+                      ? "Tìm kiếm bộ môn..."
+                      : "Search sports..."
+                    : vi
+                      ? "Tìm mã hạng, mô tả..."
+                      : "Search class codes, descriptions..."
+                }
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setLimit(9);
+                }}
+              />
+            </label>
+          </div>
         </div>
-      </div>
-      {tab === "classes" && (
-        <p className={styles.guidance}>
-          {vi
-            ? "Thông tin phân hạng theo từng bộ môn do hệ thống cập nhật. Kết quả phân hạng thi đấu cần được xác nhận bởi hội đồng chuyên môn."
-            : "Classifications are listed by sport. Competition classification must be confirmed by qualified classifiers."}
-        </p>
-      )}
-      {failed ? (
-        <div className={styles.empty}>
-          <p>
+        {tab === "classes" && (
+          <p className={styles.guidance}>
             {vi
-              ? "Chưa thể tải dữ liệu. Vui lòng thử lại."
-              : "Unable to load this data. Please try again."}
+              ? "Thông tin phân hạng theo từng bộ môn do hệ thống cập nhật. Kết quả phân hạng thi đấu cần được xác nhận bởi hội đồng chuyên môn."
+              : "Classifications are listed by sport. Competition classification must be confirmed by qualified classifiers."}
           </p>
-          <a href={`/${locale}/sports`}>
-            {vi ? "Tải lại trang" : "Reload page"}
-            <ArrowRight size={14} />
-          </a>
-        </div>
-      ) : !items.length ? (
-        <p className={styles.empty} role="status">
-          {vi ? "Không tìm thấy kết quả phù hợp." : "No matching results."}
-        </p>
-      ) : tab === "sports" ? (
-        <div className={styles.grid}>
-          {filteredSports.slice(0, limit).map((sport) => (
-            <article key={sport.id} className={styles.card}>
-              <Link
-                className={styles.image}
-                href={`/${locale}/sports/${sport.slug}`}
-                aria-label={name(sport)}
-              >
-                {sport.thumbnail || SPORT_BACKGROUNDS[sport.slug] ? (
-                  <Image
-                    className={styles.cardPhoto}
-                    src={sportThumbnailSource(sport.thumbnail, sport.slug)}
-                    alt=""
-                    fill
-                    sizes="(max-width:639px) 100vw, (max-width:1023px) 50vw, 33vw"
-                    unoptimized={Boolean(sport.thumbnail)}
-                  />
-                ) : (
-                  <span className={styles.photoFallback}>
-                    Vietnam ParaSports
-                  </span>
-                )}
-                {sportIconSource(sport.icon, sport.slug) && (
-                  <span className={styles.logo}>
-                    <img
-                      src={sportIconSource(sport.icon, sport.slug)!}
-                      alt=""
-                      width={36}
-                      height={36}
-                    />
-                  </span>
-                )}
-              </Link>
-              <div className={styles.cardBody}>
-                <span className={styles.category}>
-                  {vi ? "Bộ môn thể thao" : "Sport"}
-                </span>
-                <h3>
-                  <Link href={`/${locale}/sports/${sport.slug}`}>
-                    {name(sport)}
-                  </Link>
-                </h3>
-                <p>
-                  {plain((vi ? sport.descVi : sport.descEn) || sport.descVi) ||
-                    (vi
-                      ? "Khám phá tin tức, tập luyện và cộng đồng của bộ môn."
-                      : "Explore the sport's stories, training and community.")}
-                </p>
+        )}
+        {failed ? (
+          <div className={styles.empty}>
+            <p>
+              {vi
+                ? "Chưa thể tải dữ liệu. Vui lòng thử lại."
+                : "Unable to load this data. Please try again."}
+            </p>
+            <a href={`/${locale}/sports`}>
+              {vi ? "Tải lại trang" : "Reload page"}
+              <ArrowRight size={14} />
+            </a>
+          </div>
+        ) : !items.length ? (
+          <p className={styles.empty} role="status">
+            {vi ? "Không tìm thấy kết quả phù hợp." : "No matching results."}
+          </p>
+        ) : tab === "sports" ? (
+          <div className={styles.grid}>
+            {filteredSports.slice(0, limit).map((sport) => (
+              <article key={sport.id} className={styles.card}>
                 <Link
-                  className={styles.cardLink}
+                  className={styles.image}
                   href={`/${locale}/sports/${sport.slug}`}
+                  aria-label={name(sport)}
                 >
-                  {vi ? "Khám phá bộ môn" : "Explore sport"}
-                  <span>
-                    <ArrowRight size={14} />
-                  </span>
+                  {sport.thumbnail || SPORT_BACKGROUNDS[sport.slug] ? (
+                    <Image
+                      className={styles.cardPhoto}
+                      src={sportThumbnailSource(sport.thumbnail, sport.slug)}
+                      alt=""
+                      fill
+                      sizes="(max-width:639px) 100vw, (max-width:1023px) 50vw, 33vw"
+                      unoptimized={Boolean(sport.thumbnail)}
+                    />
+                  ) : (
+                    <span className={styles.photoFallback}>
+                      Vietnam ParaSports
+                    </span>
+                  )}
+                  {sportIconSource(sport.icon, sport.slug) && (
+                    <span className={styles.logo}>
+                      <img
+                        src={sportIconSource(sport.icon, sport.slug)!}
+                        alt=""
+                        width={36}
+                        height={36}
+                      />
+                    </span>
+                  )}
                 </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <div className={styles.classGrid}>
-          {filteredClasses.slice(0, limit).map((item) => {
-            const sport = sportById.get(item.sportId);
-            return (
-              <article key={item.id} className={styles.classCard}>
-                <div className={styles.classTop}>
-                  <span className={styles.classCode}>{item.code}</span>
-                  {sport && (
+                <div className={styles.cardBody}>
+                  <span className={styles.category}>
+                    {vi ? "Bộ môn thể thao" : "Sport"}
+                  </span>
+                  <h3>
                     <Link href={`/${locale}/sports/${sport.slug}`}>
                       {name(sport)}
-                      <ArrowRight size={13} />
                     </Link>
-                  )}
+                  </h3>
+                  <p>
+                    {plain(
+                      (vi ? sport.descVi : sport.descEn) || sport.descVi,
+                    ) ||
+                      (vi
+                        ? "Khám phá tin tức, tập luyện và cộng đồng của bộ môn."
+                        : "Explore the sport's stories, training and community.")}
+                  </p>
+                  <Link
+                    className={styles.cardLink}
+                    href={`/${locale}/sports/${sport.slug}`}
+                  >
+                    {vi ? "Khám phá bộ môn" : "Explore sport"}
+                    <span>
+                      <ArrowRight size={14} />
+                    </span>
+                  </Link>
                 </div>
-                <h3>{vi ? "Mô tả chức năng" : "Functional description"}</h3>
-                <p>
-                  {plain(item.description) ||
-                    (vi ? "Đang cập nhật mô tả." : "Description coming soon.")}
-                </p>
-                {(item.medicalDesc || item.disabilityCriteria) && (
-                  <details>
-                    <summary>
-                      {vi ? "Thông tin phân hạng" : "Classification details"}
-                      <ChevronDown size={14} />
-                    </summary>
-                    {item.medicalDesc && (
-                      <div>
-                        <h4>{vi ? "Mô tả y khoa" : "Medical description"}</h4>
-                        <p>{plain(item.medicalDesc)}</p>
-                      </div>
-                    )}
-                    {item.disabilityCriteria && (
-                      <div>
-                        <h4>
-                          {vi ? "Tiêu chí khuyết tật" : "Disability criteria"}
-                        </h4>
-                        <p>{plain(item.disabilityCriteria)}</p>
-                      </div>
-                    )}
-                  </details>
-                )}
-                {item.requiresAssistant && (
-                  <span className={styles.assistance}>
-                    {vi
-                      ? "Cần hỗ trợ viên khi thi đấu"
-                      : "Assistant required in competition"}
-                  </span>
-                )}
               </article>
-            );
-          })}
-        </div>
-      )}
-      {!failed && items.length > 0 && (
-        <div className={styles.results} aria-live="polite">
-          {vi
-            ? `Đang hiển thị ${Math.min(limit, items.length)} / ${items.length} ${tab === "sports" ? "bộ môn" : "hạng thương tật"}`
-            : `Showing ${Math.min(limit, items.length)} / ${items.length} results`}
-        </div>
-      )}
-      {!failed && limit < items.length && (
-        <button
-          type="button"
-          className={styles.loadMore}
-          onClick={() => setLimit((value) => value + 9)}
-        >
-          {vi ? "Xem thêm" : "Load more"}
-          <ChevronDown size={16} />
-        </button>
-      )}
-    </section>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.classGrid}>
+            {filteredClasses.slice(0, limit).map((item) => {
+              const sport = sportById.get(item.sportId);
+              return (
+                <article key={item.id} className={styles.classCard}>
+                  <div className={styles.classTop}>
+                    <span className={styles.classCode}>{item.code}</span>
+                    {sport && (
+                      <Link href={`/${locale}/sports/${sport.slug}`}>
+                        {name(sport)}
+                        <ArrowRight size={13} />
+                      </Link>
+                    )}
+                  </div>
+                  <h3>{vi ? "Mô tả chức năng" : "Functional description"}</h3>
+                  <p>
+                    {plain(item.description) ||
+                      (vi
+                        ? "Đang cập nhật mô tả."
+                        : "Description coming soon.")}
+                  </p>
+                  {(item.medicalDesc || item.disabilityCriteria) && (
+                    <details>
+                      <summary>
+                        {vi ? "Thông tin phân hạng" : "Classification details"}
+                        <ChevronDown size={14} />
+                      </summary>
+                      {item.medicalDesc && (
+                        <div>
+                          <h4>{vi ? "Mô tả y khoa" : "Medical description"}</h4>
+                          <p>{plain(item.medicalDesc)}</p>
+                        </div>
+                      )}
+                      {item.disabilityCriteria && (
+                        <div>
+                          <h4>
+                            {vi ? "Tiêu chí khuyết tật" : "Disability criteria"}
+                          </h4>
+                          <p>{plain(item.disabilityCriteria)}</p>
+                        </div>
+                      )}
+                    </details>
+                  )}
+                  {item.requiresAssistant && (
+                    <span className={styles.assistance}>
+                      {vi
+                        ? "Cần hỗ trợ viên khi thi đấu"
+                        : "Assistant required in competition"}
+                    </span>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        )}
+        {!failed && items.length > 0 && (
+          <div className={styles.results} aria-live="polite">
+            {vi
+              ? `Đang hiển thị ${Math.min(limit, items.length)} / ${items.length} ${tab === "sports" ? "bộ môn" : "hạng thương tật"}`
+              : `Showing ${Math.min(limit, items.length)} / ${items.length} results`}
+          </div>
+        )}
+        {!failed && limit < items.length && (
+          <button
+            type="button"
+            className={styles.loadMore}
+            onClick={() => setLimit((value) => value + 9)}
+          >
+            {vi ? "Xem thêm" : "Load more"}
+            <ChevronDown size={16} />
+          </button>
+        )}
+      </section>
+    </ConfigProvider>
   );
 }

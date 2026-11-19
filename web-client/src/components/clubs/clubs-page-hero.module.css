@@ -60,7 +60,7 @@
   margin: 0 0 28px;
   font-family: var(--font-clubs-calvera), sans-serif;
   font-weight: 400;
-  font-size: 100px;
+  font-size: 96px;
   line-height: 1.08;
   letter-spacing: 0;
   color: #fff;
@@ -328,7 +328,7 @@
 }
 @media (max-width: 1023px) {
   .copy h1 {
-    font-size: 80px;
+    font-size: 76px;
   }
   .intro {
     gap: 24px;
@@ -359,7 +359,7 @@
     margin: 28px 0 32px;
   }
   .copy h1 {
-    font-size: clamp(66px, 13vw, 90px);
+    font-size: clamp(62px, calc(13vw - 4px), 86px);
     margin-bottom: 20px;
   }
   .copy p {
