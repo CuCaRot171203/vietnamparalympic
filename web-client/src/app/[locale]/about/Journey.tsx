@@ -4,11 +4,18 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import {
   BookOpen,
+  CalendarDays,
+  Flag,
+  Flame,
+  Heart,
   Megaphone,
+  Mic,
   Monitor,
   Play,
   Trophy,
+  Target,
   Users,
+  Video,
 } from "lucide-react";
 import { generations } from "./generations";
 import AnimatedDetails from "./AnimatedDetails";
@@ -19,6 +26,13 @@ const activityIcons = [
   [Megaphone, Trophy, Play, Users],
   [Users, Monitor, BookOpen],
   [Trophy, Play, Users, Monitor],
+];
+const sloganIcons = [Target, Users, Video, Flame];
+const highlightIcons = [
+  [Trophy, Users],
+  [Trophy, Mic],
+  [Monitor, Video, BookOpen],
+  [Trophy, Video, Users],
 ];
 export default function Journey() {
   const [active, setActive] = useState(3);
@@ -60,61 +74,102 @@ export default function Journey() {
           aria-label="Các thế hệ Vietnam ParaSports"
           className={styles.timeline}
         >
-          {generations.map((generation, i) => (
-            <button
-              key={generation.label}
-              ref={(el) => {
-                tabs.current[i] = el;
-              }}
-              type="button"
-              role="tab"
-              id={"gen-tab-" + i}
-              aria-controls={"gen-panel-" + i}
-              aria-selected={active === i}
-              tabIndex={active === i ? 0 : -1}
-              onClick={() => setActive(i)}
-              onKeyDown={(event) => {
-                const next =
-                  event.key === "ArrowRight"
-                    ? (i + 1) % 4
-                    : event.key === "ArrowLeft"
-                      ? (i + 3) % 4
-                      : event.key === "Home"
-                        ? 0
-                        : event.key === "End"
-                          ? 3
-                          : null;
-                if (next !== null) {
-                  event.preventDefault();
-                  setActive(next);
-                  tabs.current[next]?.focus();
-                }
-              }}
-              className={styles.genTab}
-            >
-              <span className={styles.timelineDot} aria-hidden="true" />
-              <span className={styles.genTabMedia}>
-                <Image
-                  src={"/ABOUT/gen_" + (i + 1) + ".jpg"}
-                  alt={"Tập thể Vietnam ParaSports Gen " + (i + 1)}
-                  width={640}
-                  height={360}
-                  sizes="(max-width: 900px) 45vw, 23vw"
-                />
-              </span>
-              <span className={styles.genTabBody}>
-                <span className={styles.genMeta}>
-                  GEN {i + 1}{" "}
-                  <span>| {generation.time.replace(/\s/g, "")}</span>
+          {generations.map((generation, i) => {
+            const SloganIcon = sloganIcons[i];
+            const MessageIcon = i === 0 ? Heart : Flag;
+            return (
+              <button
+                key={generation.label}
+                ref={(el) => {
+                  tabs.current[i] = el;
+                }}
+                type="button"
+                role="tab"
+                id={"gen-tab-" + i}
+                aria-controls={"gen-panel-" + i}
+                aria-selected={active === i}
+                tabIndex={active === i ? 0 : -1}
+                onClick={() => setActive(i)}
+                onKeyDown={(event) => {
+                  const next =
+                    event.key === "ArrowRight"
+                      ? (i + 1) % 4
+                      : event.key === "ArrowLeft"
+                        ? (i + 3) % 4
+                        : event.key === "Home"
+                          ? 0
+                          : event.key === "End"
+                            ? 3
+                            : null;
+                  if (next !== null) {
+                    event.preventDefault();
+                    setActive(next);
+                    tabs.current[next]?.focus();
+                  }
+                }}
+                className={styles.genTab}
+              >
+                <span className={styles.timelineDot} aria-hidden="true" />
+                <span className={styles.genTabMedia}>
+                  <Image
+                    src={"/ABOUT/gen_" + (i + 1) + ".jpg"}
+                    alt={"Tập thể Vietnam ParaSports Gen " + (i + 1)}
+                    width={640}
+                    height={360}
+                    sizes="(max-width: 900px) 45vw, 23vw"
+                  />
                 </span>
-                <strong>{generation.title}</strong>
-                <span className={styles.genMilestones}>
-                  <span>{generation.slogan}</span>
-                  {generation.quote && <span>{generation.quote}</span>}
+                <span className={styles.genTabBody}>
+                  <span className={styles.genMeta}>
+                    <CalendarDays size={13} aria-hidden="true" />
+                    GEN {i + 1}{" "}
+                    <span>| {generation.time.replace(/\s/g, "")}</span>
+                  </span>
+                  <strong>{generation.title}</strong>
+                  <span className={styles.genMilestones}>
+                    {generation.highlights.map(({ text, value }, index) => {
+                      const Icon = highlightIcons[i][index];
+                      const [before, after] = value
+                        ? text.split(value)
+                        : [text];
+                      return (
+                        <span className={styles.genHighlight} key={text}>
+                          <Icon
+                            size={18}
+                            strokeWidth={1.7}
+                            aria-hidden="true"
+                          />
+                          <span>
+                            {before}
+                            {value && <b>{value}</b>}
+                            {after}
+                          </span>
+                        </span>
+                      );
+                    })}
+                    <span>
+                      <SloganIcon
+                        size={18}
+                        strokeWidth={1.7}
+                        aria-hidden="true"
+                      />
+                      <span>{generation.cardSlogan}</span>
+                    </span>
+                    {generation.cardQuote && (
+                      <span>
+                        <MessageIcon
+                          size={18}
+                          strokeWidth={1.7}
+                          aria-hidden="true"
+                        />
+                        <span>{generation.cardQuote}</span>
+                      </span>
+                    )}
+                  </span>
                 </span>
-              </span>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
       <article

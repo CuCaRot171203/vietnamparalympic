@@ -5,6 +5,12 @@ export const generations = [
     time: "04/2024 – 02/2025",
     title: "Tình yêu của Thể thao dành cho người khuyết tật",
     slogan: "Vượt giới hạn, chạm tương lai",
+    cardSlogan: "Vượt giới hạn",
+    cardQuote: "Tình yêu thương",
+    highlights: [
+      { text: "Paralympic Paris 2024", value: "2024" },
+      { text: "Boccia tại Thụy An", value: "" },
+    ],
     quote: "Có tình yêu thương, không gì là không thể",
     intro:
       "Gen 1 khởi đầu Vietnam ParaSports với chiến dịch truyền thông gắn với Paralympic Paris 2024, lan tỏa những câu chuyện vận động viên và tình yêu dành cho thể thao người khuyết tật Việt Nam.",
@@ -31,6 +37,13 @@ export const generations = [
     time: "08/2025 – 04/2026",
     title: "FPTU ĐỒNG HÀNH PARASPORT VIỆT NAM 2026",
     slogan: "Thấy mình trong thể thao",
+    cardSlogan: "Thấy mình trong thể thao",
+    cardQuote: "Dấu mốc A30–A80",
+    highlights: [
+      { text: "ASEAN Para Games 13", value: "13" },
+      // Tài liệu ghi “sản xuất ba tập podcast”.
+      { text: "3 tập podcast", value: "3" },
+    ],
     quote: "Dấu mốc A30 – ASEAN Para Games 13 – A80: Cùng nhau tiến bước",
     intro:
       "Gen 2 kết hợp truyền thông đa nền tảng với các hoạt động trải nghiệm thực tế, giúp người khuyết tật không chỉ theo dõi những câu chuyện thể thao mà còn nhận thấy cơ hội tham gia của chính mình.",
@@ -61,6 +74,12 @@ export const generations = [
     time: "05/2026 – 08/2026",
     title: "VIETNAM CREATOR LAB",
     slogan: "THỂ THAO KHÔNG RÀO CẢN",
+    cardSlogan: "Thể thao không rào cản",
+    highlights: [
+      { text: "Đào tạo trực tuyến", value: "" },
+      { text: "TikTok cá nhân", value: "" },
+      { text: "Học liệu số", value: "" },
+    ],
     intro:
       "Gen 3 tập trung hỗ trợ vận động viên người khuyết tật phát triển kỹ năng truyền thông số, xây dựng kênh cá nhân và chủ động chia sẻ câu chuyện thể thao của chính mình.",
     activities: [
@@ -86,6 +105,12 @@ export const generations = [
     time: "10/2026 – 12/2026",
     title: "Di sản vinh quang",
     slogan: "Khơi lửa đam mê",
+    cardSlogan: "Khơi lửa đam mê",
+    highlights: [
+      { text: "Asian Para Games 2026", value: "2026" },
+      { text: "Cuộc thi TikTok", value: "" },
+      { text: "Kết nối cộng đồng", value: "" },
+    ],
     intro:
       "Tiếp nối hành trình của ba thế hệ trước, Gen 4 tập trung lan tỏa giá trị thể thao người khuyết tật và phát triển kết nối cộng đồng, giúp người khuyết tật có thêm thông tin, cơ hội trải nghiệm và tham gia tập luyện phù hợp.",
     activities: [

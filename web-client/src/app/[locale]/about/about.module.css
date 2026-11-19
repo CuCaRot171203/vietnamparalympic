@@ -930,6 +930,11 @@
   background: #fae9ee;
   color: #a5213d;
 }
+.genMeta svg {
+  flex: 0 0 13px;
+  width: 13px;
+  height: 13px;
+}
 .genTab strong {
   font-size: 18px;
   align-self: start;
@@ -950,7 +955,7 @@
 }
 .genMilestones > span {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   text-align: left;
   font-size: 13px;
@@ -959,17 +964,22 @@
   background: transparent;
   min-height: 28px;
   color: #6c525b;
+  text-transform: none;
 }
 .genMilestones svg {
   flex: 0 0 18px;
   width: 18px;
   height: 18px;
   color: #ba6c80;
+  margin-top: 2px;
 }
 .genMilestones b {
   color: #a7314c;
-  font-size: 16px;
+  font-size: inherit;
   font-weight: 600;
+}
+.genMilestones .genHighlight {
+  color: var(--journey-ink);
 }
 .genSpotlight {
   position: relative;
@@ -1238,7 +1248,7 @@
     width: 20px;
   }
   .genMilestones b {
-    font-size: 16px;
+    font-size: inherit;
   }
   .genTab strong {
     font-size: 16px;
