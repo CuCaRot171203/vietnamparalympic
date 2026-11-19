@@ -1,10 +1,9 @@
 "use client";
 import { useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import {
   BookOpen,
-  Database,
-  Flame,
   Megaphone,
   Monitor,
   Play,
@@ -15,136 +14,24 @@ import { generations } from "./generations";
 import AnimatedDetails from "./AnimatedDetails";
 import styles from "./about.module.css";
 
-const summaries = [
-  ["2024", "Đặt nền móng", "70 trẻ tiếp cận Boccia · 43,81 triệu đồng gây quỹ"],
-  ["2025–2026", "Lan tỏa kiến thức", "ASEAN Para Games · Kiến thức bộ môn"],
-  ["05–08/2026", "Trao quyền sáng tạo", "30 vận động viên · 42 học liệu số"],
-  ["2026", "Viết tiếp di sản", "Kết nối cộng đồng thể thao người khuyết tật"],
-];
-const headings = new Set([
-  "Ý nghĩa tổng quan",
-  "Hoạt động nổi bật",
-  "Hoạt động và định hướng nổi bật",
-  "Dấu ấn tiêu biểu",
-  "Giá trị để lại",
-  "Chúng tôi là ai?",
-  "Mục tiêu của chúng tôi",
-  "Các hoạt động nổi bật",
-  "Những dấu ấn của Gen 4",
-  "Giá trị chúng tôi tiếp tục xây dựng",
-]);
-const milestones = [
-  [
-    { icon: Users, value: "70", text: "trẻ tiếp cận Boccia" },
-    { icon: Database, value: "43,81", text: "triệu đồng gây quỹ" },
-  ],
-  [
-    { icon: Trophy, value: "", text: "Truyền thông ASEAN Para Games" },
-    { icon: BookOpen, value: "", text: "Giới thiệu bộ môn, luật thi đấu" },
-  ],
-  [
-    { icon: Users, value: "30", text: "vận động viên" },
-    { icon: Play, value: "42", text: "học liệu số" },
-  ],
-  [
-    {
-      icon: Flame,
-      value: "",
-      text: "Phát triển cộng đồng thể thao người khuyết tật",
-    },
-  ],
-];
-const activities = [
-  [
-    {
-      icon: Megaphone,
-      title: "Kênh truyền thông",
-      text: "Đặt nền móng Vietnam ParaSports.",
-    },
-    {
-      icon: Trophy,
-      title: "Paris 2024",
-      text: "Lan tỏa hành trình vận động viên.",
-    },
-    {
-      icon: Users,
-      title: "Trải nghiệm Boccia",
-      text: "Đồng hành cùng trẻ tại Thụy An.",
-    },
-  ],
-  [
-    {
-      icon: Trophy,
-      title: "ASEAN Para Games",
-      text: "Phát triển truyền thông giải đấu.",
-    },
-    {
-      icon: BookOpen,
-      title: "Kiến thức bộ môn",
-      text: "Giới thiệu luật và kiến thức nhập môn.",
-    },
-    {
-      icon: Megaphone,
-      title: "Chuyện vận động viên",
-      text: "Góc nhìn từ thực tế thi đấu.",
-    },
-  ],
-  [
-    {
-      icon: Monitor,
-      title: "4 buổi đào tạo",
-      text: "Kỹ năng truyền thông và sáng tạo.",
-    },
-    { icon: Users, title: "Creator Lab", text: "Đà Nẵng, TP.HCM và Hà Nội." },
-    {
-      icon: Play,
-      title: "30 kênh TikTok",
-      text: "Đồng hành cùng vận động viên.",
-    },
-    {
-      icon: BookOpen,
-      title: "42 học liệu số",
-      text: "Tiếp nối nguồn lực sáng tạo.",
-    },
-  ],
-  [
-    {
-      icon: Users,
-      title: "Tuyến cộng đồng",
-      text: "Từ 23/10/2026 · Kết nối bộ môn và CLB.",
-    },
-    {
-      icon: Trophy,
-      title: "Asian Para Games 2026",
-      text: "Lan tỏa hành trình của đoàn Việt Nam.",
-    },
-    {
-      icon: Play,
-      title: "Cuộc thi TikTok",
-      text: "Chia sẻ câu chuyện thể thao.",
-    },
-    {
-      icon: Monitor,
-      title: "Phát triển website",
-      text: "Thông tin bộ môn và câu lạc bộ.",
-    },
-  ],
+const activityIcons = [
+  [Trophy, Megaphone, Users],
+  [Megaphone, Trophy, Play, Users],
+  [Users, Monitor, BookOpen],
+  [Trophy, Play, Users, Monitor],
 ];
 export default function Journey() {
   const [active, setActive] = useState(3);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const gen = generations[active];
-  const groups: { title: string; paragraphs: string[] }[] = [];
-  for (const text of gen.blocks) {
-    if (headings.has(text)) groups.push({ title: text, paragraphs: [] });
-    else {
-      if (!groups.length) groups.push({ title: "Thông điệp", paragraphs: [] });
-      groups[groups.length - 1].paragraphs.push(text);
-    }
-  }
-  const overview = groups.filter((g) =>
-    ["Thông điệp", "Ý nghĩa tổng quan", "Chúng tôi là ai?"].includes(g.title),
-  );
+  const groups = [
+    { title: "Giới thiệu", paragraphs: [gen.intro] },
+    {
+      title: "Hoạt động nổi bật",
+      paragraphs: gen.activities.map((activity) => activity.text),
+    },
+    { title: gen.impactTitle, paragraphs: [gen.impact] },
+  ];
   return (
     <section
       id="journey"
@@ -154,12 +41,18 @@ export default function Journey() {
       <div className={styles.container}>
         <header className={styles.journeyHeader}>
           <span className={styles.journeyRule} aria-hidden="true" />
+          <span className={styles.journeyEyebrow}>HÀNH TRÌNH PHÁT TRIỂN</span>
           <h2 id="journey-heading" className={styles.sectionTitle}>
-            Hành trình qua các thế hệ
+            Hành trình Vietnam ParaSports
           </h2>
           <p className={styles.journeyLead}>
-            Mỗi thế hệ một dấu ấn, cùng vun đắp cộng đồng thể thao người khuyết
-            tật.
+            Bốn thế hệ – Một hành trình phát triển
+          </p>
+          <p className={styles.journeyDescription}>
+            Từ năm 2024, Vietnam ParaSports được phát triển qua bốn thế hệ, mỗi
+            thế hệ mang một chiến dịch, một cách tiếp cận và những đóng góp
+            riêng. Khám phá từng dấu mốc để nhìn lại hành trình của Vietnam
+            ParaSports.
           </p>
         </header>
         <div
@@ -167,9 +60,9 @@ export default function Journey() {
           aria-label="Các thế hệ Vietnam ParaSports"
           className={styles.timeline}
         >
-          {summaries.map(([time, title], i) => (
+          {generations.map((generation, i) => (
             <button
-              key={title}
+              key={generation.label}
               ref={(el) => {
                 tabs.current[i] = el;
               }}
@@ -211,19 +104,13 @@ export default function Journey() {
               </span>
               <span className={styles.genTabBody}>
                 <span className={styles.genMeta}>
-                  GEN {i + 1} <span>| {time}</span>
+                  GEN {i + 1}{" "}
+                  <span>| {generation.time.replace(/\s/g, "")}</span>
                 </span>
-                <strong>{title}</strong>
+                <strong>{generation.title}</strong>
                 <span className={styles.genMilestones}>
-                  {milestones[i].map(({ icon: Icon, value, text }) => (
-                    <span key={text}>
-                      <Icon size={23} aria-hidden="true" />
-                      <span>
-                        {value && <b>{value} </b>}
-                        {text}
-                      </span>
-                    </span>
-                  ))}
+                  <span>{generation.slogan}</span>
+                  {generation.quote && <span>{generation.quote}</span>}
                 </span>
               </span>
             </button>
@@ -244,24 +131,11 @@ export default function Journey() {
               <span className={styles.spotlightRule} aria-hidden="true" />
               <h3>
                 GEN {active + 1} –<br />
-                {active === 3 ? "DI SẢN VINH QUANG" : gen.title.split(" – ")[0]}
+                {gen.title}
               </h3>
-              <p className={styles.spotlightAccent}>
-                {active === 3 ? "Khơi lửa đam mê" : gen.title.split(" – ")[1]}
-              </p>
-              <blockquote>
-                {active === 3
-                  ? "Mỗi khởi đầu mới là một di sản được viết."
-                  : gen.blocks[0]
-                      .replace("Thông điệp chính: ", "")
-                      .replace(/[“”]/g, "")}
-              </blockquote>
-              <p className={styles.spotlightIntro}>
-                {active === 3
-                  ? "Kết nối người khuyết tật với bộ môn phù hợp, câu lạc bộ và cơ hội tập luyện."
-                  : overview.find((g) => g.title !== "Thông điệp")
-                      ?.paragraphs[0]}
-              </p>
+              <p className={styles.spotlightAccent}>{gen.slogan}</p>
+              {gen.quote && <blockquote>{gen.quote}</blockquote>}
+              <p className={styles.spotlightIntro}>{gen.intro}</p>
             </div>
             <figure
               className={[
@@ -291,18 +165,30 @@ export default function Journey() {
               <figcaption>{gen.label}</figcaption>
             </figure>
           </div>
-          <div className={styles.activityGrid}>
-            {activities[active].map(({ icon: Icon, title, text }) => (
-              <div className={styles.activityCard} key={title}>
-                <span className={styles.activityIcon}>
-                  <Icon size={27} aria-hidden="true" />
-                </span>
-                <div>
-                  <h4>{title}</h4>
-                  <p>{text}</p>
+          <div
+            className={styles.activityGrid}
+            style={
+              { "--activity-columns": gen.activities.length } as CSSProperties
+            }
+          >
+            {gen.activities.map(({ title, text }, index) => {
+              const Icon = activityIcons[active][index];
+              return (
+                <div className={styles.activityCard} key={title}>
+                  <span className={styles.activityIcon}>
+                    <Icon size={27} aria-hidden="true" />
+                  </span>
+                  <div>
+                    {title && <h4>{title}</h4>}
+                    <p>
+                      {text.startsWith(title + ":")
+                        ? text.slice(title.length + 1).trim()
+                        : text}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className={styles.genDetails}>
             {groups.map((group) => (

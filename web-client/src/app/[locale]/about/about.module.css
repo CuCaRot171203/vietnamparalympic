@@ -807,6 +807,16 @@
 .journeyHeader {
   margin: 0 0 26px;
 }
+.journeyHeader .journeyEyebrow {
+  margin-top: 16px;
+}
+.journeyDescription {
+  max-width: 900px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.85;
+}
 .journeyRule,
 .spotlightRule {
   display: block;
@@ -837,6 +847,10 @@
 }
 .genTab {
   align-items: stretch;
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 4;
+  row-gap: 0;
   gap: 0;
   border: 1px solid #eee5e8;
   background: #fff;
@@ -851,7 +865,7 @@
     box-shadow 220ms ease;
 }
 .genTab:hover {
-  transform: translateY(-3px);
+  transform: none;
   border-color: #d6b2bb;
   box-shadow: 0 12px 28px #6b15200d;
 }
@@ -867,10 +881,11 @@
   overflow: hidden;
 }
 .genTabBody {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  flex: 1;
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 3;
+  row-gap: 0;
+  justify-items: start;
   padding: 18px 10px 16px;
 }
 .genTab img {
@@ -899,6 +914,7 @@
 }
 .genMeta {
   justify-content: center;
+  align-self: start;
   padding: 3px 9px;
   background: #f7f3f4;
   color: #84626b;
@@ -916,6 +932,7 @@
 }
 .genTab strong {
   font-size: 18px;
+  align-self: start;
   line-height: 1.5;
   font-weight: 600;
   padding: 0;
@@ -923,6 +940,7 @@
 }
 .genMilestones {
   display: grid;
+  align-content: start;
   gap: 12px;
   width: 100%;
   padding: 0;
@@ -1001,7 +1019,7 @@
   font-weight: 800;
   font-style: italic;
   color: #fff;
-  font-size: clamp(28px, 3vw, 43px);
+  font-size: clamp(26px, 2.5vw, 38px);
   line-height: 1.35;
   margin: 0 0 12px;
   overflow-wrap: normal;
@@ -1009,7 +1027,8 @@
 .spotlightAccent {
   display: inline-block;
   padding: 2px 20px 5px;
-  font-size: clamp(23px, 2.5vw, 34px);
+  max-width: 100%;
+  font-size: clamp(21px, 2vw, 30px);
   line-height: 1.4;
   color: #750c23;
   background: #ffb6bd;
@@ -1071,7 +1090,7 @@
 }
 .activityGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--activity-columns, 4), minmax(0, 1fr));
   gap: 14px;
   margin-top: 30px;
   animation: generationEnter 400ms 60ms cubic-bezier(0.22, 1, 0.36, 1) both;
