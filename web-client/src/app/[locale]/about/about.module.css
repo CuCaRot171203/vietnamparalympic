@@ -165,14 +165,16 @@
 .page .storyTitle,
 .page .missionTitle,
 .page .journeyHeader .sectionTitle,
+.page .journeyHeader .journeyEyebrow,
 .page .spiritTitle {
-  color: #ae142b;
+  color: #000;
 }
 :global(.dark) .page .storyTitle,
 :global(.dark) .page .missionTitle,
 :global(.dark) .page .journeyHeader .sectionTitle,
+:global(.dark) .page .journeyHeader .journeyEyebrow,
 :global(.dark) .page .spiritTitle {
-  color: #e34b63;
+  color: #fff;
 }
 .storyText {
   font-size: 14px;
@@ -799,13 +801,29 @@
   --journey-red: #cf1228;
   --journey-ink: #32131b;
   --journey-border: #efd7dc;
+  overflow-x: clip;
   padding: 56px 0 0;
   background:
     radial-gradient(ellipse at 85% 20%, #fff0f2, transparent 65%), #fff;
   color: var(--journey-ink);
 }
 .journeyHeader {
+  position: relative;
+  isolation: isolate;
   margin: 0 0 26px;
+}
+.journeyHeader::before {
+  content: "";
+  position: absolute;
+  top: 48px;
+  bottom: -24px;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: -1;
+  background: url("/ABOUT/Ribbon.webp") center / cover no-repeat;
+  opacity: 0.16;
+  pointer-events: none;
 }
 .journeyHeader .journeyEyebrow {
   margin-top: 16px;
@@ -1023,6 +1041,30 @@
 .spotlightRule {
   background: #ffb5b6;
   margin-bottom: 18px;
+}
+.genSpotlight .genCopy {
+  position: relative;
+  isolation: isolate;
+}
+/* CUSTOMIZE LOGO: fixed placement within the left copy, independent of the text flow. */
+.genLogoWatermark {
+  --logo-width: 58.5%;
+  --logo-left: calc(45% - 48px);
+  --logo-top: calc(50% + 48px);
+  --logo-opacity: 0.3;
+  position: absolute;
+  left: var(--logo-left);
+  top: var(--logo-top);
+  width: var(--logo-width);
+  max-width: 306px;
+  height: auto;
+  aspect-ratio: 310 / 615;
+  transform: translate(-50%, -50%);
+  opacity: var(--logo-opacity);
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
 }
 .genSpotlight .genCopy h3 {
   font-family: var(--font-home-label), sans-serif;

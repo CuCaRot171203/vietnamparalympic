@@ -183,6 +183,19 @@ export default function Journey() {
         <div className={styles.container}>
           <div className={styles.genOverview}>
             <div className={styles.genCopy}>
+              {/* Logo watermark: crop only the symbol; customize placement in .genLogoWatermark. */}
+              <svg
+                className={styles.genLogoWatermark}
+                viewBox="130 190 310 615"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <image
+                  href="/KV/logo_white.png"
+                  width="1774"
+                  height="887"
+                />
+              </svg>
               <span className={styles.spotlightRule} aria-hidden="true" />
               <h3>
                 GEN {active + 1} –<br />
