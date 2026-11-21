@@ -1004,10 +1004,22 @@
   isolation: isolate;
   color: #fff;
   padding: 44px 0 32px;
-  /* Keep image scale and position stable when detail panels expand. */
+  background: #200a08;
+}
+.genSpotlight::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 5760 / 3996;
+  z-index: -1;
+  pointer-events: none;
+  /* Stable image size; fade out before the navigation marks baked into the asset. */
   background:
     linear-gradient(#00000040, #00000040),
-    #200a08 url("/DES/else/NEWS_BG.webp") center top / 100% auto no-repeat;
+    url("/DES/else/NEWS_BG.webp") center top / 100% 100% no-repeat;
+  mask-image: linear-gradient(to bottom, #000 75%, transparent 88%);
 }
 .genSpotlight .genOverview {
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
